@@ -47,7 +47,27 @@ struct MangaView: View {
                         .lineLimit(1)
                         .foregroundColor(Color(.gray))
                     
-                    Text("\(manga.rating.bayesian) || \(manga.rating.users)")
+                    Spacer()
+                    
+                    HStack {
+                        ForEach((1..<6)) { index in
+                            if Float(index * 2) <= Float(manga.rating.bayesian) ?? 0.0 {
+                                Image(systemName: "star.fill")
+                            } else if Float(index * 2) - 1  <= Float(manga.rating.bayesian) ?? 0.0 {
+                                Image(systemName: "star.lefthalf.fill")
+                            } else {
+                                Image(systemName: "star")
+                            }
+                        }
+                        
+                        Text("\(manga.rating.bayesian)")
+                            .foregroundColor(Color(.gray))
+                    }
+                    
+                    Text("\(manga.rating.users) ratings")
+                        .foregroundColor(Color(.gray))
+                    
+                    Spacer()
                 }
             }
             
