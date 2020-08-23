@@ -74,7 +74,7 @@ struct ChapterView: View {
             }
         }.onAppear {
             loadChapter(currentChapter: 0)
-        }.navigationBarTitle(remainingChapters[0].chapterInfo.title ?? "")
+        }.navigationBarTitle(remainingChapters[chapterRead].chapterInfo.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
     }
     
