@@ -24,6 +24,39 @@ struct MangaView: View {
         List {
             //MARK: - Header
             MangaViewTitle(manga: manga)
+            //MARK: - Manga actions
+            HStack {
+                
+                Spacer()
+                
+                VStack(spacing: 3) {
+                    Image(systemName: "heart.fill")
+                    Text("Favourite")
+                }.padding(5)
+                .foregroundColor(Color(.systemBlue))
+                
+                Divider()
+                
+                VStack(spacing: 3) {
+                    Image(systemName: "play.fill")
+                    Text("Resume")
+                }.padding(15)
+                .foregroundColor(Color(.systemBlue))
+                .onTapGesture {
+                    print("pressed")
+                    print(manga.tags)
+                }
+                
+                Divider()
+                
+                VStack(spacing: 3) {
+                    Image(systemName: "square.and.arrow.down.fill")
+                    Text("Download")
+                }.padding(5)
+                .foregroundColor(Color(.systemBlue))
+                
+                Spacer()
+            }
             //MARK: - Description
             VStack(alignment: .leading) {
                 Text("Description")

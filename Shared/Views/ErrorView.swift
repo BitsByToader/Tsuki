@@ -16,7 +16,7 @@ struct ErrorView: View {
         VStack {
             Spacer(minLength: 25)
             
-            Text("Here's you error")
+            Text("Here's your error")
                 .font(.largeTitle)
                 .bold()
                 .multilineTextAlignment(.center)
