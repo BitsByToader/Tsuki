@@ -21,8 +21,8 @@ struct MangaViewTags: View {
                                 .font(.system(size: 14))
                                 .foregroundColor(Color(.systemGray))
                                 .frame(width: 65, height: 65)
-                                .background(Color(.secondarySystemBackground))
-                                .cornerRadius(8)
+                            
+                            Divider()
                         }
                     }
                 }
