@@ -9,7 +9,7 @@ import SwiftUI
 import MessageUI
 
 struct ErrorView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
     @State private var isShowingMailComposer: Bool = false
     
     var body: some View {

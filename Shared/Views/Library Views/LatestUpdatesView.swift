@@ -41,7 +41,7 @@ struct Label: View {
 }
 
 struct LatestUpdatesView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
     
     @State private var result: [ReturnedUpdatedManga] = []
     

@@ -9,7 +9,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct ChapterView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
     var remainingChapters: [Chapter]
     
     @State private var pageURLs: [String] = []

@@ -9,7 +9,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct AccountView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
 //    let username: String = "ToaderTheBoi"
 //    let password: String = "Pr0z6Po58jm3"
     

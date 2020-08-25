@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
     @State private var errorSheetPresented: Bool = false
     
     var body: some View {

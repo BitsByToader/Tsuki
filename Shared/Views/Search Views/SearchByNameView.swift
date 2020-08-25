@@ -15,7 +15,7 @@ import SwiftSoup
 import SDWebImageSwiftUI
 
 struct SearchByNameView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
     
     @State private var searchInput: String = ""
     var tagsToSearch: String = ""

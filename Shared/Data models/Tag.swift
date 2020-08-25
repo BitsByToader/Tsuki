@@ -6,6 +6,11 @@
 //
 
 import Foundation
+import SwiftUI
+
+class MangaTags: ObservableObject  {
+    var tags: [Tag] = []
+}
 
 struct Tag: Hashable {
     let tagName: String

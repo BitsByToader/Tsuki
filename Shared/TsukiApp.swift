@@ -7,20 +7,16 @@
 
 import SwiftUI
 
-class AppStates: ObservableObject {
-    @Published var isLoading: Bool = false
-    @Published var errorOccured: Bool = false
-    @Published var errorMessage: String = ""
-}
-
 @main
 struct TsukiApp: App {
-    @StateObject var appState: AppStates = AppStates()
+    @StateObject var appState: AppState = AppState()
+    @StateObject var tags: MangaTags = MangaTags()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
+                .environmentObject(tags)
         }
     }
 }

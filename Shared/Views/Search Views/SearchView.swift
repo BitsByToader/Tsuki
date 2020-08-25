@@ -16,7 +16,8 @@ import SwiftUI
 import SwiftSoup
 
 struct SearchView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
+    @EnvironmentObject var mangaTags: MangaTags
     
     @State private var searchInput: String = ""
     @State private var showCancelButton: Bool = false
@@ -81,6 +82,7 @@ struct SearchView: View {
                         }
                         
                         try extractedSections.append(TagSection(tags: extractedTags, sectionName: section.attr("label")))
+                        mangaTags.tags += extractedTags
                     }
                     
                     DispatchQueue.main.async {

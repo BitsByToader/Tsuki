@@ -9,9 +9,9 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct MangaView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
     
-    @State private var manga: Manga = Manga(title: "", artist: "", coverURL: "", description: "", rating: Manga.Rating(bayesian: "", users: ""))
+    @State private var manga: Manga = Manga(title: "", artist: "", coverURL: "", description: "", rating: Manga.Rating(bayesian: "", users: ""), tags: [])
     @State private var chapters: [Chapter] = []
     
     @State var reloadContents: Bool
@@ -22,55 +22,9 @@ struct MangaView: View {
     
     var body: some View {
         List {
-            HStack(alignment: .top) {
-                WebImage(url: URL(string: manga.coverURL))
-                    .resizable()
-                    .placeholder {
-                        Rectangle().foregroundColor(.gray)
-                            .opacity(0.2)
-                    }
-                    .indicator(.activity)
-                    .transition(.fade(duration: 0.5))
-                    .scaledToFit()
-                    .frame(width: 100)
-                    .cornerRadius(5)
-                
-                VStack(alignment: .leading) {
-                    Text(manga.title)
-                    .font(.title)
-                    .bold()
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(2)
-                    
-                    Text(manga.artist)
-                        .font(.body)
-                        .lineLimit(1)
-                        .foregroundColor(Color(.gray))
-                    
-                    Spacer()
-                    
-                    HStack {
-                        ForEach((1..<6)) { index in
-                            if Float(index * 2) <= Float(manga.rating.bayesian) ?? 0.0 {
-                                Image(systemName: "star.fill")
-                            } else if Float(index * 2) - 1  <= Float(manga.rating.bayesian) ?? 0.0 {
-                                Image(systemName: "star.lefthalf.fill")
-                            } else {
-                                Image(systemName: "star")
-                            }
-                        }
-                        
-                        Text("\(manga.rating.bayesian)")
-                            .foregroundColor(Color(.gray))
-                    }
-                    
-                    Text("\(manga.rating.users) ratings")
-                        .foregroundColor(Color(.gray))
-                    
-                    Spacer()
-                }
-            }
-            
+            //MARK: - Header
+            MangaViewTitle(manga: manga)
+            //MARK: - Description
             VStack(alignment: .leading) {
                 Text("Description")
                     .font(.title2)
@@ -82,30 +36,23 @@ struct MangaView: View {
             .onTapGesture {
                 descriptionExpanded.toggle()
             }
-            
+            //MARK: - Tags
+            VStack(alignment: .leading) {
+                Text("Genres")
+                    .font(.title2)
+                    .bold()
+                
+                MangaViewTags(tagsToDisplay: manga.tags)
+                    .padding(.top, 5)
+            }
+            //MARK: - Chapters
             VStack(alignment: .leading, spacing: 10) {
                 Text("Chapters")
                     .font(.title2)
                     .bold()
                 
-                List {
-                    ForEach(Array(chapters.enumerated()), id: \.offset) { index, chapter in
-                        NavigationLink(destination: ChapterView(remainingChapters: chapters.reversed().suffix(index+1))) {
-                            HStack {
-                                Text("Vol.\(chapter.chapterInfo.volume!) Ch.\(chapter.chapterInfo.chapter!)")
-                                    .font(.subheadline)
-                                Spacer()
-                                Text("\(chapter.chapterInfo.title!)")
-                                    .allowsTightening(true)
-                                    .lineLimit(1)
-                                    .multilineTextAlignment(.center)
-                                    .opacity(0.5)
-                            }
-                        }
-                    }
-                }.frame(height: 200)
+                MangaViewChapterList(chapters: chapters)
             }
-            
         }.onAppear{
             if reloadContents {
                 appState.isLoading = true
@@ -117,6 +64,7 @@ struct MangaView: View {
         .listStyle(PlainListStyle())
     }
     
+    //MARK: - Manga details loader
     func loadMangaInfo() {
         guard let url = URL(string: "https://mangadex.org/api/manga/\(mangaId)") else {
             print("Invalid URL")

@@ -10,7 +10,7 @@ import SwiftUI
 import MessageUI
 
 struct MailComposer: UIViewControllerRepresentable {
-    @EnvironmentObject private var appState: AppStates
+    @EnvironmentObject private var appState: AppState
     
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
         let mail = MFMailComposeViewController()

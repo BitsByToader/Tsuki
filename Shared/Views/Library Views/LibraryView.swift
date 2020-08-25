@@ -17,7 +17,7 @@ import SDWebImageSwiftUI
 #warning("TODO: implement searching of saved mangas from the text field")
 
 struct LibraryView: View {
-    @EnvironmentObject var appState: AppStates
+    @EnvironmentObject var appState: AppState
     
     @State private var searchInput: String = ""
     var tagsToSearch: String = ""

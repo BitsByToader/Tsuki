@@ -29,6 +29,7 @@ struct Manga: Codable {
     var coverURL: String
     let description: String
     let rating: Rating
+    let tags: [Int]
     
     enum CodingKeys: String, CodingKey {
         case title
@@ -36,6 +37,7 @@ struct Manga: Codable {
         case coverURL = "cover_url"
         case description
         case rating
+        case tags = "genres"
     }
     
     struct Rating: Codable {
