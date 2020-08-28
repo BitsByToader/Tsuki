@@ -9,17 +9,21 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
+    @AppStorage("firstLaunch") var firstLaunch: Bool = true
+    
     @State private var errorSheetPresented: Bool = false
+    @State private var tabViewSelection: Int = 0
     
     var body: some View {
         ZStack(alignment: .bottom) {
             ZStack {
                 TabView {
-                    AccountView()
+                    TodayView()
                         .tabItem {
-                            Image(systemName: "person.crop.circle")
-                            Text("Account")
+                            Image(systemName: "newspaper.fill")
+                            Text("Today")
                         }
+                    
                     SearchView()
                         .tabItem {
                             Image(systemName: "magnifyingglass")
@@ -29,6 +33,12 @@ struct ContentView: View {
                         .tabItem {
                             Image(systemName: "books.vertical.fill")
                             Text("Library")
+                        }
+                    
+                    AccountView()
+                        .tabItem {
+                            Image(systemName: "person.crop.circle")
+                            Text("Account")
                         }
                 }
 
@@ -70,7 +80,9 @@ struct ContentView: View {
                 }
                 .transition(.move(edge: .bottom))
             }
-        }
+        }.sheet(isPresented: $firstLaunch, content: {
+            InitialOnboardingView(isPresented: $firstLaunch)
+        })
     }
 }
 

@@ -17,29 +17,6 @@ struct ReturnedUpdatedManga: Hashable {
     let volumeAndChapter: String
 }
 
-struct Label: View {
-    var labelText: String
-    
-    var body: some View {
-        ZStack {
-            Rectangle()
-                .background(Color(.gray))
-                .opacity(0.15)
-                .cornerRadius(12)
-            
-            Text("\(labelText)")
-                .foregroundColor(Color(.white))
-                .truncationMode(.middle)
-                .padding(.leading, 5)
-                .padding(.trailing, 5)
-        }.padding(.leading, 10)
-        .padding(.trailing, 10)
-        .padding(.top, 0)
-        .padding(.bottom, 0)
-        .frame(height: 15)
-    }
-}
-
 struct LatestUpdatesView: View {
     @EnvironmentObject var appState: AppState
     
@@ -51,26 +28,7 @@ struct LatestUpdatesView: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
                 ForEach(result, id: \.self) { manga in
                     NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
-                        VStack {
-                            WebImage(url: URL(string: manga.coverArtURL))
-                                .resizable()
-                                .placeholder {
-                                    Rectangle().foregroundColor(.gray)
-                                        .opacity(0.2)
-                                }
-                                .indicator(.activity)
-                                .transition(.fade(duration: 0.5))
-                                .scaledToFit()
-                                .frame(height: 180)
-                            
-                            Label(labelText: manga.timeOfUpdate)
-                            Label(labelText: manga.volumeAndChapter)
-                            
-                            Text(manga.title)
-                                .multilineTextAlignment(.center)
-                            
-                            Spacer()
-                        }.frame(height: 300)
+                        UpdatedManga(manga: manga)
                     }.buttonStyle(PlainButtonStyle())
                 }
             }
@@ -152,8 +110,52 @@ struct LatestUpdatesView: View {
     }
 }
 
-struct LatestUpdatesView_Previews: PreviewProvider {
-    static var previews: some View {
-        LatestUpdatesView()
+struct UpdatedManga: View {
+    let manga: ReturnedUpdatedManga
+    
+    var body: some View {
+        VStack {
+            WebImage(url: URL(string: manga.coverArtURL))
+                .resizable()
+                .placeholder {
+                    Rectangle().foregroundColor(.gray)
+                        .opacity(0.2)
+                }
+                .indicator(.activity)
+                .transition(.fade(duration: 0.5))
+                .scaledToFit()
+                .frame(height: 180)
+            
+            Label(labelText: manga.timeOfUpdate)
+            Label(labelText: manga.volumeAndChapter)
+            
+            Text(manga.title)
+                .multilineTextAlignment(.center)
+            
+            Spacer()
+        }.frame(height: 300)
+    }
+}
+
+struct Label: View {
+    var labelText: String
+    
+    var body: some View {
+        ZStack {
+            Rectangle()
+                .background(Color(.secondarySystemBackground))
+                .opacity(0.15)
+                .cornerRadius(12)
+            
+            Text("\(labelText)")
+                .foregroundColor(Color(.white))
+                .truncationMode(.middle)
+                .padding(.leading, 5)
+                .padding(.trailing, 5)
+        }.padding(.leading, 10)
+        .padding(.trailing, 10)
+        .padding(.top, 0)
+        .padding(.bottom, 0)
+        .frame(height: 15)
     }
 }

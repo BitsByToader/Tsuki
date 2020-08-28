@@ -59,9 +59,12 @@ struct LibraryView: View {
 
                         HStack {
                             Text("Latest Updates")
+                                .buttonStyle(PlainButtonStyle())
                             Spacer()
-                            Image(systemName: "arrow.right")
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(Color(.systemGray))
                         }.padding(5)
+                        .padding(.horizontal)
                     }.padding(15)
                     .padding(.top, 0)
                     .frame(height: 75)

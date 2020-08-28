@@ -76,7 +76,6 @@ struct MangaView: View {
                     .bold()
                 
                 MangaViewTags(tagsToDisplay: manga.tags)
-                    .padding(.top, 5)
             }
             //MARK: - Chapters
             VStack(alignment: .leading, spacing: 10) {
@@ -84,7 +83,21 @@ struct MangaView: View {
                     .font(.title2)
                     .bold()
                 
-                MangaViewChapterList(chapters: chapters)
+                if chapters.isEmpty {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        Text("No chapters available")
+                            .font(.title3)
+                            .bold()
+                            .foregroundColor(Color(.lightGray))
+                            .frame(height: 200)
+                        Spacer()
+                    }
+                    Spacer()
+                } else {
+                    MangaViewChapterList(chapters: chapters)
+                }
             }
         }.onAppear{
             if reloadContents {

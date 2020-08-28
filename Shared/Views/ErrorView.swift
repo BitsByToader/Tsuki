@@ -53,7 +53,7 @@ struct ErrorView: View {
                     }
                     .sheet(isPresented: $isShowingMailComposer) {
                         if MFMailComposeViewController.canSendMail() {
-                            MailComposer()
+                            MailComposer(viewDismissed: $isShowingMailComposer)
                         } else {
                             Text("Can't send emails from this device :(")
                         }

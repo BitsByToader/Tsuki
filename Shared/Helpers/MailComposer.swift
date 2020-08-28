@@ -11,6 +11,7 @@ import MessageUI
 
 struct MailComposer: UIViewControllerRepresentable {
     @EnvironmentObject private var appState: AppState
+    @Binding var viewDismissed: Bool
     
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
         let mail = MFMailComposeViewController()
@@ -22,11 +23,10 @@ struct MailComposer: UIViewControllerRepresentable {
     }
     
     func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-        controller.dismiss(animated: true)
-        DispatchQueue.main.async {
-            appState.errorOccured = false
-        }
+        appState.errorOccured = false
         print("tried to dismiss")
+        viewDismissed = true
+        controller.dismiss(animated: false)
     }
     
     func updateUIViewController(_ uiViewController: MFMailComposeViewController, context: Context) {

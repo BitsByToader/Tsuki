@@ -44,7 +44,7 @@ struct SearchView: View {
                     }
                 }
                 
-            }
+            }.transition(.fade)
             .navigationBarTitle(Text("Search"))
             .listStyle(InsetGroupedListStyle())
         }.onAppear {
@@ -62,6 +62,8 @@ struct SearchView: View {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
+        
+        print(url)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
