@@ -18,6 +18,7 @@ import SwiftSoup
 struct SearchView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var mangaTags: MangaTags
+    @Environment(\.colorScheme) var colorScheme
     
     private var loggedIn: Bool {
         checkLogInStatus()
@@ -40,18 +41,34 @@ struct SearchView: View {
                         }
                     }
                     
-                    ForEach(sectionList, id: \.self) { section in
+                    ForEach(Array(sectionList.enumerated()), id: \.offset) { i, section in
                         Section(header: Text(section.sectionName)) {
-                            ForEach(section.tags, id: \.self) { tag in
+                            ForEach(Array((section.tags).enumerated()), id: \.offset) { j, tag in
                                 NavigationLink(destination: SearchByNameView(tagsToSearch: tag.id, preloadManga: true, sectionName: tag.tagName)) {
                                     Text(tag.tagName)
                                 }
+//                                Button(action: {
+//                                    switch tag.state {
+//                                    case .untoggled:
+//                                        withAnimation {
+//                                            sectionList[i].tags[j].state = .enabled
+//                                        }
+//
+//                                    case .enabled:
+//                                        sectionList[i].tags[j].state = .disabled
+//                                    case .disabled:
+//                                        sectionList[i].tags[j].state = .untoggled
+//                                    }
+//                                }, label: {
+//                                    Text(tag.tagName)
+//                                        .foregroundColor(colorScheme == .dark ? .white : .black)
+//                                }).listRowBackground(state: tag.state)
+//                                .animation(.none)
                             }
                         }
                     }
                     
-                }.transition(.fade)
-                .navigationBarTitle(Text("Search"))
+                }.navigationBarTitle(Text("Search"))
                 .listStyle(InsetGroupedListStyle())
             }.onAppear {
                 if (loggedIn) {
@@ -137,5 +154,21 @@ struct SearchView: View {
 struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         SearchView()
+    }
+}
+
+extension View {
+    func listRowBackground(state: Tag.ToggleState) -> some View {
+        switch state {
+        case .disabled:
+            return self.listRowBackground(Color.red)
+                .animation(.default)
+        case .enabled:
+            return self.listRowBackground(Color.green)
+                .animation(.default)
+        case .untoggled:
+            return self.listRowBackground(Color.clear)
+                .animation(.default)
+        }
     }
 }

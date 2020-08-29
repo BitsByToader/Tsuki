@@ -15,9 +15,16 @@ class MangaTags: ObservableObject  {
 struct Tag: Hashable {
     let tagName: String
     let id: String
+    var state: ToggleState = .untoggled
+    
+    enum ToggleState {
+        case enabled
+        case disabled
+        case untoggled
+    }
 }
 
 struct TagSection: Hashable {
-    let tags: [Tag]
+    var tags: [Tag]
     let sectionName: String
 }
