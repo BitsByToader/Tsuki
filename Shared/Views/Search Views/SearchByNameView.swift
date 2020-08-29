@@ -71,7 +71,7 @@ struct SearchByNameView: View {
         let payload = urlComponents.percentEncodedQuery
         
         guard let url = URL(string: "https://mangadex.org/search?\(payload ?? "")") else {
-            print("Invalid URL")
+            print("From SearchByName: Invalid URL")
             return
         }
         

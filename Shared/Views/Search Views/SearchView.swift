@@ -19,43 +19,54 @@ struct SearchView: View {
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var mangaTags: MangaTags
     
+    private var loggedIn: Bool {
+        checkLogInStatus()
+    }
+    
     @State private var searchInput: String = ""
     @State private var showCancelButton: Bool = false
+    @State private var logInViewPresented: Bool = false
     
     @State private var sectionList: [TagSection] = []
     
     var body: some View {
-        NavigationView {
-            List {
-                // Filtered list of names
-                Section() {
-                    NavigationLink(destination: SearchByNameView()) {
-                        Text("Search by name")
+        if loggedIn {
+            NavigationView {
+                List {
+                    // Filtered list of names
+                    Section() {
+                        NavigationLink(destination: SearchByNameView()) {
+                            Text("Search by name")
+                        }
                     }
-                }
-                
-                ForEach(sectionList, id: \.self) { section in
-                    Section(header: Text(section.sectionName)) {
-                        ForEach(section.tags, id: \.self) { tag in
-                            NavigationLink(destination: SearchByNameView(tagsToSearch: tag.id, preloadManga: true, sectionName: tag.tagName)) {
-                                Text(tag.tagName)
+                    
+                    ForEach(sectionList, id: \.self) { section in
+                        Section(header: Text(section.sectionName)) {
+                            ForEach(section.tags, id: \.self) { tag in
+                                NavigationLink(destination: SearchByNameView(tagsToSearch: tag.id, preloadManga: true, sectionName: tag.tagName)) {
+                                    Text(tag.tagName)
+                                }
                             }
                         }
                     }
+                    
+                }.transition(.fade)
+                .navigationBarTitle(Text("Search"))
+                .listStyle(InsetGroupedListStyle())
+            }.onAppear {
+                if (loggedIn) {
+                    appState.isLoading = true
+                    retrieveTags()
                 }
-                
-            }.transition(.fade)
-            .navigationBarTitle(Text("Search"))
-            .listStyle(InsetGroupedListStyle())
-        }.onAppear {
-            appState.isLoading = true
-            retrieveTags()
+            }
+        } else {
+            SignInRequiredView(description: "The search function will be available once you sign in.", logInViewPresented: $logInViewPresented)
         }
     }
     
     func retrieveTags() {
         guard let url = URL(string: "https://mangadex.org/search") else {
-            print("Invalid URL")
+            print("From SearchView: Invalid URL")
             return
         }
         
@@ -63,7 +74,7 @@ struct SearchView: View {
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
-        print(url)
+        print("From SearchView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {

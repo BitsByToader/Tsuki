@@ -82,7 +82,7 @@ struct ChapterView: View {
         appState.isLoading = true
         
         guard let url = URL(string: "https://mangadex.org/api/chapter/\(remainingChapters[currentChapter].chapterId)") else {
-            print("Invalid URL")
+            print("From ChapterView: Invalid URL")
             return
         }
         

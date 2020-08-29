@@ -18,71 +18,83 @@ import SDWebImageSwiftUI
 
 struct LibraryView: View {
     @EnvironmentObject var appState: AppState
+    @AppStorage("MDListLink") var MDlListLink: String = ""
+
+     private var loggedIn: Bool {
+        checkLogInStatus()
+    }
     
     @State private var searchInput: String = ""
+    @State private var logInViewPresented: Bool = false
     var tagsToSearch: String = ""
     
     @State private var searchResult: [ReturnedManga] = []
     
     var body: some View {
-        NavigationView {
-            ScrollView {
-                
-                HStack {
-                    Image(systemName: "magnifyingglass")
+        if loggedIn {
+            NavigationView {
+                ScrollView {
                     
-                    TextField("Search", text: $searchInput, onCommit: {
-                        self.hideKeyboard()
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                        
+                        TextField("Search", text: $searchInput, onCommit: {
+                            self.hideKeyboard()
+                            searchManga()
+                        }).foregroundColor(.primary)
+                        
+                        Button(action: {
+                            self.searchInput = ""
+                            self.hideKeyboard()
+                        }) {
+                            Image(systemName: "xmark.circle.fill").opacity(searchInput == "" ? 0 : 1)
+                        }
+                    }
+                    .padding(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
+                    .foregroundColor(.secondary)
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(10.0)
+                    .padding(.horizontal)
+                    .padding(.bottom, 0)
+                    .navigationTitle(Text("Library"))
+                    
+                    NavigationLink(destination: LatestUpdatesView()) {
+                        ZStack(alignment: .leading) {
+                            Rectangle()
+                                .fill(Color(.secondarySystemBackground))
+                                .cornerRadius(7)
+
+                            HStack {
+                                Text("Latest Updates")
+                                    .buttonStyle(PlainButtonStyle())
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(Color(.systemGray))
+                            }.padding(5)
+                            .padding(.horizontal)
+                        }.padding(15)
+                        .padding(.top, 0)
+                        .frame(height: 75)
+                    }
+                    
+                    MangaGrid(dataSource: searchResult)
+                    
+                    Spacer()
+                }.onAppear {
+                    if (loggedIn) {
+                        appState.isLoading = true
                         searchManga()
-                    }).foregroundColor(.primary)
-                    
-                    Button(action: {
-                        self.searchInput = ""
-                        self.hideKeyboard()
-                    }) {
-                        Image(systemName: "xmark.circle.fill").opacity(searchInput == "" ? 0 : 1)
                     }
                 }
-                .padding(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
-                .foregroundColor(.secondary)
-                .background(Color(.secondarySystemBackground))
-                .cornerRadius(10.0)
-                .padding(.horizontal)
-                .padding(.bottom, 0)
-                .navigationTitle(Text("Library"))
-                
-                NavigationLink(destination: LatestUpdatesView()) {
-                    ZStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(Color(.secondarySystemBackground))
-                            .cornerRadius(7)
-
-                        HStack {
-                            Text("Latest Updates")
-                                .buttonStyle(PlainButtonStyle())
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(Color(.systemGray))
-                        }.padding(5)
-                        .padding(.horizontal)
-                    }.padding(15)
-                    .padding(.top, 0)
-                    .frame(height: 75)
-                }
-                
-                MangaGrid(dataSource: searchResult)
-                
-                Spacer()
-            }.onAppear {
-                appState.isLoading = true
-                searchManga()
             }
+        } else {
+            SignInRequiredView(description: "Your library will be available once you sign in.", logInViewPresented: $logInViewPresented)
         }
     }
     
     func searchManga() {
-        guard let url = URL(string: "https://mangadex.org/list/915553") else {
-            print("Invalid URL")
+        guard let url = URL(string: MDlListLink) else {
+            print("From LibraryView: Invalid URL")
             return
         }
         
@@ -90,7 +102,7 @@ struct LibraryView: View {
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
-        print(url.absoluteString)
+        print("From LibraryView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {

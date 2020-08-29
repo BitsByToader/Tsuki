@@ -113,7 +113,7 @@ struct MangaView: View {
     //MARK: - Manga details loader
     func loadMangaInfo() {
         guard let url = URL(string: "https://mangadex.org/api/manga/\(mangaId)") else {
-            print("Invalid URL")
+            print("From MangaView: Invalid URL")
             return
         }
         

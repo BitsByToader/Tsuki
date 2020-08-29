@@ -7,21 +7,22 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
+import SwiftSoup
 
 struct LogInView: View {
-    //    @EnvironmentObject var appState: AppState
+    @EnvironmentObject var appState: AppState
+    
+    @AppStorage("userProfileLink") var userProfileLink: String = ""
+    @AppStorage("MDListLink") var MDlListLink: String = ""
+    
     @Binding var isPresented: Bool
     
     @State private var twoFactorCode: String = ""
     @State private var username: String = ""
     @State private var password: String = ""
     
-    //    init() {
-    //        UINavigationBar.appearance().barTintColor = .clear
-    //        UINavigationBar.appearance().backgroundColor = .clear
-    //        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
-    //        UINavigationBar.appearance().shadowImage = UIImage()
-    //    }
+    @State private var loading: Bool = false
+    @State private var errorOccured: Bool = false
     
     var body: some View {
         
@@ -48,6 +49,19 @@ struct LogInView: View {
                     .textContentType(.oneTimeCode)
                     .keyboardType(.numberPad)
                     .padding(.horizontal)
+                
+                
+                ZStack {
+                    Text("Signing In...")
+                        .foregroundColor(.gray)
+                        .opacity(loading ? 1 : 0)
+                        .animation(.default)
+                    
+                    Text("Something went wrong!")
+                        .foregroundColor(.red)
+                        .opacity(errorOccured ? 1 : 0)
+                        .animation(.default)
+                }
                 
                 Button(action: logIntoMD, label: {
                     Text("Log In")
@@ -80,8 +94,17 @@ struct LogInView: View {
     }
     
     func logIntoMD() {
+        DispatchQueue.main.async {
+            password = ""
+            twoFactorCode = ""
+            loading = true
+            errorOccured = false
+        }
+        
+        logOutUser()
+        
         guard let url = URL(string: "https://mangadex.org/ajax/actions.ajax.php?function=login&nojs=1") else {
-            print("Invalid URL")
+            print("From LogInVIew: Invalid URL")
             return
         }
         
@@ -101,17 +124,62 @@ struct LogInView: View {
         addToRequestBody(body: payload, key: "two_factor", value: twoFactorCode, boundaryPrefix: boundaryPrefix)
         
         URLSession.shared.uploadTask(with: request, from: payload as Data? ) { data, response, error in
-            // step 4
-            DispatchQueue.main.async {
-                username = ""
-                password = ""
-                twoFactorCode = ""
+            if ( checkLogInStatus() ) {
+                //The credentials were correct, so the session cookies were set.
+                //We are logged in now.
+                
+                //Grab the user page URL (for the account view) and the mdlist url (for the library view)
+                do {
+                    let doc: Document = try SwiftSoup.parse(String(data: data ?? Data(), encoding: .utf8) ?? "")
+                    
+                    let linkList = try doc.getElementById("homepage_cog")?.siblingElements().first()?.select("div").first()?.children().array()
+                    
+                    var tempLink: String? = try linkList?[0].attr("href")
+                    let userProfile: String = tempLink == nil ? "" : "https://mangadex.org" + (tempLink ?? "")
+                    
+                    tempLink = try linkList?[4].attr("href")
+                    let MDList: String = tempLink == nil ? "" : "https://mangadex.org" + (tempLink ?? "")
+                    
+                    DispatchQueue.main.async {
+                        self.MDlListLink = MDList
+                        self.userProfileLink = userProfile
+                        self.loading = false
+                        self.isPresented = false
+                    }
+                    
+                    return
+                }
+                catch Exception.Error(let type, let message) {
+                    print ("Error of type \(type): \(message)")
+                    DispatchQueue.main.async {
+                        self.loading = false
+                        self.errorOccured = true
+                        appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                        }
+                    }
+                    return
+                } catch {
+                    print ("error")
+                    DispatchQueue.main.async {
+                        self.loading = false
+                        self.errorOccured = true
+                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                        }
+                    }
+                    return
+                }
+            } else {
+                //Couldn't log in for some reaseon
+                DispatchQueue.main.async {
+                    self.loading = false
+                    self.errorOccured = true
+                }
             }
         }.resume()
-    }
-    
-    func checkStatus() {
-        print(URLSession.shared.configuration.httpCookieStorage?.cookies as Any)
     }
     
     func addToRequestBody(body: NSMutableData, key: String, value: String, boundaryPrefix: String) {

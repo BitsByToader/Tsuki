@@ -23,6 +23,8 @@
 		8B49D62B24C77EAC007D1FFE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B49D60024C77EAB007D1FFE /* ContentView.swift */; };
 		8B49D62C24C77EAC007D1FFE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B49D60124C77EAC007D1FFE /* Assets.xcassets */; };
 		8B49D62D24C77EAC007D1FFE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B49D60124C77EAC007D1FFE /* Assets.xcassets */; };
+		8B53722A24FA6EBC006D95BD /* SignInRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B53722924FA6EBC006D95BD /* SignInRequiredView.swift */; };
+		8B53722B24FA6EBC006D95BD /* SignInRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B53722924FA6EBC006D95BD /* SignInRequiredView.swift */; };
 		8B59E13D24F9780400392E6E /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B59E13C24F9780400392E6E /* AccountView.swift */; };
 		8B59E13E24F9780400392E6E /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B59E13C24F9780400392E6E /* AccountView.swift */; };
 		8B5E33BD24C8D0210042EDC3 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B5E33BC24C8D0210042EDC3 /* SearchView.swift */; };
@@ -95,6 +97,7 @@
 		8B49D62124C77EAC007D1FFE /* Tests macOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tests macOS.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B49D62524C77EAC007D1FFE /* Tests_macOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests_macOS.swift; sourceTree = "<group>"; };
 		8B49D62724C77EAC007D1FFE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8B53722924FA6EBC006D95BD /* SignInRequiredView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInRequiredView.swift; sourceTree = "<group>"; };
 		8B59E13C24F9780400392E6E /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		8B5E33BC24C8D0210042EDC3 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		8B6A6B7C24F4330D00D4E9D8 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -278,6 +281,7 @@
 			children = (
 				8B2D726024DBDABC004C1602 /* MangaGrid.swift */,
 				8B96E17F24ED9CDC00717DCC /* MailComposer.swift */,
+				8B53722924FA6EBC006D95BD /* SignInRequiredView.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -458,6 +462,7 @@
 			files = (
 				8B2D726124DBDABC004C1602 /* MangaGrid.swift in Sources */,
 				8B5E33BD24C8D0210042EDC3 /* SearchView.swift in Sources */,
+				8B53722A24FA6EBC006D95BD /* SignInRequiredView.swift in Sources */,
 				8BBA7D5B24CF6176004BAF63 /* MangaView.swift in Sources */,
 				8BACBB0224C8632C005D5F08 /* LogInView.swift in Sources */,
 				8B59E13D24F9780400392E6E /* AccountView.swift in Sources */,
@@ -487,6 +492,7 @@
 			files = (
 				8B2D726224DBDABC004C1602 /* MangaGrid.swift in Sources */,
 				8B5E33BE24C8D0210042EDC3 /* SearchView.swift in Sources */,
+				8B53722B24FA6EBC006D95BD /* SignInRequiredView.swift in Sources */,
 				8BBA7D5C24CF6176004BAF63 /* MangaView.swift in Sources */,
 				8BACBB0324C8632C005D5F08 /* LogInView.swift in Sources */,
 				8B59E13E24F9780400392E6E /* AccountView.swift in Sources */,

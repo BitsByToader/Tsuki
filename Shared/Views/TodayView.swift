@@ -89,7 +89,7 @@ struct TodayView: View {
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
-        print(url.absoluteString)
+        print("From TodayView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {

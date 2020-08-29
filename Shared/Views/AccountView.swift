@@ -11,6 +11,15 @@ import SDWebImageSwiftUI
 
 struct AccountView: View {
     @EnvironmentObject var appState: AppState
+    @AppStorage("userProfileLink") var userProfileLink: String = ""
+    
+    private var logInButtonString: String {
+        return checkLogInStatus() ? "Change account" : "Sign In"
+    }
+    
+    private var loggedIn: Bool {
+        return checkLogInStatus()
+    }
     
     @State private var profileStats: [ProfileStat] = []
     @State private var profilePicURL: String = ""
@@ -41,44 +50,51 @@ struct AccountView: View {
                             .lineLimit(1)
                     }
                 }
-                
-                Section {
-                    ForEach(profileStats, id: \.self) { stat in
-                        HStack {
-                            Text(stat.label)
-                                .foregroundColor(.gray)
-                            
-                            Spacer()
-                            
-                            Text(stat.value)
+                if loggedIn {
+                    Section {
+                        ForEach(profileStats, id: \.self) { stat in
+                            HStack {
+                                Text(stat.label)
+                                    .foregroundColor(.gray)
+                                
+                                Spacer()
+                                
+                                Text(stat.value)
+                            }
                         }
                     }
                 }
                 
                 Section {
                     Button(action: {logInViewPresented = true}, label: {
-                        Text("Change Account")
+                        Text(logInButtonString)
                     }).sheet(isPresented: $logInViewPresented) {
                         LogInView(isPresented: $logInViewPresented)
                     }
                     
-                    Button(action: logOut, label: {
-                        Text("Sign Out")
-                            .foregroundColor(Color(.systemRed))
-                    })
+                    if loggedIn {
+                        Button(action: logOut, label: {
+                            Text("Sign Out")
+                                .foregroundColor(Color(.systemRed))
+                        })
+                    }
                 }
             }.listStyle(InsetGroupedListStyle())
             .navigationTitle("Your Account")
             .navigationBarTitleDisplayMode(.large)
             .transition(.fade)
-        }.onAppear(perform: loadAccountInformation)
+        }.onAppear {
+            if (loggedIn) {
+                loadAccountInformation()
+            }
+        }
     }
     
     func loadAccountInformation() {
         appState.isLoading = true
         
-        guard let url = URL(string: "https://mangadex.org/user/915553/toadertheboi/") else {
-            print("Invalid URL")
+        guard let url = URL(string: userProfileLink) else {
+            print("From AccountView: Invalid URL")
             return
         }
         
@@ -86,7 +102,7 @@ struct AccountView: View {
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
-        print(url.absoluteString)
+        print("From AccountView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
@@ -148,13 +164,7 @@ struct AccountView: View {
     }
     
     func logOut() {
-        let cookies: [HTTPCookie] = (URLSession.shared.configuration.httpCookieStorage?.cookies)!
-        
-        for cookie in cookies {
-            if ( cookie.name == "mangadex_session" || cookie.name == "mangadex_rememberme_token" ) {
-                URLSession.shared.configuration.httpCookieStorage?.deleteCookie(cookie)
-            }
-        }
+        logOutUser()
         
         DispatchQueue.main.async {
             self.username = ""
