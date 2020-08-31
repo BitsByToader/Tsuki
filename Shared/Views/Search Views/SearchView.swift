@@ -74,7 +74,7 @@ struct SearchView: View {
                                         }
                                     }, label: {
                                         Text(tag.tagName)
-                                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                                            .foregroundColor( (colorScheme == .dark) || (tag.state == .enabled || tag.state == .disabled) ? .white : .black)
                                     }).listRowBackground(state: tag.state)
                                 }
                             }
