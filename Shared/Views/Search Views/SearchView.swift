@@ -16,6 +16,7 @@ import SwiftUI
 import SwiftSoup
 
 struct SearchView: View {
+    @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var mangaTags: MangaTags
     @Environment(\.colorScheme) var colorScheme
@@ -30,47 +31,72 @@ struct SearchView: View {
     
     @State private var sectionList: [TagSection] = []
     
+    @State private var tagString: String = ""
+    @State private var includedTags: Int = 0
+    @State private var excludedTags: Int = 0
+    
     var body: some View {
         if loggedIn {
             NavigationView {
-                List {
-                    // Filtered list of names
-                    Section() {
-                        NavigationLink(destination: SearchByNameView()) {
-                            Text("Search by name")
-                        }
-                    }
-                    
-                    ForEach(Array(sectionList.enumerated()), id: \.offset) { i, section in
-                        Section(header: Text(section.sectionName)) {
-                            ForEach(Array((section.tags).enumerated()), id: \.offset) { j, tag in
-                                NavigationLink(destination: SearchByNameView(tagsToSearch: tag.id, preloadManga: true, sectionName: tag.tagName)) {
-                                    Text(tag.tagName)
-                                }
-//                                Button(action: {
-//                                    switch tag.state {
-//                                    case .untoggled:
-//                                        withAnimation {
-//                                            sectionList[i].tags[j].state = .enabled
-//                                        }
-//
-//                                    case .enabled:
-//                                        sectionList[i].tags[j].state = .disabled
-//                                    case .disabled:
-//                                        sectionList[i].tags[j].state = .untoggled
-//                                    }
-//                                }, label: {
-//                                    Text(tag.tagName)
-//                                        .foregroundColor(colorScheme == .dark ? .white : .black)
-//                                }).listRowBackground(state: tag.state)
-//                                .animation(.none)
+                ZStack(alignment: .bottom) {
+                    List {
+                        // Filtered list of names
+                        Section() {
+                            NavigationLink(destination: SearchByNameView()) {
+                                Text("Search by name")
                             }
                         }
-                    }
+                        
+                        ForEach(Array(sectionList.enumerated()), id: \.element) { i, section in
+                            Section(header: Text(section.sectionName)) {
+                                ForEach(Array((section.tags).enumerated()), id: \.element) { j, tag in
+                                    Button(action: {
+                                        switch tag.state {
+                                        case .untoggled:
+                                            withAnimation {
+                                                sectionList[i].tags[j].state = .enabled
+                                                updateTagString(tagId: tag.id)
+                                                includedTags += 1
+                                            }
+                                        case .enabled:
+                                            withAnimation {
+                                                sectionList[i].tags[j].state = .disabled
+                                                updateTagString(tagId: "-\(tag.id)")
+                                                includedTags -= 1
+                                                excludedTags += 1
+                                            }
+                                        case .disabled:
+                                            withAnimation {
+                                                sectionList[i].tags[j].state = .untoggled
+                                                removeTagFromString(tagId: "-\(tag.id)")
+                                                excludedTags -= 1
+                                            }
+                                        }
+                                    }, label: {
+                                        Text(tag.tagName)
+                                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                                    }).listRowBackground(state: tag.state)
+                                }
+                            }
+                        }
+                        
+                    }.navigationBarTitle(Text("Search"))
+                    .listStyle(InsetGroupedListStyle())
                     
-                }.navigationBarTitle(Text("Search"))
-                .listStyle(InsetGroupedListStyle())
-            }.onAppear {
+                    if includedTags > 0 || excludedTags > 0 {
+                        NavigationLink(destination: SearchByNameView(tagsToSearch: tagString, preloadManga: true)) {
+                            SearchWithTagsBox(includedTags: includedTags, excludedTags: excludedTags)
+                        }.transition(.move(edge: .bottom))
+                    }
+                }
+                
+                if sizeClass == .regular {
+                    MangaView(reloadContents: false, mangaId: "")
+                    
+                    ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
+                }
+            }.navigationViewStyle(DoubleColumnNavigationViewStyle())
+            .onAppear {
                 if (loggedIn) {
                     appState.isLoading = true
                     retrieveTags()
@@ -86,6 +112,8 @@ struct SearchView: View {
             print("From SearchView: Invalid URL")
             return
         }
+        
+        mangaTags.tags = []
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -127,6 +155,7 @@ struct SearchView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                 } catch {
@@ -135,6 +164,7 @@ struct SearchView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                 }
@@ -144,10 +174,70 @@ struct SearchView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
+                        appState.isLoading = false
                     }
                 }
             }
         }.resume()
+    }
+    
+    func updateTagString(tagId: String) {
+        var tagsArray: [String] = tagString.components(separatedBy: ",")
+        if ( tagString == "" ) {
+            tagsArray = []
+        }
+        
+        var newString: String = ""
+        for tag in tagsArray {
+            if ( tagId != tag && String(tagId.dropFirst()) != tag && tagId != "-\(tag)" ) {
+                //If the tag is alreay in the array(included or excluded), ignore it
+                newString += "\(tag),"
+            }
+        }
+        //Add it at the end with the updated state (included/excluded)
+        newString += "\(tagId)"
+        
+        //Update the string
+        self.tagString = newString
+    }
+    
+    func removeTagFromString(tagId: String) {
+        let tagsArray: [String] = tagString.components(separatedBy: ",")
+        
+        var newString: String = ""
+        for tag in tagsArray {
+            if ( tag != tagId ) {
+                newString += "\(tag),"
+            }
+        }
+        
+        self.tagString = String(newString.dropLast())
+    }
+}
+
+struct SearchWithTagsBox: View {
+    var includedTags: Int
+    var excludedTags: Int
+    
+    var body: some View {
+        ZStack {
+            Rectangle()
+                .fill(Color.accentColor)
+                .cornerRadius(10)
+            
+            HStack(alignment: .center) {
+                VStack(alignment: .leading) {
+                    Text("Search with current tags")
+                    Text("Tags: " + (includedTags > 0 ? "\(includedTags) included" : "") + (excludedTags > 0 && includedTags > 0 ? ", " : "") + (excludedTags > 0 ? "\(excludedTags) excluded" : "") )
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+            }.padding(.horizontal, 10)
+        }.frame(height: 60)
+        .padding(5)
+        .foregroundColor(.white)
     }
 }
 

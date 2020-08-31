@@ -83,7 +83,8 @@ struct AccountView: View {
             .navigationTitle("Your Account")
             .navigationBarTitleDisplayMode(.large)
             .transition(.fade)
-        }.onAppear {
+        }.navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
             if (loggedIn) {
                 loadAccountInformation()
             }
@@ -138,6 +139,7 @@ struct AccountView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                     return
@@ -147,6 +149,7 @@ struct AccountView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                     return
@@ -157,6 +160,7 @@ struct AccountView: View {
                 appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                 withAnimation {
                     appState.errorOccured = true
+                    appState.isLoading = false
                 }
             }
             return

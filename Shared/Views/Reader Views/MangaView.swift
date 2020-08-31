@@ -9,14 +9,17 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct MangaView: View {
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @Environment(\.managedObjectContext) var moc
     @EnvironmentObject var appState: AppState
     
-    @State private var manga: Manga = Manga(title: "", artist: "", coverURL: "", description: "", rating: Manga.Rating(bayesian: "", users: ""), tags: [])
+    @State var manga: Manga = Manga(title: "", artist: "", coverURL: "", description: "", rating: Manga.Rating(bayesian: "", users: ""), tags: [])
     @State private var chapters: [Chapter] = []
     
     @State var reloadContents: Bool
     
     @State private var descriptionExpanded: Bool = false
+    @State private var chapterDownloadingViewPresented: Bool = false
     
     var mangaId: String
     
@@ -54,6 +57,12 @@ struct MangaView: View {
                     Text("Download")
                 }.padding(5)
                 .foregroundColor(Color(.systemBlue))
+                .onTapGesture {
+                    chapterDownloadingViewPresented = true
+                }.sheet(isPresented: $chapterDownloadingViewPresented) {
+                    ChapterSelectionView(isPresented: $chapterDownloadingViewPresented,manga: manga, chapters: chapters)
+                        .environment(\.managedObjectContext, moc)
+                }
                 
                 Spacer()
             }
@@ -159,6 +168,7 @@ struct MangaView: View {
                         appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                 }
@@ -168,6 +178,7 @@ struct MangaView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
+                        appState.isLoading = false
                     }
                 }
             }

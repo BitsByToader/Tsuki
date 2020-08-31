@@ -17,6 +17,7 @@ import SDWebImageSwiftUI
 #warning("TODO: implement searching of saved mangas from the text field")
 
 struct LibraryView: View {
+    @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var appState: AppState
     @AppStorage("MDListLink") var MDlListLink: String = ""
 
@@ -59,22 +60,11 @@ struct LibraryView: View {
                     .navigationTitle(Text("Library"))
                     
                     NavigationLink(destination: LatestUpdatesView()) {
-                        ZStack(alignment: .leading) {
-                            Rectangle()
-                                .fill(Color(.secondarySystemBackground))
-                                .cornerRadius(7)
-
-                            HStack {
-                                Text("Latest Updates")
-                                    .buttonStyle(PlainButtonStyle())
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(Color(.systemGray))
-                            }.padding(5)
-                            .padding(.horizontal)
-                        }.padding(15)
-                        .padding(.top, 0)
-                        .frame(height: 75)
+                        LibraryLink(linkTitle: "Latest Updates")
+                    }
+                    
+                    NavigationLink(destination: DownloadedMangaView()) {
+                        LibraryLink(linkTitle: "Downloaded manga")
                     }
                     
                     MangaGrid(dataSource: searchResult)
@@ -86,7 +76,13 @@ struct LibraryView: View {
                         searchManga()
                     }
                 }
-            }
+                
+                if sizeClass == .regular {
+                    MangaView(reloadContents: false, mangaId: "")
+                    
+                    ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
+                }
+            }.navigationViewStyle(DoubleColumnNavigationViewStyle())
         } else {
             SignInRequiredView(description: "Your library will be available once you sign in.", logInViewPresented: $logInViewPresented)
         }
@@ -137,6 +133,7 @@ struct LibraryView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                 } catch {
@@ -145,6 +142,7 @@ struct LibraryView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                 }
@@ -154,6 +152,7 @@ struct LibraryView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
+                        appState.isLoading = false
                     }
                 }
             }

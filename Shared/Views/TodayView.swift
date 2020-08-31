@@ -9,6 +9,7 @@ import SwiftUI
 import SwiftSoup
 
 struct TodayView: View {
+    @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var appState: AppState
     
     @State private var newChapters: [ReturnedUpdatedManga] = []
@@ -69,10 +70,17 @@ struct TodayView: View {
                         }
                     }
                 }
-            }.transition(.fade)
-            .animation(.default)
+            }.listStyle(PlainListStyle())
             .navigationTitle(Text("Today"))
-        }.onAppear {
+            
+            if sizeClass == .regular {
+                MangaView(reloadContents: !featuredDisplayedMangas.isEmpty, mangaId: featuredDisplayedMangas.isEmpty ? "" : featuredDisplayedMangas[0].id)
+                
+                ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
+            }
+            
+        }.navigationViewStyle(DoubleColumnNavigationViewStyle())
+        .onAppear {
             loadUpdates()
         }
     }
@@ -147,6 +155,7 @@ struct TodayView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                     return
@@ -156,6 +165,7 @@ struct TodayView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                     return
@@ -167,6 +177,7 @@ struct TodayView: View {
                 appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                 withAnimation {
                     appState.errorOccured = true
+                    appState.isLoading = false
                 }
             }
             return

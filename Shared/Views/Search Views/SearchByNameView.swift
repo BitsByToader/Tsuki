@@ -114,6 +114,7 @@ struct SearchByNameView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                 } catch {
@@ -122,6 +123,7 @@ struct SearchByNameView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                 }
@@ -131,6 +133,7 @@ struct SearchByNameView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
+                        appState.isLoading = false
                     }
                 }
             }

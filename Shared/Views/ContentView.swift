@@ -40,7 +40,9 @@ struct ContentView: View {
                             Image(systemName: "person.crop.circle")
                             Text("Account")
                         }
-                }
+                }.sheet(isPresented: $firstLaunch, content: {
+                    InitialOnboardingView(isPresented: $firstLaunch)
+                })
 
                 ZStack {
                     BlurView(style: .systemThickMaterial)
@@ -80,9 +82,7 @@ struct ContentView: View {
                 }
                 .transition(.move(edge: .bottom))
             }
-        }.sheet(isPresented: $firstLaunch, content: {
-            InitialOnboardingView(isPresented: $firstLaunch)
-        })
+        }
     }
 }
 

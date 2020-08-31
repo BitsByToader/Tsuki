@@ -6,18 +6,42 @@
 //
 
 import SwiftUI
+import CoreData
+
+#warning("When first testing on Big Sur, check to make sure that it supports sizeClasses. Else use the compiler directive (os) to check for the operating system and adjust the nav view accordingly.")
 
 @main
 struct TsukiApp: App {
     @StateObject var appState: AppState = AppState()
     @StateObject var tags: MangaTags = MangaTags()
     
+    @Environment(\.scenePhase) private var scenePhase
+    @StateObject private var persistentStore = PersistentStore.shared
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
                 .environmentObject(tags)
+                .environment(\.managedObjectContext, persistentStore.context)
+            
+        }.onChange(of: scenePhase) { phase in
+            switch phase {
+            case .active:
+                print("\(#function) REPORTS - App change of scenePhase to ACTIVE")
+            case .inactive:
+                print("\(#function) REPORTS - App change of scenePhase to INACTIVE")
+            case .background:
+                print("\(#function) REPORTS - App change of scenePhase to BACKGROUND")
+                savePersistentStore()
+            @unknown default:
+                fatalError("\(#function) REPORTS - fatal error in switch statement for .onChange modifier")
+            }
         }
+    }
+    
+    func savePersistentStore() {
+        persistentStore.save()
     }
 }
 

@@ -10,6 +10,9 @@ import SDWebImageSwiftUI
 
 struct ChapterView: View {
     @EnvironmentObject var appState: AppState
+    
+    var loadContents: Bool
+    
     var remainingChapters: [Chapter]
     
     @State private var pageURLs: [String] = []
@@ -73,7 +76,9 @@ struct ChapterView: View {
                 }
             }
         }.onAppear {
-            loadChapter(currentChapter: 0)
+            if loadContents {
+                loadChapter(currentChapter: 0)
+            }
         }.navigationBarTitle(remainingChapters[chapterRead].chapterInfo.title ?? "")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -114,6 +119,7 @@ struct ChapterView: View {
                         appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
                         withAnimation {
                             appState.errorOccured = true
+                            appState.isLoading = false
                         }
                     }
                 }
@@ -123,6 +129,7 @@ struct ChapterView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
+                        appState.isLoading = false
                     }
                 }
             }

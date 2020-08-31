@@ -13,9 +13,9 @@ struct MangaViewChapterList: View {
     var body: some View {
         List {
             ForEach(Array(chapters.enumerated()), id: \.offset) { index, chapter in
-                NavigationLink(destination: ChapterView(remainingChapters: chapters.reversed().suffix(index+1))) {
+                NavigationLink(destination: ChapterView(loadContents: true, remainingChapters: chapters.reversed().suffix(index+1))) {
                     HStack {
-                        Text("Vol.\(chapter.chapterInfo.volume!) Ch.\(chapter.chapterInfo.chapter!)")
+                        Text("Vol.\(chapter.chapterInfo.volume ?? "") Ch.\(chapter.chapterInfo.chapter ?? "")")
                             .font(.subheadline)
                         Spacer()
                         Text("\(chapter.chapterInfo.title!)")
