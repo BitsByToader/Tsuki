@@ -13,14 +13,19 @@ struct DownloadedMangaView: View {
     
     var body: some View {
         VStack {
-            List {
-                ForEach(Array(downloadedMangas.enumerated()), id: \.offset) { index, manga in
-                    NavigationLink(destination: MangaView(manga: Manga(fromDownloadedManga: manga), localChapters: manga.chapterArray, reloadContents: false, mangaId: "")) {
-                        DownloadedMangaListRow(manga: manga)
-                    }
-                }.onDelete(perform: deleteManga)
-                
-                
+            if !downloadedMangas.isEmpty {
+                List {
+                    ForEach(Array(downloadedMangas.enumerated()), id: \.offset) { index, manga in
+                        NavigationLink(destination: MangaView(manga: Manga(fromDownloadedManga: manga), localChapters: manga.chapterArray, reloadContents: false, mangaId: "")) {
+                            DownloadedMangaListRow(manga: manga)
+                        }
+                    }.onDelete(perform: deleteManga)
+                }
+            } else {
+                Text("You have no downloaded mangas")
+                    .font(.title3)
+                    .bold()
+                    .foregroundColor(Color(.lightGray))
             }
         }.navigationTitle(Text("Downloaded manga"))
         .navigationBarTitleDisplayMode(.large)

@@ -229,15 +229,17 @@ struct SearchWithTagsBox: View {
             HStack(alignment: .center) {
                 VStack(alignment: .leading) {
                     Text("Search with current tags")
+                        .bold()
                     Text("Tags: " + (includedTags > 0 ? "\(includedTags) included" : "") + (excludedTags > 0 && includedTags > 0 ? ", " : "") + (excludedTags > 0 ? "\(excludedTags) excluded" : "") )
+                        .opacity(0.5)
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-            }.padding(.horizontal, 10)
+            }.padding(.horizontal)
         }.frame(height: 60)
-        .padding(5)
+        .padding()
         .foregroundColor(.white)
     }
 }

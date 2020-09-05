@@ -28,6 +28,20 @@ struct ChapterSelectionView: View {
     }
     
     @State private var pages: [Pages] = []
+    @State private var downloadStarted: Bool = false
+    @State private var gatheringInfo: Bool = false
+    @State private var pageInProgress: Double = 0
+    private var pageCount: Double {
+        var number: Double = 0
+        
+        for page in pages {
+            for _ in page.array {
+                number += 1
+            }
+        }
+        
+        return number
+    }
     
     struct Pages: Equatable {
         var array: [String]
@@ -46,76 +60,97 @@ struct ChapterSelectionView: View {
     var body: some View {
         VStack {
             Spacer()
+            Spacer()
             Text("Select chapters")
                 .bold()
                 .font(.largeTitle)
             Spacer()
-            VStack(alignment: .leading, spacing: 15) {
-                Picker("Chapters", selection: $selection) {
-                    Text("All")
-                        .tag(Selection.allChapters)
-                    
-                    Text("Until")
-                        .tag(Selection.chaptersUntil)
-                    
-                    Text("Inbetween")
-                        .tag(Selection.chaptersInbetween)
-                    
-                    Text("Selected")
-                        .tag(Selection.selectedChapters)
-                }.pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal)
-                .onChange(of: selection) { choice in
-                    updateSelectedChapters(choice)
-                }
-                
-                List(Array(chapters.enumerated()), id: \.element) { index, chapter in
-                    Button(action: {
-                        selectedChapters[index].toggle()
-                        selection = .selectedChapters
-                    }) {
-                        HStack {
-                            Text("Vol.\(chapter.chapterInfo.volume ?? "") Ch.\(chapter.chapterInfo.chapter)")
+            
+            ZStack {
+                VStack {
+                    Spacer()
+                    VStack(alignment: .leading, spacing: 15) {
+                        Picker("Chapters", selection: $selection) {
+                            Text("All")
+                                .tag(Selection.allChapters)
                             
-                            Spacer()
+                            Text("Until")
+                                .tag(Selection.chaptersUntil)
                             
-                            HStack {
-                                Text("Selected")
-                                    .font(Font.headline.smallCaps())
-                                Image(systemName: "checkmark")
-                            }.foregroundColor(Color.accentColor)
-                            .opacity(selectedChapters[index] ? 1 : 0)
-                            .animation(.default)
+                            Text("Inbetween")
+                                .tag(Selection.chaptersInbetween)
+                            
+                            Text("Selected")
+                                .tag(Selection.selectedChapters)
+                        }.pickerStyle(SegmentedPickerStyle())
+                        .padding(.horizontal)
+                        .onChange(of: selection) { choice in
+                            updateSelectedChapters(choice)
                         }
+                        
+                        List(Array(chapters.enumerated()), id: \.element) { index, chapter in
+                            Button(action: {
+                                selectedChapters[index].toggle()
+                                selection = .selectedChapters
+                            }) {
+                                HStack {
+                                    Text("Vol.\(chapter.chapterInfo.volume ?? "") Ch.\(chapter.chapterInfo.chapter)")
+                                    
+                                    Spacer()
+                                    
+                                    HStack {
+                                        Text("Selected")
+                                            .font(Font.headline.smallCaps())
+                                        Image(systemName: "checkmark")
+                                    }.foregroundColor(Color.accentColor)
+                                    .opacity(selectedChapters[index] ? 1 : 0)
+                                    .animation(.default)
+                                }
+                            }
+                        }
+                        .frame(maxHeight: 400)
                     }
-                }
-                .frame(maxHeight: 400)
+                    Spacer()
+                    
+                    Button(action: initDownload) {
+                        Text("Download Chapters")
+                            .bold()
+                            .frame(height: 50)
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(15)
+                            .padding(.horizontal)
+                    }
+                    Button(action: {
+                        for index in 0..<selectedChapters.count {
+                            selectedChapters[index] = false
+                        }
+                    }) {
+                        Text("Deselect all")
+                    }.padding()
+                }.opacity( !(gatheringInfo || downloadStarted) ? 1 : 0)
+                .animation(.default)
+                
+                ProgressView(label: {
+                    Text("Downloading chapter(s)...")
+                }).opacity(gatheringInfo ? 1 : 0)
+                .animation(.default)
+                
+                ProgressView(value: pageInProgress, total: pageCount, label: {
+                    Text("Downloading chapter(s)...")
+                }).opacity(downloadStarted ? 1 : 0)
+                .animation(.default)
             }
-            Spacer()
-            
-            Button(action: initDownload) {
-                Text("Download Chapters")
-                    .bold()
-                    .frame(height: 50)
-                    .frame(maxWidth: .infinity)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(15)
-                    .padding(.horizontal)
-            }
-            
-            Button(action: {
-                for index in 0..<selectedChapters.count {
-                    selectedChapters[index] = false
-                }
-            }) {
-                Text("Deselect all")
-            }.padding()
             
             Spacer()
                 .onChange(of: pages) { pages in
                     print("Pages count is \(pages.count)")
                     if pages.count == numberOfSelectedChapters {
+                        DispatchQueue.main.async(qos: .userInteractive) {
+                            gatheringInfo = false
+                            downloadStarted = true
+                        }
                         saveChapters()
                     }
                 }
@@ -153,6 +188,8 @@ struct ChapterSelectionView: View {
     }
     
     func initDownload() {
+        downloadStarted = false
+        gatheringInfo = true
         for index in 0..<selectedChapters.count {
             if ( selectedChapters[index] ) {
                 getChapterPages(chapter: chapters[index], chapterId: chapters[index].chapterId)
@@ -211,10 +248,15 @@ struct ChapterSelectionView: View {
                     let imageName: String = "\(self.pages[index].chapter.chapterId)\(j+1).png"
                     let filename = getDocumentsDirectory().appendingPathComponent(imageName)
                     
-                    try? data!.write(to: filename, options: [.atomic])
+                    do {
+                        try data!.write(to: filename)
+                    } catch {
+                        print("Error when saving image: \(error)")
+                    }
                     print("Should've written to storage image: \(filename)")
                     
                     imagePaths += [imageName]
+                    self.pageInProgress += 1
                 }
             }
             print("Downloaded pages for chapter \(self.pages[index].chapter.chapterId)")

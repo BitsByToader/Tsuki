@@ -85,7 +85,17 @@ struct LibraryView: View {
             }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
             .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
         } else {
-            SignInRequiredView(description: "Your library will be available once you sign in.", logInViewPresented: $logInViewPresented)
+            NavigationView {
+                VStack(spacing: 10) {
+                    SignInRequiredView(description: "Your library will be available once you sign in.", logInViewPresented: $logInViewPresented)
+                    
+                    NavigationLink(destination: DownloadedMangaView(), label: {
+                        Text("...or you can view your downloaded mangas")
+                            .multilineTextAlignment(.center)
+                    })
+                }
+            }.navigationBarHidden(true)
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
     

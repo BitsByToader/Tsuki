@@ -2,7 +2,7 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17189" systemVersion="19G2021" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="DownloadedChapter" representedClassName="DownloadedChapter" syncable="YES">
         <attribute name="chapter" optional="YES" attributeType="String"/>
-        <attribute name="pages" optional="YES" attributeType="Transformable" customClassName="[String]"/>
+        <attribute name="pages" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName="[String]"/>
         <attribute name="timestamp" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <attribute name="volume" optional="YES" attributeType="String"/>
@@ -14,7 +14,7 @@
         <attribute name="mangaDescription" optional="YES" attributeType="String"/>
         <attribute name="mangaId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="mangaRating" optional="YES" attributeType="String"/>
-        <attribute name="mangaTags" optional="YES" attributeType="Transformable" customClassName=".[Int]"/>
+        <attribute name="mangaTags" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName=".[Int]"/>
         <attribute name="mangaTitle" optional="YES" attributeType="String"/>
         <attribute name="usersRated" optional="YES" attributeType="String"/>
         <relationship name="chapter" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DownloadedChapter" inverseName="origin" inverseEntity="DownloadedChapter"/>
