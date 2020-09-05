@@ -14,7 +14,9 @@ struct MangaView: View {
     @EnvironmentObject var appState: AppState
     
     @State var manga: Manga = Manga(title: "", artist: "", coverURL: "", description: "", rating: Manga.Rating(bayesian: "", users: ""), tags: [])
-    @State private var chapters: [Chapter] = []
+    
+    @State var chapters: [Chapter] = [] //chapters -- remoteChapters
+    @State var localChapters: [DownloadedChapter] = []
     
     @State var reloadContents: Bool
     
@@ -29,13 +31,13 @@ struct MangaView: View {
             MangaViewTitle(manga: manga)
             //MARK: - Manga actions
             HStack {
-                
                 Spacer()
                 
                 VStack(spacing: 3) {
                     Image(systemName: "heart.fill")
                     Text("Favourite")
                 }.padding(5)
+                .hoverEffect(.automatic)
                 .foregroundColor(Color(.systemBlue))
                 
                 Divider()
@@ -44,6 +46,7 @@ struct MangaView: View {
                     Image(systemName: "play.fill")
                     Text("Resume")
                 }.padding(15)
+                .hoverEffect(.automatic)
                 .foregroundColor(Color(.systemBlue))
                 .onTapGesture {
                     print("pressed")
@@ -56,11 +59,12 @@ struct MangaView: View {
                     Image(systemName: "square.and.arrow.down.fill")
                     Text("Download")
                 }.padding(5)
+                .hoverEffect(.automatic)
                 .foregroundColor(Color(.systemBlue))
                 .onTapGesture {
                     chapterDownloadingViewPresented = true
                 }.sheet(isPresented: $chapterDownloadingViewPresented) {
-                    ChapterSelectionView(isPresented: $chapterDownloadingViewPresented,manga: manga, chapters: chapters)
+                    ChapterSelectionView(isPresented: $chapterDownloadingViewPresented,manga: manga, chapters: chapters.reversed(), selectedChapters: [Bool](repeating: false, count: chapters.count))
                         .environment(\.managedObjectContext, moc)
                 }
                 
@@ -92,7 +96,7 @@ struct MangaView: View {
                     .font(.title2)
                     .bold()
                 
-                if chapters.isEmpty {
+                if chapters.isEmpty && localChapters.isEmpty {
                     Spacer()
                     HStack {
                         Spacer()
@@ -105,7 +109,11 @@ struct MangaView: View {
                     }
                     Spacer()
                 } else {
-                    MangaViewChapterList(chapters: chapters)
+                    if localChapters.isEmpty {
+                        MangaViewChapterList(chapters: chapters, remote: true)
+                    } else {
+                        MangaViewChapterList(chapters: [], remote: false, localChapters: localChapters)
+                    }
                 }
             }
         }.onAppear{
@@ -145,15 +153,15 @@ struct MangaView: View {
                         }
                     }
                     
-                    //Sort the array starting with the chapter that is the newest
-                    // i.e. the one with the biggest "time" value
+                    //Sort the array based on the chapter...
+                    //Would've liked to also sort based on volume as well (like when a
+                    //chapter's number gets reset with the volume, like how it is in actual books
+                    //But mangas that don't have a volume number, will get their sort all messed up
+                    //And will leave the chapters without a volume last (even though they might be first)
                     
                     filteredChapters = filteredChapters.sorted {
-                        $0.chapterInfo.timestamp! > $1.chapterInfo.timestamp!
+                        return Double($0.chapterInfo.chapter)! > Double($1.chapterInfo.chapter)!
                     }
-                    //I would like however to change the sorting mode to something more intricate
-                    //Like sorting based on volume/chapter, so I would display the latest chapter, not the newest one
-                    //which isn't always the same thing
                     
                     DispatchQueue.main.async {
                         self.manga = decodedResponse.manga

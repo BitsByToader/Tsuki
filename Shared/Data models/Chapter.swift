@@ -14,9 +14,9 @@ struct Chapter: Codable, Hashable {
 
 struct ChapterData: Codable, Hashable {
     let volume: String?
-    let chapter: String?
+    let chapter: String
     let title: String?
-    let langCode: String?
+    let langCode: String
     let timestamp: Double?
     
     

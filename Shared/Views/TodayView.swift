@@ -73,13 +73,12 @@ struct TodayView: View {
             }.listStyle(PlainListStyle())
             .navigationTitle(Text("Today"))
             
-            if sizeClass == .regular {
-                MangaView(reloadContents: !featuredDisplayedMangas.isEmpty, mangaId: featuredDisplayedMangas.isEmpty ? "" : featuredDisplayedMangas[0].id)
-                
-                ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
-            }
+            MangaView(reloadContents: !featuredDisplayedMangas.isEmpty, mangaId: featuredDisplayedMangas.isEmpty ? "" : featuredDisplayedMangas[0].id)
+
+            ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
             
-        }.navigationViewStyle(DoubleColumnNavigationViewStyle())
+        }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
+        .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
         .onAppear {
             loadUpdates()
         }
@@ -198,6 +197,21 @@ struct TodayView: View {
         return ReturnedManga(title: title, coverArtURL: coverArt, id: mangaId)
     }
 }
+
+extension View {
+  @ViewBuilder
+  func `if`<Transform: View>(
+    _ condition: Bool,
+    transform: (Self) -> Transform
+  ) -> some View {
+    if condition {
+      transform(self)
+    } else {
+      self
+    }
+  }
+}
+
 
 //struct TodayView_Previews: PreviewProvider {
 //    static var previews: some View {

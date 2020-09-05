@@ -31,6 +31,24 @@ struct Manga: Codable {
     let rating: Rating
     let tags: [Int]
     
+    init( title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [Int]) {
+        self.title = title
+        self.artist = artist
+        self.coverURL = coverURL
+        self.description = description
+        self.rating = rating
+        self.tags = tags
+    }
+    
+    init(fromDownloadedManga manga: DownloadedManga) {
+        title = manga.wrappedMangaTitle
+        artist = manga.wrappedMangaArtist
+        coverURL = manga.wrappedMangaCoverURL
+        description = manga.wrappedMangaDescription
+        rating = Rating(bayesian: manga.wrappedMangaRating, users: manga.wrappedUsersRated)
+        tags = manga.wrappedMangaTags
+    }
+    
     enum CodingKeys: String, CodingKey {
         case title
         case artist

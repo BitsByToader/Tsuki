@@ -14,15 +14,22 @@ struct ChapterView: View {
     var loadContents: Bool
     
     var remainingChapters: [Chapter]
+    var remainingLocalChapters: [DownloadedChapter] = []
     
     @State private var pageURLs: [String] = []
-    
-    var chapter: PageData?
     
     @State private var readingProgress: Int = 0
     @State private var currentPage: Int = 0
     @State private var extraProgressIsShown: Bool = false
     @State private var chapterRead: Int = 0
+    
+    var navTitle: String {
+        if loadContents {
+            return remainingChapters[chapterRead].chapterInfo.title ?? ""
+        } else {
+            return remainingLocalChapters[chapterRead].wrappedTitle
+        }
+    }
     
     var body: some View {
         ZStack(alignment: .top) {
@@ -42,7 +49,7 @@ struct ChapterView: View {
                                 currentPage = index + 1
                                 getReadingStatus(index: index+1)
                                 
-                                if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != remainingChapters.count ) {
+                                if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != (loadContents ? remainingChapters.count : remainingLocalChapters.count) ) {
                                     chapterRead += 1
                                     loadChapter(currentChapter: chapterRead)
                                 }
@@ -76,14 +83,19 @@ struct ChapterView: View {
                 }
             }
         }.onAppear {
-            if loadContents {
-                loadChapter(currentChapter: 0)
-            }
-        }.navigationBarTitle(remainingChapters[chapterRead].chapterInfo.title ?? "")
+            loadChapter(currentChapter: 0)
+        }.navigationBarTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
     }
     
     func loadChapter(currentChapter: Int) {
+        print(remainingLocalChapters)
+        if !loadContents {
+            pageURLs += remainingLocalChapters[currentChapter].wrappedPages
+            //Add the document directory path before this^^^
+            return
+        }
+        
         appState.isLoading = true
         
         guard let url = URL(string: "https://mangadex.org/api/chapter/\(remainingChapters[currentChapter].chapterId)") else {

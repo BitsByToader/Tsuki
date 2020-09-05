@@ -15,7 +15,7 @@ struct DownloadedMangaView: View {
         VStack {
             List {
                 ForEach(Array(downloadedMangas.enumerated()), id: \.offset) { index, manga in
-                    NavigationLink(destination: MangaView(manga: Manga(title: manga.mangaTitle!, artist: manga.mangaArtist!, coverURL: manga.mangaCoverURL!, description: manga.mangaDescription!, rating: Manga.Rating(bayesian: manga.mangaRating!, users: manga.usersRated!), tags: manga.mangaTags!), reloadContents: false, mangaId: "")) {
+                    NavigationLink(destination: MangaView(manga: Manga(fromDownloadedManga: manga), localChapters: manga.chapterArray, reloadContents: false, mangaId: "")) {
                         DownloadedMangaListRow(manga: manga)
                     }
                 }.onDelete(perform: deleteManga)

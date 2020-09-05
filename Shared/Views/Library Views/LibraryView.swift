@@ -77,12 +77,13 @@ struct LibraryView: View {
                     }
                 }
                 
-                if sizeClass == .regular {
-                    MangaView(reloadContents: false, mangaId: "")
-                    
-                    ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
-                }
-            }.navigationViewStyle(DoubleColumnNavigationViewStyle())
+                
+                MangaView(reloadContents: false, mangaId: "")
+
+                ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
+                
+            }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
+            .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
         } else {
             SignInRequiredView(description: "Your library will be available once you sign in.", logInViewPresented: $logInViewPresented)
         }

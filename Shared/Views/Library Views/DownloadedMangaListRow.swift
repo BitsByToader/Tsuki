@@ -13,7 +13,7 @@ struct DownloadedMangaListRow: View {
     
     var body: some View {
         HStack {
-            WebImage(url: URL(string: manga.mangaCoverURL ?? ""))
+            WebImage(url: URL(string: manga.wrappedMangaCoverURL))
                 .resizable()
                 .placeholder {
                     Rectangle().foregroundColor(.gray)
@@ -26,18 +26,18 @@ struct DownloadedMangaListRow: View {
                 .cornerRadius(5)
             
             VStack(alignment: .leading, spacing: 5) {
-                Text(manga.mangaTitle ?? "")
+                Text(manga.wrappedMangaTitle)
                     .font(.title2)
                     .bold()
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 
-                Text(manga.mangaArtist ?? "")
+                Text(manga.wrappedMangaArtist)
                     .font(.body)
                     .lineLimit(1)
                     .foregroundColor(Color(.gray))
                 
-                Text("Downloaded chapter 2 to 69")
+                Text("Chapters downloaded: \(manga.chapterArray.count)")
                     .font(.body)
                     .lineLimit(1)
                     .foregroundColor(Color(.gray))
