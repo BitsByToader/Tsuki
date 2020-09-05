@@ -36,24 +36,40 @@ struct ChapterView: View {
             ScrollView {
                 LazyVStack {
                     ForEach(Array(pageURLs.enumerated()), id: \.offset) { index, page in
-                        WebImage(url: URL(string: page))
-                            .resizable()
-                            .placeholder {
-                                Rectangle().foregroundColor(.gray)
-                                    .opacity(0.2)
-                            }
-                            .indicator(.activity)
-                            .transition(.fade(duration: 0.5))
-                            .scaledToFit()
-                            .onAppear {
-                                currentPage = index + 1
-                                getReadingStatus(index: index+1)
-                                
-                                if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != (loadContents ? remainingChapters.count : remainingLocalChapters.count) ) {
-                                    chapterRead += 1
-                                    loadChapter(currentChapter: chapterRead)
+                        if loadContents {
+                            WebImage(url: URL(string: page))
+                                .resizable()
+                                .placeholder {
+                                    Rectangle().foregroundColor(.gray)
+                                        .opacity(0.2)
                                 }
-                            }
+                                .indicator(.activity)
+                                .transition(.fade(duration: 0.5))
+                                .scaledToFit()
+                                .onAppear {
+                                    currentPage = index + 1
+                                    getReadingStatus(index: index+1)
+                                    
+                                    if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != (loadContents ? remainingChapters.count : remainingLocalChapters.count) ) {
+                                        chapterRead += 1
+                                        loadChapter(currentChapter: chapterRead)
+                                    }
+                                }
+                        } else {
+                            Image(uiImage: UIImage(contentsOfFile: page)!)
+                                .resizable()
+                                .transition(.fade(duration:0.5))
+                                .scaledToFit()
+                                .onAppear {
+                                    currentPage = index + 1
+                                    getReadingStatus(index: index+1)
+                                    
+                                    if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != (loadContents ? remainingChapters.count : remainingLocalChapters.count) ) {
+                                        chapterRead += 1
+                                        loadChapter(currentChapter: chapterRead)
+                                    }
+                                }
+                        }
                     }
                 }
             }
@@ -89,9 +105,11 @@ struct ChapterView: View {
     }
     
     func loadChapter(currentChapter: Int) {
-        print(remainingLocalChapters)
         if !loadContents {
-            pageURLs += remainingLocalChapters[currentChapter].wrappedPages
+            let chapterPages = remainingLocalChapters[currentChapter].wrappedPages
+            for page in chapterPages {
+                pageURLs += [getDocumentsDirectory().appendingPathComponent(page).path]
+            }
             //Add the document directory path before this^^^
             return
         }

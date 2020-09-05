@@ -179,14 +179,16 @@ struct ChapterSelectionView: View {
         mangaToDownload.usersRated = manga.rating.users
         
         for index in 0..<pages.count {
-//            let chapter = DownloadedChapter(context: moc)
-//
-//            chapter.title = self.pages[index].chapter.chapterInfo.title
-//            chapter.chapter = self.pages[index].chapter.chapterInfo.chapter
-//            chapter.volume = self.pages[index].chapter.chapterInfo.volume
-//            chapter.timestamp = self.pages[index].chapter.chapterInfo.timestamp!
+            let chapter = DownloadedChapter(context: moc)
+
+            chapter.title = self.pages[index].chapter.chapterInfo.title
+            chapter.chapter = self.pages[index].chapter.chapterInfo.chapter
+            chapter.volume = self.pages[index].chapter.chapterInfo.volume
+            chapter.timestamp = self.pages[index].chapter.chapterInfo.timestamp!
             
             //insert string array here that contains image url paths
+            var imagePaths: [String] = []
+            
             for j in 0..<pages[index].array.count {
                 print("Attempting to save image number \(j)")
                 guard let url = URL(string: pages[index].array[j]) else {
@@ -198,61 +200,31 @@ struct ChapterSelectionView: View {
                 request.httpMethod = "GET"
                 request.httpShouldHandleCookies = true
                 
-                URLSession.shared.dataTask(with: request) { data, response, error in
-                    if let data = data {
-                        let imageName: String = "\(self.pages[index].chapter.chapterId)\(j+1).png"
-                        
-                        //Replace the remote URL of the image used for downloading it, with the local name constructed earlier^^^
-                        //When the for loop that goes through the pages.array is finished, the array will have all local URLs ready...
-                        
-                        self.pages[index].array[j] = imageName
-                        
-                        
-                        let filename = getDocumentsDirectory().appendingPathComponent(imageName)
-                        try? data.write(to: filename)
-                        
-                        print("Wrote to storage image name: \(filename.absoluteString)")
-                        
-                        if ( j == (pages[index].array.count - 1) ) {
-                            print("Reached final page!")
-                            saveToCD(manga: mangaToDownload, index: index)
-                        }
-                        
-                        return
-                    }
-                }.resume()
+                let (data, _, error) = URLSession.shared.synchronousDataTask(with: request)
+                if let error = error {
+                    print("Error downloading page: \(error)")
+                    #warning("MAKE SURE TO KEEP IN STORAGE ALL OF THE IMAGE PATHS SO YOU CAN DELETE THEM IF AN ERROR OCCURS")
+                    //also, i shouldn't revert everything if an error pops up. Just stop the process, inform the user, and leave everything else still intact
+                    self.moc.rollback()
+                    self.isPresented = false
+                } else {
+                    let imageName: String = "\(self.pages[index].chapter.chapterId)\(j+1).png"
+                    let filename = getDocumentsDirectory().appendingPathComponent(imageName)
+                    
+                    try? data!.write(to: filename, options: [.atomic])
+                    print("Should've written to storage image: \(filename)")
+                    
+                    imagePaths += [imageName]
+                }
             }
-            
-//            chapter.origin = mangaToDownload
+            print("Downloaded pages for chapter \(self.pages[index].chapter.chapterId)")
+            chapter.pages = imagePaths
+            chapter.origin = mangaToDownload
         }
         
-//        try? self.moc.save()
-//
-//        self.isPresented = false
-    }
-    
-    func saveToCD(manga: DownloadedManga, index: Int) {
-        print("Reached saveToCD with index \(index)")
-        
-        let chapter = DownloadedChapter(context: moc)
-        
-        chapter.title = self.pages[index].chapter.chapterInfo.title
-        chapter.chapter = self.pages[index].chapter.chapterInfo.chapter
-        chapter.volume = self.pages[index].chapter.chapterInfo.volume
-        chapter.timestamp = self.pages[index].chapter.chapterInfo.timestamp!
-        
-        chapter.pages = self.pages[index].array
-        
-        chapter.origin = manga
-        
-        if ( index == (pages.count - 1) ) {
-            finishSave()
-        }
-    }
-    
-    func finishSave() {
-        print("Finished save!")
+        print("Done...")
         try? self.moc.save()
+
         self.isPresented = false
     }
     
