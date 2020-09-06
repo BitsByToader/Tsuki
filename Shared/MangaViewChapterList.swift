@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct MangaViewChapterList: View {
+    @Environment(\.managedObjectContext) var moc
     let chapters: [Chapter]
     let remote: Bool
     var localChapters: [DownloadedChapter] = []

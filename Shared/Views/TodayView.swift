@@ -75,10 +75,10 @@ struct TodayView: View {
             
             MangaView(reloadContents: !featuredDisplayedMangas.isEmpty, mangaId: featuredDisplayedMangas.isEmpty ? "" : featuredDisplayedMangas[0].id)
 
-            ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
+            ChapterView(loadContents: false, remainingChapters: [])
             
         }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
-        .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
+        .if( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
         .onAppear {
             loadUpdates()
         }

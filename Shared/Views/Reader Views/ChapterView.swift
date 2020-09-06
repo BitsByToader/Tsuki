@@ -27,7 +27,7 @@ struct ChapterView: View {
         if loadContents {
             return remainingChapters[chapterRead].chapterInfo.title ?? ""
         } else {
-            return remainingLocalChapters[chapterRead].wrappedTitle
+            return !remainingLocalChapters.isEmpty ? remainingLocalChapters[chapterRead].wrappedTitle : "Please select a chapter"
         }
     }
     
@@ -105,12 +105,15 @@ struct ChapterView: View {
     }
     
     func loadChapter(currentChapter: Int) {
-        if !loadContents {
+        if !loadContents && !remainingLocalChapters.isEmpty {
             let chapterPages = remainingLocalChapters[currentChapter].wrappedPages
             for page in chapterPages {
                 pageURLs += [getDocumentsDirectory().appendingPathComponent(page).path]
             }
-            //Add the document directory path before this^^^
+            return
+        }
+        
+        if remainingChapters.isEmpty && remainingLocalChapters.isEmpty {
             return
         }
         

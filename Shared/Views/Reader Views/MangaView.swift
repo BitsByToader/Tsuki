@@ -22,8 +22,19 @@ struct MangaView: View {
     
     @State private var descriptionExpanded: Bool = false
     @State private var chapterDownloadingViewPresented: Bool = false
+    @State private var presentAlert: Bool = false
     
     var mangaId: String
+    
+    enum MangaStatus: String, CaseIterable {
+        case unfollow = "Unfollow"
+        case reading = "Reading"
+        case completed = "Completed"
+        case onHold = "On Hold"
+        case planning = "Plan to read"
+        case dropped = "Dropped"
+        case reReading = "Re-Reading"
+    }
     
     var body: some View {
         List {
@@ -35,8 +46,22 @@ struct MangaView: View {
                 
                 VStack(spacing: 3) {
                     Image(systemName: "heart.fill")
-                    Text("Favourite")
-                }.padding(5)
+                    Text("Status")
+                        .contextMenu {
+                            ForEach(Array(MangaStatus.allCases.enumerated()), id: \.offset) { index, status in
+                                Button(action: {
+                                    if ( status == .unfollow ) {
+                                        updateMangaStatus(statusId: Int(mangaId)! )
+                                    } else {
+                                        updateMangaStatus(statusId: index)
+                                    }
+                                }) {
+                                    Text("\(status.rawValue)")
+                                }
+                            }
+                        }
+                }
+                .padding(5)
                 .hoverEffect(.automatic)
                 .foregroundColor(Color(.systemBlue))
                 
@@ -48,9 +73,11 @@ struct MangaView: View {
                 }.padding(15)
                 .hoverEffect(.automatic)
                 .foregroundColor(Color(.systemBlue))
+                .alert(isPresented: $presentAlert) {
+                    Alert(title: Text("Coming soon...™️"), message: Text("This feature is currently unavailable. It will be coming soon in an update, so hang tight!"), dismissButton: Alert.Button.cancel(Text("OK")))
+                }
                 .onTapGesture {
-                    print("pressed")
-                    print(manga.tags)
+                    self.presentAlert = true
                 }
                 
                 Divider()
@@ -122,7 +149,7 @@ struct MangaView: View {
                 loadMangaInfo()
                 self.reloadContents = false
             }
-        }.navigationTitle(manga.title)
+        }.navigationTitle(mangaId != "" ? manga.title : "Please select a manga to read")
         .navigationBarTitleDisplayMode(.inline)
         .listStyle(PlainListStyle())
     }
@@ -188,6 +215,50 @@ struct MangaView: View {
                         appState.errorOccured = true
                         appState.isLoading = false
                     }
+                }
+            }
+        }.resume()
+    }
+    //MARK: - Update the reading status of the manga
+    func updateMangaStatus(statusId: Int) {
+        appState.isLoading = true
+        
+        var action: String = ""
+        if ( statusId == Int(mangaId)! ) {
+            action = "manga_unfollow"
+        } else {
+            action = "manga_follow"
+        }
+        
+        guard let url = URL(string :"https://mangadex.org/ajax/actions.ajax.php?function=\(action)&id=\(mangaId)&type=\(statusId)&_=\(Int(Date().timeIntervalSince1970))") else {
+            print("from updateMangaStatus: Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.httpShouldHandleCookies = true
+        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        
+        print(url.absoluteString)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                print(String(bytes: data, encoding: .utf8))
+                DispatchQueue.main.async {
+                    withAnimation {
+                        appState.isLoading = false
+                    }
+                }
+                return
+            }
+            
+            DispatchQueue.main.async {
+                print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                withAnimation {
+                    appState.errorOccured = true
+                    appState.isLoading = false
                 }
             }
         }.resume()

@@ -58,103 +58,107 @@ struct ChapterSelectionView: View {
     @State private var selection: Selection = .selectedChapters
     
     var body: some View {
-        VStack {
-            Spacer()
-            Spacer()
-            Text("Select chapters")
-                .bold()
-                .font(.largeTitle)
-            Spacer()
-            
-            ZStack {
-                VStack {
-                    Spacer()
-                    VStack(alignment: .leading, spacing: 15) {
-                        Picker("Chapters", selection: $selection) {
-                            Text("All")
-                                .tag(Selection.allChapters)
-                            
-                            Text("Until")
-                                .tag(Selection.chaptersUntil)
-                            
-                            Text("Inbetween")
-                                .tag(Selection.chaptersInbetween)
-                            
-                            Text("Selected")
-                                .tag(Selection.selectedChapters)
-                        }.pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal)
-                        .onChange(of: selection) { choice in
-                            updateSelectedChapters(choice)
-                        }
+        ZStack {
+            VStack {
+                Spacer()
+                Text("Select chapters")
+                    .bold()
+                    .font(.largeTitle)
+                Spacer()
+                VStack(alignment: .leading, spacing: 15) {
+                    Picker("Chapters", selection: $selection) {
+                        Text("All")
+                            .tag(Selection.allChapters)
                         
-                        List(Array(chapters.enumerated()), id: \.element) { index, chapter in
-                            Button(action: {
-                                selectedChapters[index].toggle()
-                                selection = .selectedChapters
-                            }) {
+                        Text("Until")
+                            .tag(Selection.chaptersUntil)
+                        
+                        Text("Inbetween")
+                            .tag(Selection.chaptersInbetween)
+                        
+                        Text("Selected")
+                            .tag(Selection.selectedChapters)
+                    }.pickerStyle(SegmentedPickerStyle())
+                    .padding(.horizontal)
+                    .onChange(of: selection) { choice in
+                        updateSelectedChapters(choice)
+                    }
+                    
+                    List(Array(chapters.enumerated()), id: \.element) { index, chapter in
+                        Button(action: {
+                            selectedChapters[index].toggle()
+                            selection = .selectedChapters
+                        }) {
+                            HStack {
+                                Text("Vol.\(chapter.chapterInfo.volume ?? "") Ch.\(chapter.chapterInfo.chapter)")
+                                
+                                Spacer()
+                                
                                 HStack {
-                                    Text("Vol.\(chapter.chapterInfo.volume ?? "") Ch.\(chapter.chapterInfo.chapter)")
-                                    
-                                    Spacer()
-                                    
-                                    HStack {
-                                        Text("Selected")
-                                            .font(Font.headline.smallCaps())
-                                        Image(systemName: "checkmark")
-                                    }.foregroundColor(Color.accentColor)
-                                    .opacity(selectedChapters[index] ? 1 : 0)
-                                    .animation(.default)
-                                }
+                                    Text("Selected")
+                                        .font(Font.headline.smallCaps())
+                                    Image(systemName: "checkmark")
+                                }.foregroundColor(Color.accentColor)
+                                .opacity(selectedChapters[index] ? 1 : 0)
+                                .animation(.default)
                             }
                         }
-                        .frame(maxHeight: 400)
                     }
-                    Spacer()
-                    
-                    Button(action: initDownload) {
-                        Text("Download Chapters")
-                            .bold()
-                            .frame(height: 50)
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(15)
-                            .padding(.horizontal)
+                    .frame(maxHeight: 400)
+                }
+                Spacer()
+                
+                Button(action: initDownload) {
+                    Text("Download Chapters")
+                        .bold()
+                        .frame(height: 50)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(15)
+                        .padding(.horizontal)
+                }
+                Button(action: {
+                    for index in 0..<selectedChapters.count {
+                        selectedChapters[index] = false
                     }
-                    Button(action: {
-                        for index in 0..<selectedChapters.count {
-                            selectedChapters[index] = false
-                        }
-                    }) {
-                        Text("Deselect all")
-                    }.padding()
-                }.opacity( !(gatheringInfo || downloadStarted) ? 1 : 0)
-                .animation(.default)
-                
-                ProgressView(label: {
-                    Text("Downloading chapter(s)...")
-                }).opacity(gatheringInfo ? 1 : 0)
-                .animation(.default)
-                
-                ProgressView(value: pageInProgress, total: pageCount, label: {
-                    Text("Downloading chapter(s)...")
-                }).opacity(downloadStarted ? 1 : 0)
-                .animation(.default)
-            }
+                }) {
+                    Text("Deselect all")
+                }.padding()
+            }.opacity( !(gatheringInfo || downloadStarted) ? 1 : 0)
+            .animation(.default)
             
-            Spacer()
-                .onChange(of: pages) { pages in
-                    print("Pages count is \(pages.count)")
-                    if pages.count == numberOfSelectedChapters {
-                        DispatchQueue.main.async(qos: .userInteractive) {
-                            gatheringInfo = false
-                            downloadStarted = true
-                        }
+            ProgressView(label: {
+                Text("Gathering chapter info...")
+            }).opacity(gatheringInfo ? 1 : 0)
+            .animation(.default)
+            
+            ProgressView(value: pageInProgress, total: pageCount, label: {
+                HStack {
+                    Spacer()
+                    Text("Downloading chapter(s)...")
+                    Spacer()
+                }
+            }).opacity(downloadStarted ? 1 : 0)
+            .animation(.default)
+            .padding(.horizontal)
+        }
+        
+        Spacer()
+            .onChange(of: pages) { pages in
+                print("Pages count is \(pages.count)")
+                if pages.count == numberOfSelectedChapters {
+                    gatheringInfo = false
+                    downloadStarted = true
+                    
+                    UIApplication.shared.isIdleTimerDisabled = true
+                    
+                    DispatchQueue.global(qos: .userInitiated).async {
                         saveChapters()
                     }
                 }
-        }
+            }
+        
     }
     
     func updateSelectedChapters(_ choice : Selection) {
@@ -198,11 +202,11 @@ struct ChapterSelectionView: View {
     }
     
     func saveChapters() {
-//        UIApplication.shared.isIdleTimerDisabled = true
-//        Use this ^^^ to prevent the screen from dimming while downloading chapters
-//        Don't forget to set it back to false after the download is finished
-//        Or when an error is encountered. If you forget this one, the screen won't dim
-//        until the is completely restarted
+        //        UIApplication.shared.isIdleTimerDisabled = true
+        //        Use this ^^^ to prevent the screen from dimming while downloading chapters
+        //        Don't forget to set it back to false after the download is finished
+        //        Or when an error is encountered. If you forget this one, the screen won't dim
+        //        until the is completely restarted
         
         let mangaToDownload = DownloadedManga(context: moc)
         
@@ -217,7 +221,7 @@ struct ChapterSelectionView: View {
         
         for index in 0..<pages.count {
             let chapter = DownloadedChapter(context: moc)
-
+            
             chapter.title = self.pages[index].chapter.chapterInfo.title
             chapter.chapter = self.pages[index].chapter.chapterInfo.chapter
             chapter.volume = self.pages[index].chapter.chapterInfo.volume
@@ -243,7 +247,9 @@ struct ChapterSelectionView: View {
                     #warning("MAKE SURE TO KEEP IN STORAGE ALL OF THE IMAGE PATHS SO YOU CAN DELETE THEM IF AN ERROR OCCURS")
                     //also, i shouldn't revert everything if an error pops up. Just stop the process, inform the user, and leave everything else still intact
                     self.moc.rollback()
-                    self.isPresented = false
+                    DispatchQueue.main.async {
+                        self.isPresented = false
+                    }
                 } else {
                     let imageName: String = "\(self.pages[index].chapter.chapterId)\(j+1).png"
                     let filename = getDocumentsDirectory().appendingPathComponent(imageName)
@@ -256,7 +262,11 @@ struct ChapterSelectionView: View {
                     print("Should've written to storage image: \(filename)")
                     
                     imagePaths += [imageName]
-                    self.pageInProgress += 1
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            self.pageInProgress += 1
+                        }
+                    }
                 }
             }
             print("Downloaded pages for chapter \(self.pages[index].chapter.chapterId)")
@@ -266,8 +276,11 @@ struct ChapterSelectionView: View {
         
         print("Done...")
         try? self.moc.save()
-
-        self.isPresented = false
+        
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = false
+            self.isPresented = false
+        }
     }
     
     func getChapterPages(chapter: Chapter, chapterId: String) {
@@ -297,29 +310,29 @@ struct ChapterSelectionView: View {
                     }
                     
                     DispatchQueue.main.async {
-//                        self.pages += [pages]
+                        //                        self.pages += [pages]
                         self.pages += [Pages(array: pages, chapter: chapter)]
                     }
                     
                     return
                 } catch {
-//                    DispatchQueue.main.async {
-//                        appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
-//                        withAnimation {
-//                            appState.errorOccured = true
-//                            appState.isLoading = false
-//                        }
-//                    }
+                    //                    DispatchQueue.main.async {
+                    //                        appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
+                    //                        withAnimation {
+                    //                            appState.errorOccured = true
+                    //                            appState.isLoading = false
+                    //                        }
+                    //                    }
                 }
                 
-//                DispatchQueue.main.async {
-//                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-//                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
-//                    withAnimation {
-//                        appState.errorOccured = true
-//                        appState.isLoading = false
-//                    }
-//                }
+                //                DispatchQueue.main.async {
+                //                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                //                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                //                    withAnimation {
+                //                        appState.errorOccured = true
+                //                        appState.isLoading = false
+                //                    }
+                //                }
             }
         }.resume()
     }
@@ -338,20 +351,20 @@ extension URLSession {
         var data: Data?
         var response: URLResponse?
         var error: Error?
-
+        
         let semaphore = DispatchSemaphore(value: 0)
-
+        
         let dataTask = self.dataTask(with: urlRequest) {
             data = $0
             response = $1
             error = $2
-
+            
             semaphore.signal()
         }
         dataTask.resume()
-
+        
         _ = semaphore.wait(timeout: .distantFuture)
-
+        
         return (data, response, error)
     }
 }

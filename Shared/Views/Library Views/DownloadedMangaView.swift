@@ -33,6 +33,20 @@ struct DownloadedMangaView: View {
     
     func deleteManga(at offsets: IndexSet) {
         withAnimation {
+            let index = offsets.first ?? 0
+            let fileManager = FileManager.default
+            let docPath = getDocumentsDirectory()
+            for chapter in downloadedMangas[index].chapterArray {
+                for page in chapter.wrappedPages {
+                    do {
+                        try fileManager.removeItem(at: docPath.appendingPathComponent(page))
+                    } catch {
+                        print(error)
+                    }
+                    print("Deleted image: \(page)")
+                }
+            }
+            
             self.moc.delete(downloadedMangas[offsets.first ?? 0])
             try? self.moc.save()
         }
