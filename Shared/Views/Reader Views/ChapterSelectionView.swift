@@ -165,6 +165,7 @@ struct ChapterSelectionView: View {
                         //is far greater with the Async one. Don't know what I should do... Will leave both in
                         //and I'll decide later. Currently, I'll use the regular one since it is easier to understand
                         //and might be more reliable as well...
+                        
                         saveChapters()
                     }
                 }
@@ -211,7 +212,7 @@ struct ChapterSelectionView: View {
             }
         }
     }
-    
+    //MARK: - Synchronous chapter saving
     func saveChapters() {
         let mangaToDownload = DownloadedManga(context: moc)
 
@@ -287,7 +288,7 @@ struct ChapterSelectionView: View {
             self.isPresented = false
         }
     }
-    
+    //MARK: - Asynchronous chapter saving
     func saveChaptersAsync() {
         let mangaToDownload = DownloadedManga(context: moc)
         
@@ -349,6 +350,10 @@ struct ChapterSelectionView: View {
                     }
 
                     print("Downloaded pages for chapter \(self.pages[index].chapter.chapterId)")
+                    imagePaths = imagePaths.sorted {
+                        Int($0.prefix($0.count - 4))! < Int($1.prefix($1.count - 4))!
+                    }
+                    
                     chapter.pages = imagePaths
                     chapter.origin = mangaToDownload
                     
