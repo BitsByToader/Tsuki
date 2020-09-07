@@ -13,7 +13,7 @@ struct MangaView: View {
     @Environment(\.managedObjectContext) var moc
     @EnvironmentObject var appState: AppState
     
-    @State var manga: Manga = Manga(title: "", artist: "", coverURL: "", description: "", rating: Manga.Rating(bayesian: "", users: ""), tags: [])
+    @State var manga: Manga = Manga()
     
     @State var chapters: [Chapter] = [] //chapters -- remoteChapters
     @State var localChapters: [DownloadedChapter] = []
@@ -23,6 +23,7 @@ struct MangaView: View {
     @State private var descriptionExpanded: Bool = false
     @State private var chapterDownloadingViewPresented: Bool = false
     @State private var presentAlert: Bool = false
+    @State private var currentStatus: String = "Status"
     
     var mangaId: String
     
@@ -46,17 +47,30 @@ struct MangaView: View {
                 
                 VStack(spacing: 3) {
                     Image(systemName: "heart.fill")
-                    Text("Status")
-                        .contextMenu {
-                            ForEach(Array(MangaStatus.allCases.enumerated()), id: \.offset) { index, status in
-                                Button(action: {
-                                    if ( status == .unfollow ) {
-                                        updateMangaStatus(statusId: Int(mangaId)! )
-                                    } else {
-                                        updateMangaStatus(statusId: index)
+                    Text(currentStatus)
+                        .multilineTextAlignment(.center)
+                        .contextMenu() {
+                            if mangaId != "" {
+                                Section {
+                                    Button(action: {
+                                        updateMangaStatus(statusId: Int(mangaId)!)
+                                        currentStatus = "Status"
+                                    }) {
+                                        Text("\(MangaStatus.unfollow.rawValue)")
+                                    }.foregroundColor(.red)
+                                }
+                            }
+                            
+                            Section {
+                                ForEach(Array(MangaStatus.allCases.enumerated()), id: \.offset) { index, status in
+                                    if status != .unfollow {
+                                        Button(action: {
+                                            updateMangaStatus(statusId: index)
+                                            currentStatus = status.rawValue
+                                        }) {
+                                            Text("\(status.rawValue)")
+                                        }
                                     }
-                                }) {
-                                    Text("\(status.rawValue)")
                                 }
                             }
                         }
@@ -64,6 +78,11 @@ struct MangaView: View {
                 .padding(5)
                 .hoverEffect(.automatic)
                 .foregroundColor(Color(.systemBlue))
+                .onTapGesture(perform: {
+                    //Always set status to "Reading" on tap
+                    updateMangaStatus(statusId: 1)
+                    currentStatus = "Reading"
+                })
                 
                 Divider()
                 
@@ -91,7 +110,7 @@ struct MangaView: View {
                 .onTapGesture {
                     chapterDownloadingViewPresented = true
                 }.sheet(isPresented: $chapterDownloadingViewPresented) {
-                    ChapterSelectionView(isPresented: $chapterDownloadingViewPresented,manga: manga, chapters: chapters.reversed(), selectedChapters: [Bool](repeating: false, count: chapters.count))
+                    ChapterSelectionView(isPresented: $chapterDownloadingViewPresented, manga: manga, chapters: chapters.reversed(), selectedChapters: [Bool](repeating: false, count: chapters.count))
                         .environment(\.managedObjectContext, moc)
                 }
                 
@@ -230,7 +249,7 @@ struct MangaView: View {
             action = "manga_follow"
         }
         
-        guard let url = URL(string :"https://mangadex.org/ajax/actions.ajax.php?function=\(action)&id=\(mangaId)&type=\(statusId)&_=\(Int(Date().timeIntervalSince1970))") else {
+        guard let url = URL(string :"https://mangadex.org/ajax/actions.ajax.php?function=\(action)&id=\(mangaId)&type=\(statusId)") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }
@@ -244,7 +263,7 @@ struct MangaView: View {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
-                print(String(bytes: data, encoding: .utf8))
+                print(String(bytes: data, encoding: .utf8) as Any)
                 DispatchQueue.main.async {
                     withAnimation {
                         appState.isLoading = false

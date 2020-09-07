@@ -31,6 +31,15 @@ struct Manga: Codable {
     let rating: Rating
     let tags: [Int]
     
+    init() {
+        self.title = ""
+        self.artist = ""
+        self.coverURL = ""
+        self.description = ""
+        self.rating = Rating(bayesian: "", users: "")
+        self.tags = []
+    }
+    
     init( title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [Int]) {
         self.title = title
         self.artist = artist

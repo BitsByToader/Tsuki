@@ -14,10 +14,11 @@ struct LibraryLink: View {
         ZStack(alignment: .leading) {
             Rectangle()
                 .fill(Color(.secondarySystemBackground))
-                .cornerRadius(7)
+                .cornerRadius(12)
 
             HStack {
                 Text(linkTitle)
+                    .bold()
                     .buttonStyle(PlainButtonStyle())
                 Spacer()
                 Image(systemName: "chevron.right")

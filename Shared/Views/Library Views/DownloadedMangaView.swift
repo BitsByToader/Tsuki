@@ -11,6 +11,9 @@ struct DownloadedMangaView: View {
     @Environment(\.managedObjectContext) var moc
     @FetchRequest(entity: DownloadedManga.entity(), sortDescriptors: []) var downloadedMangas: FetchedResults<DownloadedManga>
     
+    @State private var mangaToDelete: IndexSet = IndexSet()
+    @State private var deleteWarningPresented: Bool = false
+    
     var body: some View {
         VStack {
             if !downloadedMangas.isEmpty {
@@ -19,7 +22,16 @@ struct DownloadedMangaView: View {
                         NavigationLink(destination: MangaView(manga: Manga(fromDownloadedManga: manga), localChapters: manga.chapterArray, reloadContents: false, mangaId: "")) {
                             DownloadedMangaListRow(manga: manga)
                         }
-                    }.onDelete(perform: deleteManga)
+                    }.onDelete(perform: askForPermission)
+                }.actionSheet(isPresented: $deleteWarningPresented) {
+                    ActionSheet(
+                        title: Text("Wait a second!"),
+                        message: Text("This action will delete this downloaded manga, as well as *ALL* chapters associated with it... This action is non-reversable. Are you sure you want to continue?"),
+                        buttons: [
+                            .cancel(Text("Cancel"), action: {deleteWarningPresented = false}),
+                            .destructive(Text("Delete"), action: {deleteManga(at: mangaToDelete)})
+                        ]
+                    )
                 }
             } else {
                 Text("You have no downloaded mangas")
@@ -29,6 +41,11 @@ struct DownloadedMangaView: View {
             }
         }.navigationTitle(Text("Downloaded manga"))
         .navigationBarTitleDisplayMode(.large)
+    }
+    
+    func askForPermission(at offsets: IndexSet) {
+        mangaToDelete = offsets
+        deleteWarningPresented.toggle()
     }
     
     func deleteManga(at offsets: IndexSet) {
