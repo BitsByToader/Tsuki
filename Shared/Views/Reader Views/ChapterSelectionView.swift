@@ -152,13 +152,19 @@ struct ChapterSelectionView: View {
         Spacer()
             .onChange(of: pages) { pages in
                 print("Pages count is \(pages.count)")
-                if pages.count == numberOfSelectedChapters {
+                if (pages.count == numberOfSelectedChapters && gatheringInfo) {
                     gatheringInfo = false
                     downloadStarted = true
                     
                     UIApplication.shared.isIdleTimerDisabled = true
                     
                     DispatchQueue.global(qos: .userInitiated).async {
+                        //Don't know if i should use saveChapters or saveChaptersAsync...
+                        //Did a quick test with a random 24 page chapter and Async scored 36s
+                        //While the regular one did 43s. However, the strain on MangaDex's servers
+                        //is far greater with the Async one. Don't know what I should do... Will leave both in
+                        //and I'll decide later. Currently, I'll use the regular one since it is easier to understand
+                        //and might be more reliable as well...
                         saveChapters()
                     }
                 }
@@ -206,95 +212,83 @@ struct ChapterSelectionView: View {
         }
     }
     
-//    func saveChapters() {
-//        //        UIApplication.shared.isIdleTimerDisabled = true
-//        //        Use this ^^^ to prevent the screen from dimming while downloading chapters
-//        //        Don't forget to set it back to false after the download is finished
-//        //        Or when an error is encountered. If you forget this one, the screen won't dim
-//        //        until the is completely restarted
-//
-//        let mangaToDownload = DownloadedManga(context: moc)
-//
-//        mangaToDownload.mangaArtist = manga.artist
-//        mangaToDownload.mangaCoverURL = manga.coverURL
-//        mangaToDownload.mangaId = UUID()
-//        mangaToDownload.mangaTitle = manga.title
-//        mangaToDownload.mangaRating = manga.rating.bayesian
-//        mangaToDownload.mangaTags = manga.tags
-//        mangaToDownload.mangaDescription = manga.description
-//        mangaToDownload.usersRated = manga.rating.users
-//
-//        for index in 0..<pages.count {
-//            let chapter = DownloadedChapter(context: moc)
-//
-//            chapter.title = self.pages[index].chapter.chapterInfo.title
-//            chapter.chapter = self.pages[index].chapter.chapterInfo.chapter
-//            chapter.volume = self.pages[index].chapter.chapterInfo.volume
-//            chapter.timestamp = self.pages[index].chapter.chapterInfo.timestamp!
-//
-//            //insert string array here that contains image url paths
-//            var imagePaths: [String] = []
-//
-//            for j in 0..<pages[index].array.count {
-//                print("Attempting to save image number \(j)")
-//                guard let url = URL(string: pages[index].array[j]) else {
-//                    print("From chapter selection view, invalid url")
-//                    break
-//                }
-//
-//                var request = URLRequest(url: url)
-//                request.httpMethod = "GET"
-//                request.httpShouldHandleCookies = true
-//
-//                let (data, _, error) = URLSession.shared.synchronousDataTask(with: request)
-//                if let error = error {
-//                    print("Error downloading page: \(error)")
-//                    #warning("MAKE SURE TO KEEP IN STORAGE ALL OF THE IMAGE PATHS SO YOU CAN DELETE THEM IF AN ERROR OCCURS")
-//                    //also, i shouldn't revert everything if an error pops up. Just stop the process, inform the user, and leave everything else still intact
-//                    self.moc.rollback()
-//                    DispatchQueue.main.async {
-//                        self.isPresented = false
-//                    }
-//                } else {
-//                    let imageName: String = "\(self.pages[index].chapter.chapterId)\(j+1).png"
-//                    let filename = getDocumentsDirectory().appendingPathComponent(imageName)
-//
-//                    do {
-//                        try data!.write(to: filename)
-//                    } catch {
-//                        print("Error when saving image: \(error)")
-//                    }
-//                    print("Should've written to storage image: \(filename)")
-//
-//                    imagePaths += [imageName]
-//                    DispatchQueue.main.async {
-//                        withAnimation {
-//                            self.pageInProgress += 1
-//                        }
-//                    }
-//                }
-//            }
-//            print("Downloaded pages for chapter \(self.pages[index].chapter.chapterId)")
-//            chapter.pages = imagePaths
-//            chapter.origin = mangaToDownload
-//        }
-//
-//        print("Done...")
-//        try? self.moc.save()
-//
-//        DispatchQueue.main.async {
-//            UIApplication.shared.isIdleTimerDisabled = false
-//            self.isPresented = false
-//        }
-//    }
-    
     func saveChapters() {
-        //        UIApplication.shared.isIdleTimerDisabled = true
-        //        Use this ^^^ to prevent the screen from dimming while downloading chapters
-        //        Don't forget to set it back to false after the download is finished
-        //        Or when an error is encountered. If you forget this one, the screen won't dim
-        //        until the is completely restarted
-        
+        let mangaToDownload = DownloadedManga(context: moc)
+
+        mangaToDownload.mangaArtist = manga.artist
+        mangaToDownload.mangaCoverURL = manga.coverURL
+        mangaToDownload.mangaId = UUID()
+        mangaToDownload.mangaTitle = manga.title
+        mangaToDownload.mangaRating = manga.rating.bayesian
+        mangaToDownload.mangaTags = manga.tags
+        mangaToDownload.mangaDescription = manga.description
+        mangaToDownload.usersRated = manga.rating.users
+
+        for index in 0..<pages.count {
+            let chapter = DownloadedChapter(context: moc)
+
+            chapter.title = self.pages[index].chapter.chapterInfo.title
+            chapter.chapter = self.pages[index].chapter.chapterInfo.chapter
+            chapter.volume = self.pages[index].chapter.chapterInfo.volume
+            chapter.timestamp = self.pages[index].chapter.chapterInfo.timestamp!
+
+            //insert string array here that contains image url paths
+            var imagePaths: [String] = []
+
+            for j in 0..<pages[index].array.count {
+                print("Attempting to save image number \(j)")
+                guard let url = URL(string: pages[index].array[j].pagePath) else {
+                    print("From chapter selection view, invalid url")
+                    break
+                }
+
+                var request = URLRequest(url: url)
+                request.httpMethod = "GET"
+                request.httpShouldHandleCookies = true
+
+                let (data, _, error) = URLSession.shared.synchronousDataTask(with: request)
+                if let error = error {
+                    print("Error downloading page: \(error)")
+                    #warning("MAKE SURE TO KEEP IN STORAGE ALL OF THE IMAGE PATHS SO YOU CAN DELETE THEM IF AN ERROR OCCURS")
+                    //also, i shouldn't revert everything if an error pops up. Just stop the process, inform the user, and leave everything else still intact
+                    self.moc.rollback()
+                    DispatchQueue.main.async {
+                        self.isPresented = false
+                    }
+                } else {
+                    let imageName: String = "\(self.pages[index].chapter.chapterId)\(j+1).png"
+                    let filename = getDocumentsDirectory().appendingPathComponent(imageName)
+
+                    do {
+                        try data!.write(to: filename)
+                    } catch {
+                        print("Error when saving image: \(error)")
+                    }
+                    print("Should've written to storage image: \(filename)")
+
+                    imagePaths += [imageName]
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            self.pageInProgress += 1
+                        }
+                    }
+                }
+            }
+            print("Downloaded pages for chapter \(self.pages[index].chapter.chapterId)")
+            chapter.pages = imagePaths
+            chapter.origin = mangaToDownload
+        }
+
+        print("Done...")
+        try? self.moc.save()
+
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = false
+            self.isPresented = false
+        }
+    }
+    
+    func saveChaptersAsync() {
         let mangaToDownload = DownloadedManga(context: moc)
         
         mangaToDownload.mangaArtist = manga.artist
@@ -314,6 +308,7 @@ struct ChapterSelectionView: View {
             chapter.volume = self.pages[index].chapter.chapterInfo.volume
             chapter.timestamp = self.pages[index].chapter.chapterInfo.timestamp!
             
+            print("Starting to download chapter: \(chapter.wrappedChapter)")
             //insert string array here that contains image url paths
             var imagePaths: [String] = []
             
@@ -327,17 +322,6 @@ struct ChapterSelectionView: View {
                 var request = URLRequest(url: url)
                 request.httpMethod = "GET"
                 request.httpShouldHandleCookies = true
-                
-                //let (data, _, error) = URLSession.shared.synchronousDataTask(with: request)
-                //if let error = error {
-                    //print("Error downloading page: \(error)")
-                    //#warning("MAKE SURE TO KEEP IN STORAGE ALL OF THE IMAGE PATHS SO YOU CAN DELETE THEM IF AN ERROR OCCURS")
-                    //also, i shouldn't revert everything if an error pops up. Just stop the process, inform the user, and leave everything else still intact
-                    //self.moc.rollback()
-                    //DispatchQueue.main.async {
-                  //      self.isPresented = false
-                  //  }
-                //} else {
                 
                 URLSession.shared.dataTask(with: request) { data, response, error in
                     let imageName: String = "\(self.pages[index].chapter.chapterId)\(j+1).png"
@@ -363,7 +347,7 @@ struct ChapterSelectionView: View {
                             return
                         }
                     }
-                    
+
                     print("Downloaded pages for chapter \(self.pages[index].chapter.chapterId)")
                     chapter.pages = imagePaths
                     chapter.origin = mangaToDownload
@@ -414,33 +398,24 @@ struct ChapterSelectionView: View {
                     for page in decodedResponse.pages {
                         let pageToAppend: Pages.Page = Pages.Page(pagePath: decodedResponse.baseURL + decodedResponse.mangaHash + "/" + page, pageSaved: false)
                         pages.append(pageToAppend)
-//                        print("\(decodedResponse.baseURL + decodedResponse.mangaHash + "/" + page)")
                     }
                     
                     DispatchQueue.main.async {
-                        //                        self.pages += [pages]
                         self.pages += [Pages(array: pages, chapter: chapter)]
                     }
                     
                     return
                 } catch {
-                    //                    DispatchQueue.main.async {
-                    //                        appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
-                    //                        withAnimation {
-                    //                            appState.errorOccured = true
-                    //                            appState.isLoading = false
-                    //                        }
-                    //                    }
+                    DispatchQueue.main.async {
+                        isPresented = false
+                    }
+                    return
                 }
                 
-                //                DispatchQueue.main.async {
-                //                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-                //                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
-                //                    withAnimation {
-                //                        appState.errorOccured = true
-                //                        appState.isLoading = false
-                //                    }
-                //                }
+                DispatchQueue.main.async {
+                    isPresented = false
+                }
+                return
             }
         }.resume()
     }

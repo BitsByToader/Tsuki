@@ -109,7 +109,10 @@ struct MangaView: View {
                 .foregroundColor(Color(.systemBlue))
                 .onTapGesture {
                     chapterDownloadingViewPresented = true
-                }.sheet(isPresented: $chapterDownloadingViewPresented) {
+                }.sheet(isPresented: $chapterDownloadingViewPresented, onDismiss: {
+                    //just in case smth fucks up, I don't want to leave the user's screen turned on
+                    UIApplication.shared.isIdleTimerDisabled = false
+                }) {
                     ChapterSelectionView(isPresented: $chapterDownloadingViewPresented, manga: manga, chapters: chapters.reversed(), selectedChapters: [Bool](repeating: false, count: chapters.count))
                         .environment(\.managedObjectContext, moc)
                 }
