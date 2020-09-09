@@ -14,8 +14,6 @@ import SwiftUI
 import SwiftSoup
 import SDWebImageSwiftUI
 
-#warning("TODO: implement searching of saved mangas from the text field")
-
 struct LibraryView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var appState: AppState
@@ -26,6 +24,7 @@ struct LibraryView: View {
     }
     
     @State private var searchInput: String = ""
+    @State private var showCancelButton: Bool = false
     @State private var logInViewPresented: Bool = false
     var tagsToSearch: String = ""
     
@@ -35,30 +34,39 @@ struct LibraryView: View {
         if loggedIn {
             NavigationView {
                 ScrollView {
-                    
+                    //MARK: - Search Bar
                     HStack {
-                        Image(systemName: "magnifyingglass")
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                            
+                            TextField("Search library...", text: $searchInput, onEditingChanged: { isEditing in
+                                self.showCancelButton = true
+                            }, onCommit: {
+                                print("onCommit")
+                            }).foregroundColor(.primary)
+                            
+                            Button(action: {
+                                self.searchInput = ""
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .opacity(searchInput == "" ? 0 : 1)
+                            }
+                        }.padding(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
+                        .foregroundColor(.secondary)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10.0)
                         
-                        TextField("Search", text: $searchInput, onCommit: {
-                            self.hideKeyboard()
-                            searchManga()
-                        }).foregroundColor(.primary)
-                        
-                        Button(action: {
-                            self.searchInput = ""
-                            self.hideKeyboard()
-                        }) {
-                            Image(systemName: "xmark.circle.fill").opacity(searchInput == "" ? 0 : 1)
+                        if showCancelButton  {
+                            Button("Cancel") {
+                                UIApplication.shared.endEditing(true) // this must be placed before the other commands here
+                                self.searchInput = ""
+                                self.showCancelButton = false
+                            }.animation(.default)
+                            .foregroundColor(Color(.systemBlue))
                         }
-                    }
-                    .padding(EdgeInsets(top: 8, leading: 6, bottom: 8, trailing: 6))
-                    .foregroundColor(.secondary)
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(10.0)
-                    .padding(.horizontal)
-                    .padding(.bottom, 0)
-                    .navigationTitle(Text("Library"))
-                    
+                    }.padding(.horizontal)
+                    .animation(.default)
+                    //MARK: - Links
                     NavigationLink(destination: LatestUpdatesView()) {
                         LibraryLink(linkTitle: "Latest Updates")
                     }
@@ -66,16 +74,20 @@ struct LibraryView: View {
                     NavigationLink(destination: DownloadedMangaView()) {
                         LibraryLink(linkTitle: "Downloaded manga")
                     }
-                    
-                    MangaGrid(dataSource: searchResult)
+                    //MARK: - Manga
+                    MangaGrid(dataSource: searchResult.filter { $0.title.contains(searchInput) || searchInput == "" })
+                        .navigationTitle(Text("Library"))
                     
                     Spacer()
-                }.onAppear {
+                }.onTapGesture {
+                    UIApplication.shared.endEditing(true)
+                    self.showCancelButton = false
+                }
+                .onAppear {
                     if (loggedIn) {
-                        searchManga()
+                        loadLibrary()
                     }
                 }
-                
                 
                 MangaView(reloadContents: false, mangaId: "")
 
@@ -98,7 +110,7 @@ struct LibraryView: View {
         }
     }
     
-    func searchManga() {
+    func loadLibrary() {
         let loadingDescription = "Loading library..."
         appState.loadingQueue.append(loadingDescription)
         
@@ -171,10 +183,37 @@ struct LibraryView: View {
             }
         }.resume()
     }
+    
+    
 }
 
 struct LibraryView_Previews: PreviewProvider {
     static var previews: some View {
         SearchByNameView()
+    }
+}
+
+extension UIApplication {
+    func endEditing(_ force: Bool) {
+        self.windows
+            .filter{$0.isKeyWindow}
+            .first?
+            .endEditing(force)
+    }
+}
+
+struct ResignKeyboardOnDragGesture: ViewModifier {
+    var gesture = DragGesture().onChanged{_ in
+        print("Dragged")
+        UIApplication.shared.endEditing(true)
+    }
+    func body(content: Content) -> some View {
+        content.gesture(gesture)
+    }
+}
+
+extension View {
+    func resignKeyboardOnDragGesture() -> some View {
+        return modifier(ResignKeyboardOnDragGesture())
     }
 }
