@@ -47,11 +47,12 @@ struct ContentView: View {
                 ZStack {
                     BlurView(style: .systemThickMaterial)
                         .cornerRadius(10)
-                        .frame(width: 150, height: 150)
                     
-                    ProgressView("Loading")
+                    ProgressView(appState.loadingQueue.last ?? "")
                         .font(.title3)
-                }.opacity(appState.isLoading ? 1 : 0)
+                        .multilineTextAlignment(.center)
+                }.frame(width: 150, height: 150)
+                .opacity(!appState.loadingQueue.isEmpty ? 1 : 0)
                 .animation(.default)
             }
             

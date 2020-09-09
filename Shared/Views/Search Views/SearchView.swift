@@ -99,7 +99,6 @@ struct SearchView: View {
             .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
             .onAppear {
                 if (loggedIn) {
-                    appState.isLoading = true
                     retrieveTags()
                 }
             }
@@ -109,6 +108,9 @@ struct SearchView: View {
     }
     
     func retrieveTags() {
+        let loadingDescription = "Loading search tags..."
+        appState.loadingQueue.append(loadingDescription)
+        
         guard let url = URL(string: "https://mangadex.org/search") else {
             print("From SearchView: Invalid URL")
             return
@@ -146,7 +148,7 @@ struct SearchView: View {
                     
                     DispatchQueue.main.async {
                         sectionList = extractedSections
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
@@ -156,7 +158,7 @@ struct SearchView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 } catch {
@@ -165,7 +167,7 @@ struct SearchView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 }
@@ -175,7 +177,7 @@ struct SearchView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
             }

@@ -166,7 +166,6 @@ struct MangaView: View {
             }
         }.onAppear{
             if reloadContents {
-                appState.isLoading = true
                 loadMangaInfo()
                 self.reloadContents = false
             }
@@ -177,6 +176,9 @@ struct MangaView: View {
     
     //MARK: - Manga details loader
     func loadMangaInfo() {
+        let loadingDescription = "Loading manga information..."
+        appState.loadingQueue.append(loadingDescription)
+        
         guard let url = URL(string: "https://mangadex.org/api/manga/\(mangaId)") else {
             print("From MangaView: Invalid URL")
             return
@@ -215,7 +217,7 @@ struct MangaView: View {
                         self.manga = decodedResponse.manga
                         self.manga.coverURL = "https://mangadex.org" + decodedResponse.manga.coverURL
                         self.chapters = filteredChapters
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
@@ -224,7 +226,7 @@ struct MangaView: View {
                         appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 }
@@ -234,7 +236,7 @@ struct MangaView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
             }
@@ -242,7 +244,8 @@ struct MangaView: View {
     }
     //MARK: - Update the reading status of the manga
     func updateMangaStatus(statusId: Int) {
-        appState.isLoading = true
+        let loadingDescription = "Updating status..."
+        appState.loadingQueue.append(loadingDescription)
         
         var action: String = ""
         if ( statusId == Int(mangaId)! ) {
@@ -268,7 +271,7 @@ struct MangaView: View {
                 print(String(bytes: data, encoding: .utf8) as Any)
                 DispatchQueue.main.async {
                     withAnimation {
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
                 return
@@ -279,7 +282,7 @@ struct MangaView: View {
                 appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                 withAnimation {
                     appState.errorOccured = true
-                    appState.isLoading = false
+                    appState.removeFromLoadingQueue(loadingState: loadingDescription)
                 }
             }
         }.resume()

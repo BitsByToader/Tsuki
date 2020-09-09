@@ -60,7 +60,8 @@ struct SearchByNameView: View {
     }
     
     func searchManga() {
-        appState.isLoading = true
+        let loadingDescription = "Loading mangas..."
+        appState.loadingQueue.append(loadingDescription)
         
         let stringToSearch: String = searchInput
         
@@ -104,7 +105,7 @@ struct SearchByNameView: View {
                     
                     DispatchQueue.main.async {
                         searchResult = mangas
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
@@ -114,7 +115,7 @@ struct SearchByNameView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 } catch {
@@ -123,7 +124,7 @@ struct SearchByNameView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 }
@@ -133,7 +134,7 @@ struct SearchByNameView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
             }

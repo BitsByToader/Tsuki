@@ -47,7 +47,8 @@ struct LatestUpdatesView: View {
     }
     
     func loadManga() {
-        appState.isLoading = true
+        let loadingDescription = "Loading updates..."
+        appState.loadingQueue.append(loadingDescription)
         
         guard let url = URL(string: "https://mangadex.org") else {
             print("From LatestUpdatesView: Invalid URL")
@@ -86,7 +87,7 @@ struct LatestUpdatesView: View {
                     
                     DispatchQueue.main.async {
                         self.result = mangas
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
@@ -96,7 +97,7 @@ struct LatestUpdatesView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 } catch {
@@ -105,7 +106,7 @@ struct LatestUpdatesView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 }
@@ -115,7 +116,7 @@ struct LatestUpdatesView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
             }

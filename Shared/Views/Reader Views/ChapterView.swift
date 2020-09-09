@@ -113,6 +113,8 @@ struct ChapterView: View {
     }
     
     func loadChapter(currentChapter: Int) {
+        let loadingDescription = "Loading chapter..."
+        
         if !loadContents && !remainingLocalChapters.isEmpty {
             let chapterPages = remainingLocalChapters[currentChapter].wrappedPages
             for page in chapterPages {
@@ -125,7 +127,7 @@ struct ChapterView: View {
             return
         }
         
-        appState.isLoading = true
+        appState.loadingQueue.append(loadingDescription)
         
         guard let url = URL(string: "https://mangadex.org/api/chapter/\(remainingChapters[currentChapter].chapterId)") else {
             print("From ChapterView: Invalid URL")
@@ -151,7 +153,7 @@ struct ChapterView: View {
                     
                     DispatchQueue.main.async {
                         self.pageURLs += pages
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
@@ -160,7 +162,7 @@ struct ChapterView: View {
                         appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 }
@@ -170,7 +172,7 @@ struct ChapterView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
             }

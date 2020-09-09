@@ -72,7 +72,6 @@ struct LibraryView: View {
                     Spacer()
                 }.onAppear {
                     if (loggedIn) {
-                        appState.isLoading = true
                         searchManga()
                     }
                 }
@@ -100,6 +99,9 @@ struct LibraryView: View {
     }
     
     func searchManga() {
+        let loadingDescription = "Loading library..."
+        appState.loadingQueue.append(loadingDescription)
+        
         guard let url = URL(string: MDlListLink) else {
             print("From LibraryView: Invalid URL")
             return
@@ -134,7 +136,7 @@ struct LibraryView: View {
                     
                     DispatchQueue.main.async {
                         searchResult = mangas
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
@@ -144,7 +146,7 @@ struct LibraryView: View {
                         appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 } catch {
@@ -153,7 +155,7 @@ struct LibraryView: View {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
                         withAnimation {
                             appState.errorOccured = true
-                            appState.isLoading = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 }
@@ -163,7 +165,7 @@ struct LibraryView: View {
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                     withAnimation {
                         appState.errorOccured = true
-                        appState.isLoading = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
             }
