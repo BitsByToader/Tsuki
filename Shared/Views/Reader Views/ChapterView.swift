@@ -25,9 +25,17 @@ struct ChapterView: View {
     
     var navTitle: String {
         if loadContents {
-            return remainingChapters[chapterRead].chapterInfo.title ?? ""
+            if remainingChapters.isEmpty {
+                return "Please select a chapter."
+            } else {
+                return remainingChapters[chapterRead].chapterInfo.title! != "" ? remainingChapters[chapterRead].chapterInfo.title! : "Ch. \(remainingChapters[chapterRead].chapterInfo.chapter)"
+            }
         } else {
-            return !remainingLocalChapters.isEmpty ? remainingLocalChapters[chapterRead].wrappedTitle : "Please select a chapter"
+            if remainingLocalChapters.isEmpty {
+                return "Please select a chapter."
+            } else {
+                return remainingLocalChapters[chapterRead].wrappedTitle != "" ? remainingLocalChapters[chapterRead].wrappedTitle : "Ch. \(remainingLocalChapters[chapterRead].wrappedChapter)"
+            }
         }
     }
     

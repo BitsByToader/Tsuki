@@ -416,12 +416,11 @@ struct ChapterSelectionView: View {
                     }
                     return
                 }
-                
-                DispatchQueue.main.async {
-                    isPresented = false
-                }
-                return
             }
+            DispatchQueue.main.async {
+                isPresented = false
+            }
+            return
         }.resume()
     }
 }

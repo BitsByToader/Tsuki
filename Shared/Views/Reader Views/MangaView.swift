@@ -24,6 +24,28 @@ struct MangaView: View {
     @State private var chapterDownloadingViewPresented: Bool = false
     @State private var presentAlert: Bool = false
     @State private var currentStatus: String = "Status"
+    @State private var statusSheetPresented: Bool = false
+    private var statusActions: [ActionSheet.Button] {
+        var statusButtons: [ActionSheet.Button] = []
+        
+        if mangaId != "" {
+            statusButtons.append(.destructive(Text("Unfollow"), action: {
+                updateMangaStatus(statusId: Int(mangaId)!)
+                currentStatus = "Status"
+            }))
+        }
+        
+        for index in 1..<MangaStatus.allCases.count {
+            statusButtons.append(.default(Text(MangaStatus.allCases[index].rawValue), action: {
+                updateMangaStatus(statusId: index)
+                currentStatus = MangaStatus.allCases[index].rawValue
+            }))
+        }
+        
+        statusButtons.append(.cancel())
+        
+        return statusButtons
+    }
     
     var mangaId: String
     
@@ -49,39 +71,16 @@ struct MangaView: View {
                     Image(systemName: "heart.fill")
                     Text(currentStatus)
                         .multilineTextAlignment(.center)
-                        .contextMenu() {
-                            if mangaId != "" {
-                                Section {
-                                    Button(action: {
-                                        updateMangaStatus(statusId: Int(mangaId)!)
-                                        currentStatus = "Status"
-                                    }) {
-                                        Text("\(MangaStatus.unfollow.rawValue)")
-                                    }.foregroundColor(.red)
-                                }
-                            }
-                            
-                            Section {
-                                ForEach(Array(MangaStatus.allCases.enumerated()), id: \.offset) { index, status in
-                                    if status != .unfollow {
-                                        Button(action: {
-                                            updateMangaStatus(statusId: index)
-                                            currentStatus = status.rawValue
-                                        }) {
-                                            Text("\(status.rawValue)")
-                                        }
-                                    }
-                                }
-                            }
-                        }
                 }
                 .padding(5)
+                .actionSheet(isPresented: $statusSheetPresented) {
+                    ActionSheet(title: Text("Change reading status to..."),
+                                buttons: statusActions)
+                }
                 .hoverEffect(.automatic)
                 .foregroundColor(Color(.systemBlue))
                 .onTapGesture(perform: {
-                    //Always set status to "Reading" on tap
-                    updateMangaStatus(statusId: 1)
-                    currentStatus = "Reading"
+                    statusSheetPresented.toggle()
                 })
                 
                 Divider()
