@@ -63,31 +63,29 @@ struct LogInView: View {
                         .animation(.default)
                 }
                 
+                Button(action: {isPresented = false}, label: {
+                    Text("Continue without logging in")
+                        .font(.system(size: 14))
+                })
+                Spacer()
+                Text("Signing in gives you access to searching and saving mangas in the cloud. This action requires a MangaDex account.")
+                    .padding(.horizontal, 20)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .font(.system(size: 12))
+                
                 Button(action: logIntoMD, label: {
                     Text("Log In")
                         .bold()
                         .font(.system(size: 18))
                         .truncationMode(.tail)
-                        .padding(.horizontal, 15)
-                        .padding(.vertical, 10)
-                        .frame(width: 300)
-                        .background(Color.blue)
                         .foregroundColor(Color.white)
-                        .cornerRadius(11)
+                        .padding(.vertical, 15)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(15)
+                        .padding()
                 })
-                
-                Button(action: {isPresented = false}, label: {
-                    Text("Continue without logging in")
-                        .font(.system(size: 14))
-                        .padding(.top, 10)
-                })
-                Spacer()
-                Text("Signing in gives you access to searching and saving mangas in the cloud. This action requires a MangaDex account.")
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 10)
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .font(.system(size: 12))
             }.navigationBarTitleDisplayMode(.inline)
             .navigationBarTitle(Text("Final Step..."))
         }
@@ -145,6 +143,14 @@ struct LogInView: View {
                         self.userProfileLink = userProfile
                         self.loading = false
                         self.isPresented = false
+                    }
+                    
+                    //Copy the cookies in a shared container, so the widget can access them as well
+                    let widgetCookieStorage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "group.TsukiApp")
+                    for cookie in URLSession.shared.configuration.httpCookieStorage?.cookies ?? [] {
+                        if ( cookie.name == "mangadex_session" || cookie.name == "mangadex_rememberme_token" ) {
+                            widgetCookieStorage.setCookie(cookie)
+                        }
                     }
                     
                     return

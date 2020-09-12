@@ -61,6 +61,9 @@ struct ChapterView: View {
                                     if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != (loadContents ? remainingChapters.count : remainingLocalChapters.count) ) {
                                         chapterRead += 1
                                         loadChapter(currentChapter: chapterRead)
+                                        
+                                        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+                                        hapticFeedback.impactOccurred()
                                     }
                                 }
                         } else {

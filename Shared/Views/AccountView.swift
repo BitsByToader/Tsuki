@@ -131,6 +131,7 @@ struct AccountView: View {
                         self.profilePicURL = profilePic
                         self.profileStats = stats
                         self.username = username
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
