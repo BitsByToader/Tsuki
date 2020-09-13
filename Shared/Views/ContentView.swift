@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appState: AppState
+    @EnvironmentObject var widgetURL: WidgetURL
     @AppStorage("firstLaunch") var firstLaunch: Bool = true
     
     @State private var errorSheetPresented: Bool = false
@@ -17,32 +18,45 @@ struct ContentView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             ZStack {
-                TabView {
+                TabView(selection: $tabViewSelection) {
                     TodayView()
                         .tabItem {
                             Image(systemName: "newspaper.fill")
                             Text("Today")
                         }
+                        .tag(0)
                     
                     SearchView()
                         .tabItem {
                             Image(systemName: "magnifyingglass")
                             Text("Search")
                         }
+                        .tag(1)
+                    
                     LibraryView()
                         .tabItem {
                             Image(systemName: "books.vertical.fill")
                             Text("Library")
                         }
+                        .tag(2)
                     
                     AccountView()
                         .tabItem {
                             Image(systemName: "person.crop.circle")
                             Text("Account")
                         }
+                        .tag(3)
                 }.sheet(isPresented: $firstLaunch, content: {
                     InitialOnboardingView(isPresented: $firstLaunch)
                 })
+                .onOpenURL { url in
+                    if ( url == URL(string: "tsuki:///latestupdates") ) {
+                        widgetURL.openedWithURL = true
+                        widgetURL.url = url
+                        
+                        self.tabViewSelection = 2
+                    }
+                }
 
                 ZStack {
                     BlurView(style: .systemThickMaterial)

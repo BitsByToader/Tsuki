@@ -24,16 +24,22 @@ struct Provider: TimelineProvider {
         
         // Generate a timeline consisting of five entries an hour apart, starting from the current date.
         let currentDate = Date()
-        //        for hourOffset in 0 ..< 5 {
-        //            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-        //            let entry = SimpleEntry(date: entryDate)
-        //            entries.append(entry)
-        //        }
         
-        entries = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: UpdatedMangas() ?? UpdatedMangas(numberOfPlaceholder: 3))]
-        
-        let timeline = Timeline(entries: entries, policy: .atEnd)
-        completion(timeline)
+        UpdatedMangas.getLibraryUpdates { mangas, error in
+            guard let mangas = mangas else {
+                entries = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: UpdatedMangas(numberOfPlaceholder: 3))]
+                
+                let timeline = Timeline(entries: entries, policy: .atEnd)
+                completion(timeline)
+                
+                return
+            }
+            
+            entries  = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: mangas)]
+            
+            let timeline = Timeline(entries: entries, policy: .atEnd)
+            completion(timeline)
+        }
     }
 }
 
@@ -46,27 +52,32 @@ struct LatestUpdatesWidgetEntryView : View {
     var entry: Provider.Entry
     
     var body: some View {
-        VStack {
-            Spacer()
-            HStack(spacing: 10) {
-                ForEach(entry.mangas.mangas, id:\.self) { manga in
-                    VStack {
-                        NetworkImage(url: URL(string: manga.cover))
-                            .clipShape(ContainerRelativeShape())
-                        Text("\(manga.title)")
-                            .font(.subheadline)
-                            .lineLimit(2)
-                    }.if(entry.mangas.placeholder) { $0.redacted(reason: .placeholder) }
-                    .padding()
-                }
-            }
-            Spacer()
+        ZStack {
+            Color("WidgetBackgroundColor")
             
+            VStack {
+                Spacer()
+                HStack(spacing: 5) {
+                    ForEach(entry.mangas.mangas, id:\.self) { manga in
+                        VStack {
+                            NetworkImage(url: URL(string: manga.cover))
+                                .clipShape(ContainerRelativeShape())
+                            Text(entry.mangas.placeholder ? "Manga title" : "\(manga.title)")
+                                .bold()
+                                .foregroundColor(Color("WidgetForegroundColor"))
+                                .font(.system(size: 12))
+                                .multilineTextAlignment(.center)
+                                .lineLimit(2)
+                        }.padding(.horizontal, 10)
+                        .if(entry.mangas.placeholder) { $0.redacted(reason: .placeholder) }
+                    }
+                }
+                Spacer()
+            }.widgetURL(URL(string: "tsuki:///latestupdates"))
         }
     }
     
     struct NetworkImage: View {
-        
         let url: URL?
         
         var body: some View {
@@ -76,14 +87,15 @@ struct LatestUpdatesWidgetEntryView : View {
                     
                     Image(uiImage: uiImage)
                         .resizable()
-                        .aspectRatio(contentMode: .fill)
+                        .aspectRatio(contentMode: .fit)
                 }
                 else {
                     Rectangle()
+                        .fill(Color.gray)
+                        .aspectRatio(contentMode: .fit)
                 }
             }
         }
-        
     }
 }
 

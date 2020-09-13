@@ -13,11 +13,17 @@ struct UpdatedMangas {
     let mangas: [UpdatedManga]
     let placeholder: Bool
     
-    init?() {
+    init(mangas: [UpdatedManga], placeholder: Bool) {
+        self.mangas = mangas
+        self.placeholder = placeholder
+    }
+    
+    static func getLibraryUpdates(completion: @escaping (UpdatedMangas?, String?) -> Void) {
         guard let url = URL(string: "https://mangadex.org") else {
             print("From chapter selection view, invalid url")
             
-            return nil
+            completion(nil, nil)
+            return
         }
 
         var request = URLRequest(url: url)
@@ -30,38 +36,33 @@ struct UpdatedMangas {
         let session = URLSession(configuration: sessionConfig)
         
         if ( (HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "group.TsukiApp").cookies ?? []).isEmpty ) {
-            mangas = []
-            placeholder = true
-            return nil
+            completion(nil, "You need to login before viewing the library updates.")
         }
         
-        let (data, _, error) = session.synchronousDataTask(with: request)
-        
-        if let error = error {
-            print("Big oof \(error)")
-            return nil
-        } else {
-            do {
-                let doc: Document = try SwiftSoup.parse(String(data: data!, encoding: .utf8)!)
-                
-                let returnedMangas = try doc.getElementById("follows_update")?.child(0).children().array()
-                
-                var mangas: [UpdatedManga] = []
-                
-                for index in 0..<3 {
-                    let title: String = try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.text()
-                    let coverArt: String = try (returnedMangas ?? [])[index].getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
+        session.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
                     
-                    mangas.append(UpdatedManga(title: title, cover: coverArt))
+                    let returnedMangas = try doc.getElementById("follows_update")?.child(0).children().array()
+                    
+                    var mangas: [UpdatedManga] = []
+                    
+                    for index in 0..<3 {
+                        let title: String = try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.text()
+                        let coverArt: String = try (returnedMangas ?? [])[index].getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
+                        
+                        mangas.append(UpdatedManga(title: title, cover: coverArt))
+                    }
+                    
+                    completion(UpdatedMangas(mangas: mangas, placeholder: false), nil)
+                } catch {
+                    completion(nil, error.localizedDescription)
                 }
-                
-                self.mangas = mangas
-                self.placeholder = false
-            } catch {
-                print(error)
-                return nil
+            } else {
+                completion(nil, "There was an error retrieving the library.")
             }
-        }
+        }.resume()
     }
     
     init(numberOfPlaceholder: Int) {

@@ -14,6 +14,7 @@ import CoreData
 struct TsukiApp: App {
     @StateObject var appState: AppState = AppState()
     @StateObject var tags: MangaTags = MangaTags()
+    @StateObject var widgetURL: WidgetURL = WidgetURL()
     
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var persistentStore = PersistentStore.shared
@@ -23,6 +24,7 @@ struct TsukiApp: App {
             ContentView()
                 .environmentObject(appState)
                 .environmentObject(tags)
+                .environmentObject(widgetURL)
                 .environment(\.managedObjectContext, persistentStore.context)
             
         }.onChange(of: scenePhase) { phase in

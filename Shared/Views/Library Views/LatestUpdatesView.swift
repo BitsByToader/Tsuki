@@ -18,6 +18,7 @@ struct ReturnedUpdatedManga: Hashable {
 }
 
 struct LatestUpdatesView: View {
+    @EnvironmentObject var widgetURL: WidgetURL
     @EnvironmentObject var appState: AppState
     
     private var loggedIn: Bool {
@@ -40,6 +41,7 @@ struct LatestUpdatesView: View {
             Spacer()
                 .navigationTitle(Text("Latest Updates"))
         }.onAppear {
+            self.widgetURL.openedWithURL = false
             if (loggedIn) {
                 loadManga()
             }

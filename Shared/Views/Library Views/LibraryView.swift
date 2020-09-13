@@ -16,12 +16,15 @@ import SDWebImageSwiftUI
 
 struct LibraryView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
+    @EnvironmentObject var widgetURL: WidgetURL
     @EnvironmentObject var appState: AppState
     @AppStorage("MDListLink") var MDlListLink: String = ""
 
      private var loggedIn: Bool {
         checkLogInStatus()
     }
+    
+    @State private var shouldOpenLatestUpdates: Bool = false
     
     @State private var searchInput: String = ""
     @State private var showCancelButton: Bool = false
@@ -67,7 +70,7 @@ struct LibraryView: View {
                     }.padding(.horizontal)
                     .animation(.default)
                     //MARK: - Links
-                    NavigationLink(destination: LatestUpdatesView()) {
+                    NavigationLink(destination: LatestUpdatesView(), isActive: $shouldOpenLatestUpdates) {
                         LibraryLink(linkTitle: "Latest Updates")
                     }
                     
@@ -84,6 +87,13 @@ struct LibraryView: View {
                     self.showCancelButton = false
                 }
                 .onAppear {
+                    //Check if the app was opened from the widget, and if it was, go to the latest updates view
+                    //Also, keep this as-is, with the if statement, or else, shouldOpenLatestUpdates will be bound to widgetURL.openedWithURL
+                    //Thus, it would the latest updated view will get dismissed as soon as it loaded
+                    if ( widgetURL.openedWithURL ) {
+                        shouldOpenLatestUpdates = true
+                    }
+                    
                     if (loggedIn) {
                         loadLibrary()
                     }
@@ -95,6 +105,11 @@ struct LibraryView: View {
                 
             }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
             .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
+            .onOpenURL { url in
+                if ( url == URL(string: "tsuki:///latestupdates") ) {
+                    self.shouldOpenLatestUpdates = true
+                }
+            }
         } else {
             NavigationView {
                 VStack(spacing: 10) {
