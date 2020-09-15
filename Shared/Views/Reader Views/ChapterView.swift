@@ -78,6 +78,9 @@ struct ChapterView: View {
                                     if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != (loadContents ? remainingChapters.count : remainingLocalChapters.count) ) {
                                         chapterRead += 1
                                         loadChapter(currentChapter: chapterRead)
+                                        
+                                        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+                                        hapticFeedback.impactOccurred()
                                     }
                                 }
                         }
@@ -100,6 +103,8 @@ struct ChapterView: View {
                             .frame(minWidth: 50)
                         
                         Text("\(currentPage) of \(pageURLs.count)")
+                            .foregroundColor(Color(.systemGray))
+                            .bold()
                     }.frame(minWidth: 50, maxWidth: 100, maxHeight: 25)
                     .opacity(extraProgressIsShown ? 1 : 0)
                     .animation(.default)

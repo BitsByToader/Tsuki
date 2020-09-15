@@ -11,11 +11,11 @@ import SwiftUI
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 3))
+        SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil)
     }
     
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 3))
+        let entry = SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil)
         completion(entry)
     }
     
@@ -27,15 +27,15 @@ struct Provider: TimelineProvider {
         
         UpdatedMangas.getLibraryUpdates { mangas, error in
             guard let mangas = mangas else {
-                entries = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: UpdatedMangas(numberOfPlaceholder: 3))]
+                entries = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil)]
                 
                 let timeline = Timeline(entries: entries, policy: .atEnd)
                 completion(timeline)
                 
                 return
             }
-            
-            entries  = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: mangas)]
+            let relevance = TimelineEntryRelevance(score: Float( mangas.relevance))
+            entries  = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: mangas, relevance: relevance)]
             
             let timeline = Timeline(entries: entries, policy: .atEnd)
             completion(timeline)
@@ -46,10 +46,25 @@ struct Provider: TimelineProvider {
 struct SimpleEntry: TimelineEntry {
     let date: Date
     let mangas: UpdatedMangas
+    let relevance: TimelineEntryRelevance?
 }
 
 struct LatestUpdatesWidgetEntryView : View {
     var entry: Provider.Entry
+    
+    @Environment(\.widgetFamily) var family
+    private var numberOfItems: Int {
+        switch family {
+        case .systemSmall:
+            return 1
+        case .systemMedium:
+            return 3
+        case .systemLarge:
+            return 6
+        @unknown default:
+            return 1
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -58,11 +73,11 @@ struct LatestUpdatesWidgetEntryView : View {
             VStack {
                 Spacer()
                 HStack(spacing: 5) {
-                    ForEach(entry.mangas.mangas, id:\.self) { manga in
+                    ForEach((0..<numberOfItems)) { index in
                         VStack {
-                            NetworkImage(url: URL(string: manga.cover))
+                            NetworkImage(url: URL(string: entry.mangas.mangas[index].cover))
                                 .clipShape(ContainerRelativeShape())
-                            Text(entry.mangas.placeholder ? "Manga title" : "\(manga.title)")
+                            Text(entry.mangas.placeholder ? "Manga title" : "\(entry.mangas.mangas[index].title)")
                                 .bold()
                                 .foregroundColor(Color("WidgetForegroundColor"))
                                 .font(.system(size: 12))
@@ -109,13 +124,13 @@ struct LatestUpdatesWidget: Widget {
         }
         .configurationDisplayName("Latest updates")
         .description("View all your library's updates at a glance.")
-        .supportedFamilies([.systemMedium])
+        .supportedFamilies([.systemMedium, .systemSmall])
     }
 }
 
 struct LatestUpdatesWidget_Previews: PreviewProvider {
     static var previews: some View {
-        LatestUpdatesWidgetEntryView(entry: SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 3)))
+        LatestUpdatesWidgetEntryView(entry: SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil))
             .previewContext(WidgetPreviewContext(family: .systemSmall))
     }
 }

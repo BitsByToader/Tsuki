@@ -45,6 +45,12 @@ struct LatestUpdatesView: View {
             if (loggedIn) {
                 loadManga()
             }
+        }.onOpenURL { url in
+            if ( url == URL(string: "tsuki:///latestupdates") ) {
+                if ( loggedIn ) {
+                    loadManga()
+                }
+            }
         }
     }
     

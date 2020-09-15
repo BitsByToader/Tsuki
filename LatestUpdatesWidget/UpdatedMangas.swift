@@ -12,10 +12,12 @@ import SwiftSoup
 struct UpdatedMangas {
     let mangas: [UpdatedManga]
     let placeholder: Bool
+    let relevance: Int
     
-    init(mangas: [UpdatedManga], placeholder: Bool) {
+    init(mangas: [UpdatedManga], placeholder: Bool, relevance: Int) {
         self.mangas = mangas
         self.placeholder = placeholder
+        self.relevance = relevance
     }
     
     static func getLibraryUpdates(completion: @escaping (UpdatedMangas?, String?) -> Void) {
@@ -47,15 +49,34 @@ struct UpdatedMangas {
                     let returnedMangas = try doc.getElementById("follows_update")?.child(0).children().array()
                     
                     var mangas: [UpdatedManga] = []
-                    
-                    for index in 0..<3 {
+                    var mangaIds: [String] = []
+                    for index in 0..<6 {
                         let title: String = try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.text()
                         let coverArt: String = try (returnedMangas ?? [])[index].getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
                         
-                        mangas.append(UpdatedManga(title: title, cover: coverArt))
+                        let mangaLink: String = try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.attr("href")
+                        let mangaId: String = mangaLink.components(separatedBy: "/")[2]
+                        
+                        mangas.append(UpdatedManga(title: title, cover: coverArt, id: mangaId))
+                        mangaIds.append(mangaId)
                     }
                     
-                    completion(UpdatedMangas(mangas: mangas, placeholder: false), nil)
+                    var similarCounter: Int = 0
+                    let array: [String] = UserDefaults.standard.stringArray(forKey: "latestMangas") ?? []
+                    for id in array {
+                        for anotherId in mangaIds {
+                            if ( id == anotherId ) {
+                                similarCounter += 1
+                                break
+                            }
+                        }
+                    }
+                    
+                    let relevance = array.count - similarCounter
+                    print(relevance)
+                    UserDefaults.standard.setValue(mangaIds, forKey: "latestMangas")
+                    
+                    completion(UpdatedMangas(mangas: mangas, placeholder: false, relevance: relevance), nil)
                 } catch {
                     completion(nil, error.localizedDescription)
                 }
@@ -68,16 +89,18 @@ struct UpdatedMangas {
     init(numberOfPlaceholder: Int) {
         var array: [UpdatedManga] = []
         for _ in 0..<numberOfPlaceholder {
-            array.append(UpdatedManga(title: "", cover: ""))
+            array.append(UpdatedManga(title: "", cover: "", id: ""))
         }
         
         self.mangas = array
         self.placeholder = true
+        self.relevance = 0
     }
     
     struct UpdatedManga: Hashable {
         let title: String
         let cover: String
+        let id: String
     }
 }
 

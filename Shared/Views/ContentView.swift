@@ -94,6 +94,9 @@ struct ContentView: View {
                 }) {
                     ErrorView()
                         .environmentObject(self.appState)
+                }.onAppear {
+                    let hapticFeedback = UIImpactFeedbackGenerator(style: .heavy)
+                    hapticFeedback.impactOccurred()
                 }
                 .transition(.move(edge: .bottom))
             }
