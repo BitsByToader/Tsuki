@@ -15,7 +15,7 @@ struct MailComposer: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
         let mail = MFMailComposeViewController()
-        mail.setToRecipients(["bl3yd3r@hotmail.com"])
+        mail.setToRecipients(["tudorifrim@icloud.com"])
         mail.setMessageBody("The following log was emitted: \n" + appState.errorMessage, isHTML: false)
         mail.setSubject("Error log emitted by Tsuki manga reader app")
         
