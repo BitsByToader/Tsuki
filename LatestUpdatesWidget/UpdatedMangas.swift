@@ -50,6 +50,7 @@ struct UpdatedMangas {
                     
                     var mangas: [UpdatedManga] = []
                     var mangaIds: [String] = []
+                    #warning("insert a computed property here that gets the returnedMangas size and either returns 6 or its size. The rest of the mangas array will be filled with placeholders")
                     for index in 0..<6 {
                         let title: String = try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.text()
                         let coverArt: String = try (returnedMangas ?? [])[index].getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")

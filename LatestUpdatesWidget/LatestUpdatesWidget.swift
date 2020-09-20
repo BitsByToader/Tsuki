@@ -11,7 +11,7 @@ import SwiftUI
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil)
+        return SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil)
     }
     
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
@@ -19,7 +19,7 @@ struct Provider: TimelineProvider {
         completion(entry)
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
+    func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
         var entries: [SimpleEntry] = []
         
         // Generate a timeline consisting of five entries an hour apart, starting from the current date.
@@ -49,68 +49,46 @@ struct SimpleEntry: TimelineEntry {
     let relevance: TimelineEntryRelevance?
 }
 
-struct LatestUpdatesWidgetEntryView : View {
-    var entry: Provider.Entry
+struct PlaceholderView : View {
+    var entry: Provider.Entry = SimpleEntry(date: Date(), mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil)
     
     @Environment(\.widgetFamily) var family
-    private var numberOfItems: Int {
-        switch family {
-        case .systemSmall:
-            return 1
-        case .systemMedium:
-            return 3
-        case .systemLarge:
-            return 6
-        @unknown default:
-            return 1
-        }
-    }
     
     var body: some View {
         ZStack {
             Color("WidgetBackgroundColor")
             
-            VStack {
-                Spacer()
-                HStack(spacing: 5) {
-                    ForEach((0..<numberOfItems)) { index in
-                        VStack {
-                            NetworkImage(url: URL(string: entry.mangas.mangas[index].cover))
-                                .clipShape(ContainerRelativeShape())
-                            Text(entry.mangas.placeholder ? "Manga title" : "\(entry.mangas.mangas[index].title)")
-                                .bold()
-                                .foregroundColor(Color("WidgetForegroundColor"))
-                                .font(.system(size: 12))
-                                .multilineTextAlignment(.center)
-                                .lineLimit(2)
-                        }.padding(.horizontal, 10)
-                        .if(entry.mangas.placeholder) { $0.redacted(reason: .placeholder) }
-                    }
-                }
-                Spacer()
-            }.widgetURL(URL(string: "tsuki:///latestupdates"))
-        }
-    }
-    
-    struct NetworkImage: View {
-        let url: URL?
-        
-        var body: some View {
-            Group {
-                if let url = url, let imageData = try? Data(contentsOf: url),
-                   let uiImage = UIImage(data: imageData) {
-                    
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                }
-                else {
-                    Rectangle()
-                        .fill(Color.gray)
-                        .aspectRatio(contentMode: .fit)
-                }
+            if family == .systemMedium {
+                MediumWidgetView(entry: entry)
+                    .redacted(reason: .placeholder)
+            } else if family == .systemSmall {
+                SmallWidgetView(entry: entry)
+                    .redacted(reason: .placeholder)
+            } else if family == .systemLarge {
+                LargeWidgetView(entry: entry)
+                    .redacted(reason: .placeholder)
             }
-        }
+        }.widgetURL(URL(string: "tsuki:///latestupdates"))
+    }
+}
+
+struct LatestUpdatesWidgetEntryView : View {
+    var entry: Provider.Entry
+    
+    @Environment(\.widgetFamily) var family
+    
+    var body: some View {
+        ZStack {
+            Color("WidgetBackgroundColor")
+            
+            if family == .systemMedium {
+                MediumWidgetView(entry: entry)
+            } else if family == .systemSmall {
+                SmallWidgetView(entry: entry)
+            } else if family == .systemLarge {
+                LargeWidgetView(entry: entry)
+            }
+        }.widgetURL(URL(string: "tsuki:///latestupdates"))
     }
 }
 
@@ -124,7 +102,7 @@ struct LatestUpdatesWidget: Widget {
         }
         .configurationDisplayName("Latest updates")
         .description("View all your library's updates at a glance.")
-        .supportedFamilies([.systemMedium, .systemSmall])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
@@ -145,6 +123,27 @@ extension View {
             transform(self)
         } else {
             self
+        }
+    }
+}
+
+struct NetworkImage: View {
+    let url: URL?
+    
+    var body: some View {
+        Group {
+            if let url = url, let imageData = try? Data(contentsOf: url),
+               let uiImage = UIImage(data: imageData) {
+                
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            }
+            else {
+                Rectangle()
+                    .fill(Color.gray)
+                    .aspectRatio(contentMode: .fit)
+            }
         }
     }
 }
