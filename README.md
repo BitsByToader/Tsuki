@@ -24,8 +24,5 @@ I don't plan to release the app on the AppStore, currently, for the simple reaso
 
 If the demand is there, I will create an AltStore repository so users can easily install the app with AltStore.
 
-# License
-Currently there is no licence on this app. I don't know how I'll license, however I don't want to see in half a month my exact app on the AppStore for 1$ or something like that. If someone is knowledgable with things like this, please feel free to drop me an email!
-
 # Bugs and other issues
 Drop me an email at tudorifrim@icloud.com and I'll see what we can do!
