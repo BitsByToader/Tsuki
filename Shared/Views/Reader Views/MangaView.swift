@@ -210,7 +210,7 @@ struct MangaView: View {
                     //And will leave the chapters without a volume last (even though they might be first)
                     
                     filteredChapters = filteredChapters.sorted {
-                        return Double($0.chapterInfo.chapter)! > Double($1.chapterInfo.chapter)!
+                        return Double($0.chapterInfo.chapter) ?? 0 > Double($1.chapterInfo.chapter) ?? 0
                     }
                     
                     DispatchQueue.main.async {
