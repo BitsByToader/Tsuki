@@ -92,6 +92,8 @@ struct LogInView: View {
     }
     
     func logIntoMD() {
+        self.hideKeyboard()
+        
         DispatchQueue.main.async {
             password = ""
             twoFactorCode = ""
