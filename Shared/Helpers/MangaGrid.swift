@@ -13,6 +13,11 @@ struct MangaGrid: View {
     
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
+            if dataSource.isEmpty {
+                ForEach(0..<12) { _ in
+                    PlaceholderManga()
+                }
+            }
             ForEach(dataSource, id: \.self) { manga in
                 NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
                     PlainManga(manga: manga)

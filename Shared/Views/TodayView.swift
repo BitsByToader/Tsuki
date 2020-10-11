@@ -11,6 +11,7 @@ import SwiftSoup
 struct TodayView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var appState: AppState
+    @State private var loadingMangas: Bool = true
     
     @State private var newChapters: [ReturnedUpdatedManga] = []
     @State private var featuredDisplayedMangas: [ReturnedManga] = []
@@ -27,11 +28,17 @@ struct TodayView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            ForEach(newChapters, id: \.self) { manga in
-                                NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
-                                    UpdatedManga(manga: manga)
-                                }.buttonStyle(PlainButtonStyle())
-                                .frame(width: 125)
+                            if loadingMangas {
+                                ForEach(0..<6) {_ in
+                                    PlaceholderManga()
+                                }
+                            } else {
+                                ForEach(newChapters, id: \.self) { manga in
+                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
+                                        UpdatedManga(manga: manga)
+                                    }.buttonStyle(PlainButtonStyle())
+                                    .frame(width: 125)
+                                }
                             }
                         }
                     }
@@ -44,11 +51,17 @@ struct TodayView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            ForEach(featuredDisplayedMangas, id: \.self) { manga in
-                                NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
-                                    PlainManga(manga: manga)
-                                }.buttonStyle(PlainButtonStyle())
-                                .frame(width: 125)
+                            if loadingMangas {
+                                ForEach(0..<6) {_ in
+                                    PlaceholderManga()
+                                }
+                            } else {
+                                ForEach(featuredDisplayedMangas, id: \.self) { manga in
+                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
+                                        PlainManga(manga: manga)
+                                    }.buttonStyle(PlainButtonStyle())
+                                    .frame(width: 125)
+                                }
                             }
                         }
                     }
@@ -61,12 +74,17 @@ struct TodayView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            ForEach(newDisplayedMangas, id: \.self) { manga in
-                                NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
-                                    PlainManga(manga: manga)
-                                }.buttonStyle(PlainButtonStyle())
-                                .frame(width: 125)
-                            }
+                            if loadingMangas {
+                                ForEach(0..<6) {_ in
+                                    PlaceholderManga()
+                                }
+                            } else {
+                                ForEach(newDisplayedMangas, id: \.self) { manga in
+                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
+                                        PlainManga(manga: manga)
+                                    }.buttonStyle(PlainButtonStyle())
+                                    .frame(width: 125)
+                                }}
                         }
                     }
                 }
@@ -87,6 +105,7 @@ struct TodayView: View {
     func loadUpdates() {
         let loadingDescription = "Loading mangas..."
         appState.loadingQueue.append(loadingDescription)
+        self.loadingMangas = true
         
         guard let url = URL(string: "https://mangadex.org") else {
             print("Invalid URL")
@@ -146,6 +165,7 @@ struct TodayView: View {
                         self.featuredDisplayedMangas = featuredMangas
                         self.newDisplayedMangas = newMangas
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        self.loadingMangas = false
                     }
                     //MARK: -
                     return

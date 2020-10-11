@@ -31,10 +31,16 @@ struct LatestUpdatesView: View {
         
         ScrollView {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
-                ForEach(result, id: \.self) { manga in
-                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
-                        UpdatedManga(manga: manga)
-                    }.buttonStyle(PlainButtonStyle())
+                if result.isEmpty {
+                    ForEach(0..<12) { _ in
+                        PlaceholderManga()
+                    }
+                } else {
+                    ForEach(result, id: \.self) { manga in
+                        NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
+                            UpdatedManga(manga: manga)
+                        }.buttonStyle(PlainButtonStyle())
+                    }
                 }
             }
             
