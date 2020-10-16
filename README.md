@@ -19,10 +19,8 @@ A beautiful and simple manga app for iOS 14, iPadOS 14 and macOS 11, built with 
 - Easily share mangas and chapters with your friends
 - Localization!
 
-# Installation
-I don't plan to release the app on the AppStore, currently, for the simple reason that I don't have an Apple Developer account. However, those with a mac, can easily open the project in Xcode and install it onto their devices.
-
-If the demand is there, I will create an AltStore repository so users can easily install the app with AltStore.
+# AppStore status
+  I am planning on uploading the app in a few days, just need to download a non-beta version of Xcode. Then comes the nightmare of *App review* whoaaa....
 
 # Bugs and other issues
 Drop me an email at tudorifrim@icloud.com and I'll see what we can do!
