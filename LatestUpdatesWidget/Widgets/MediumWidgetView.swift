@@ -25,7 +25,7 @@ struct MediumWidgetView: View {
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
                     }.padding(.horizontal, 10)
-                    .if(entry.mangas.placeholder) { $0.redacted(reason: .placeholder) }
+                    .if(entry.mangas.placeholder || entry.mangas.mangas[index].isPlaceholder) { $0.redacted(reason: .placeholder) }
                 }
             }
             Spacer()

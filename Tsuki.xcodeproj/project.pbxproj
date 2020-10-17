@@ -342,8 +342,8 @@
 		8B7861D22517BA1900E5B7F2 /* Widgets */ = {
 			isa = PBXGroup;
 			children = (
-				8B7861D32517BA7F00E5B7F2 /* MediumWidgetView.swift */,
 				8B7861DF2517BBBC00E5B7F2 /* SmallWidgetView.swift */,
+				8B7861D32517BA7F00E5B7F2 /* MediumWidgetView.swift */,
 				8B7861E62517BCE700E5B7F2 /* LargeWidgetView.swift */,
 			);
 			path = Widgets;

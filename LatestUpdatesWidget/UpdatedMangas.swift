@@ -48,10 +48,14 @@ struct UpdatedMangas {
                     
                     let returnedMangas = try doc.getElementById("follows_update")?.child(0).children().array()
                     
+                    let numberOfMangas: Int = (returnedMangas ?? []).count >= 6 ? 6 : (returnedMangas ?? []).count
+                    
+                    print(numberOfMangas)
+                    
                     var mangas: [UpdatedManga] = []
                     var mangaIds: [String] = []
-                    #warning("insert a computed property here that gets the returnedMangas size and either returns 6 or its size. The rest of the mangas array will be filled with placeholders")
-                    for index in 0..<6 {
+                    
+                    for index in 0 ..< numberOfMangas {
                         let title: String = try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.text()
                         let coverArt: String = try (returnedMangas ?? [])[index].getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
                         
@@ -76,6 +80,10 @@ struct UpdatedMangas {
                     let relevance = array.count - similarCounter
                     print(relevance)
                     UserDefaults.standard.setValue(mangaIds, forKey: "latestMangas")
+                    
+                    for _ in mangas.count ..< 6 {
+                        mangas.append(UpdatedManga(title: "", cover: "", id: "", isPlaceholder: true))
+                    }
                     
                     completion(UpdatedMangas(mangas: mangas, placeholder: false, relevance: relevance), nil)
                 } catch {
@@ -102,6 +110,7 @@ struct UpdatedMangas {
         let title: String
         let cover: String
         let id: String
+        var isPlaceholder: Bool = false
     }
 }
 

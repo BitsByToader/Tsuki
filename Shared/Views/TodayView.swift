@@ -104,6 +104,7 @@ struct TodayView: View {
     
     func loadUpdates() {
         let loadingDescription = "Loading mangas..."
+        
         appState.loadingQueue.append(loadingDescription)
         self.loadingMangas = true
         
