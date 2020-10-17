@@ -272,6 +272,9 @@ struct MangaView: View {
                 DispatchQueue.main.async {
                     withAnimation {
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        
+                        let hapticFeedback = UINotificationFeedbackGenerator.init()
+                        hapticFeedback.notificationOccurred(.success)
                     }
                 }
                 return
@@ -281,6 +284,9 @@ struct MangaView: View {
                 print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
                 appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
                 withAnimation {
+                    let hapticFeedback = UINotificationFeedbackGenerator.init()
+                    hapticFeedback.notificationOccurred(.error)
+                    
                     appState.errorOccured = true
                     appState.removeFromLoadingQueue(loadingState: loadingDescription)
                 }
