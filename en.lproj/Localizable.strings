@@ -5,6 +5,7 @@
   Created by Tudor Ifrim on 18/10/2020.
   
 */
+//MARK: - Today view
 "Today" = "Today";
 "Newest chapters" = "Newest chapters";
 "Featured Manga" = "Featured Manga";
