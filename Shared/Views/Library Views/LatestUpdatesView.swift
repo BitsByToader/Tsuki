@@ -61,7 +61,7 @@ struct LatestUpdatesView: View {
     }
     
     func loadManga() {
-        let loadingDescription = "Loading updates..."
+        let loadingDescription: LocalizedStringKey = "Loading updates..."
         appState.loadingQueue.append(loadingDescription)
         
         guard let url = URL(string: "https://mangadex.org") else {

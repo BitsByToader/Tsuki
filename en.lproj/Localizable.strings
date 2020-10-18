@@ -1,0 +1,119 @@
+/* 
+  Localizable.strings
+  Tsuki
+
+  Created by Tudor Ifrim on 18/10/2020.
+  
+*/
+"Today" = "Today";
+"Newest chapters" = "Newest chapters";
+"Featured Manga" = "Featured Manga";
+"New Titles" = "New Titles";
+"Loading mangas..." = "Loading mangas...";
+
+//MARK: - Search view
+"Search" = "Search";
+"Search by name" = "Search by name";
+"The search function will be available once you sign in." = "The search function will be available once you sign in.";
+"Loading search tags..." = "Loading search tags...";
+"Search with current tags" = "Search with current tags";
+"Tags: %lld included, %lld excluded" = "Tags: %lld included, %lld excluded";
+"Tags: %lld included" = "Tags: %lld included";
+"Tags: %lld excluded" = "Tags: %lld excluded";
+"Search by name" = "Search by name";
+"Loading mangas..." = "Loading mangas...";
+
+//MARK: - Library view
+"Library" = "Library";
+"Search library..." = "Search library...";
+"Latest Updates" = "Latest Updates";
+"Downloaded manga" = "Downloaded manga";
+"Loading library..." = "Loading library...";
+
+//MARK: - DownloadedManga view
+"Wait a second!" = "Wait a second!";
+"This action will delete this downloaded manga, as well as *ALL* chapters associated with it... This action is non-reversable. Are you sure you want to continue?" = "This action will delete this downloaded manga, as well as *ALL* chapters associated with it... This action is non-reversable. Are you sure you want to continue?";
+"You have no downloaded mangas" = "You have no downloaded mangas";
+"Downloaded manga" = "Downloaded manga";
+"Chapters downloaded %lld" = "Chapters downloaded %lld";
+
+//MARK: - Latest Updates view
+"Loading updates..." = "Loading updates...";
+
+//MARK: - Manga view
+"Status" = "Status";
+"Unfollow" = "Unfollow";
+"Reading" = "Reading";
+"Completed" = "Completed";
+"On Hold" = "On Hold";
+"Plan to read" = "Plan to read";
+"Dropped" = "Dropped";
+"Re-Reading" = "Re-Reading";
+"Change reading status to..." = "Change reading status to...";
+"Resume" = "Resume";
+"Coming soon...™️" = "Coming soon...™️";
+"This feature is currently unavailable. It will be coming soon in an update, so hang tight!" = "This feature is currently unavailable. It will be coming soon in an update, so hang tight!";
+"Download" = "Download";
+"Description" = "Description";
+"Genres" = "Genres";
+"Chapters" = "Chapters";
+"No chapters available" = "No chapters available";
+"Please select a manga to read" = "Please select a manga to read";
+"Loading manga information..." = "Loading manga information...";
+"Updating status..." = "Updating status...";
+"%a ratings" = "%a ratings";
+
+//MARK: - ChapterSelection view
+"Select chapters" = "Select chapters";
+"Chapters" = "Chapters";
+"All" = "All";
+"Until" = "Until";
+"Inbetween" = "Inbetween";
+"Selected" = "Selected";
+"Download chapters" = "Download chapters";
+"Deselect all" = "Deselect all";
+"Gathering chapter info..." = "Gathering chapter info...";
+"Downloading chapter(s)..." = "Downloading chapter(s)...";
+
+//MARK: - Chapter View
+"Please select a chapter." = "Please select a chapter.";
+"%lld of %lld" = "%lld of %lld";
+
+//MARK: - Account view
+"Account" = "Account";
+"Change account" = "Change account";
+"Sign In" = "Sign In";
+"Sign Out" = "Sign Out";
+"Your Account" = "Your Account";
+"Loading account..." = "Loading account...";
+
+"Oh no :( \nA wild *ERROR* appeared! Tap for more info" = "Oh no :( \nA wild *ERROR* appeared! Tap for more info";
+
+
+"Vol.%a Ch.%a" = "Vol.%a Ch.%a";
+
+//MARK: - LogIn view
+"Enter your credentials" = "Enter your credentials";
+"Username" ="Username";
+"Password" = "Password";
+"2FA code (optional)" = "2FA code (optional)";
+"Signing In..." = "Signing In...";
+"Something went wrong!" = "Something went wrong!";
+"Continue without logging in" = "Continue without logging in";
+"Signing in gives you access to searching and saving mangas in the cloud. This action requires a MangaDex account." = "Signing in gives you access to searching and saving mangas in the cloud. This action requires a MangaDex account.";
+"Log In" = "Log In";
+"Final step..." = "Final step...";
+
+//MARK: - Onboarding view
+"Welcome to Tsuki" = "Welcome to Tsuki";
+"Discover today's hot manga, or the newest chapters. Your pick." = "Discover today's hot manga, or the newest chapters. Your pick.";
+"Search for new manga, or maybe go through your favorite genres." = "Search for new manga, or maybe go through your favorite genres.";
+"View all of your saved manga, in an instant, on all your devices." = "View all of your saved manga, in an instant, on all your devices.";
+"Manage your MangaDex account and view all relelvant stats." = "Manage your MangaDex account and view all relelvant stats.";
+"Continue" = "Continue";
+
+//MARK: - Error view localization
+"Here's your error" = "Here's your error";
+"Send to developer" = "Send to developer";
+"Copy to clipboard" = "Copy to clipboard";
+"Can't send emails from this device :(" = "Can't send emails from this device :(";

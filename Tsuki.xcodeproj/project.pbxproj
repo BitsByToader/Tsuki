@@ -91,6 +91,7 @@
 		8BE0852024F4FE300074F4C2 /* MangaViewChapterList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0851E24F4FE300074F4C2 /* MangaViewChapterList.swift */; };
 		8BE0852224F4FFB50074F4C2 /* MangaViewTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0852124F4FFB50074F4C2 /* MangaViewTitle.swift */; };
 		8BE0852324F4FFB50074F4C2 /* MangaViewTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0852124F4FFB50074F4C2 /* MangaViewTitle.swift */; };
+		8BEE3C90253C3AA900DB79F0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8BEE3C92253C3AA900DB79F0 /* Localizable.strings */; };
 		8BFF727E24F953FC00D2914D /* InitialOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF727D24F953FC00D2914D /* InitialOnboardingView.swift */; };
 		8BFF727F24F953FC00D2914D /* InitialOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BFF727D24F953FC00D2914D /* InitialOnboardingView.swift */; };
 /* End PBXBuildFile section */
@@ -192,6 +193,8 @@
 		8BE0851B24F4FAD70074F4C2 /* MangaViewTags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaViewTags.swift; sourceTree = "<group>"; };
 		8BE0851E24F4FE300074F4C2 /* MangaViewChapterList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaViewChapterList.swift; sourceTree = "<group>"; };
 		8BE0852124F4FFB50074F4C2 /* MangaViewTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaViewTitle.swift; sourceTree = "<group>"; };
+		8BEE3C91253C3AA900DB79F0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		8BEE3C98253C3AAF00DB79F0 /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/Localizable.strings; sourceTree = "<group>"; };
 		8BFF727D24F953FC00D2914D /* InitialOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InitialOnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -254,6 +257,7 @@
 		8B49D5F924C77EAB007D1FFE = {
 			isa = PBXGroup;
 			children = (
+				8BEE3C92253C3AA900DB79F0 /* Localizable.strings */,
 				8B2206AE250D7E5700E28D3A /* LatestUpdatesWidgetExtension.entitlements */,
 				8B75DBD224FC0A77009FBCF1 /* PersistentStore.swift */,
 				8B49D5FE24C77EAB007D1FFE /* Shared */,
@@ -574,6 +578,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ro,
 			);
 			mainGroup = 8B49D5F924C77EAB007D1FFE;
 			packageReferences = (
@@ -607,6 +612,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B49D62C24C77EAC007D1FFE /* Assets.xcassets in Resources */,
+				8BEE3C90253C3AA900DB79F0 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -767,6 +773,18 @@
 		};
 /* End PBXTargetDependency section */
 
+/* Begin PBXVariantGroup section */
+		8BEE3C92253C3AA900DB79F0 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8BEE3C91253C3AA900DB79F0 /* en */,
+				8BEE3C98253C3AAF00DB79F0 /* ro */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
 		8B0F72AD250BED3C000E5F41 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -819,6 +837,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -879,6 +898,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

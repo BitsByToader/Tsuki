@@ -108,7 +108,7 @@ struct SearchView: View {
     }
     
     func retrieveTags() {
-        let loadingDescription = "Loading search tags..."
+        let loadingDescription: LocalizedStringKey = "Loading search tags..."
         appState.loadingQueue.append(loadingDescription)
         
         guard let url = URL(string: "https://mangadex.org/search") else {

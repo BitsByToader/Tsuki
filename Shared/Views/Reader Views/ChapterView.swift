@@ -121,7 +121,7 @@ struct ChapterView: View {
     }
     
     func loadChapter(currentChapter: Int) {
-        let loadingDescription = "Loading chapter..."
+        let loadingDescription: LocalizedStringKey = "Loading chapter..."
         
         if !loadContents && !remainingLocalChapters.isEmpty {
             let chapterPages = remainingLocalChapters[currentChapter].wrappedPages

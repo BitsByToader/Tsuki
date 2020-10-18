@@ -103,7 +103,7 @@ struct TodayView: View {
     }
     
     func loadUpdates() {
-        let loadingDescription = "Loading mangas..."
+        let loadingDescription: LocalizedStringKey = "Loading mangas..."
         
         appState.loadingQueue.append(loadingDescription)
         self.loadingMangas = true

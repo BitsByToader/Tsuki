@@ -60,7 +60,7 @@ struct SearchByNameView: View {
     }
     
     func searchManga() {
-        let loadingDescription = "Loading mangas..."
+        let loadingDescription: LocalizedStringKey = "Loading mangas..."
         appState.loadingQueue.append(loadingDescription)
         
         let stringToSearch: String = searchInput

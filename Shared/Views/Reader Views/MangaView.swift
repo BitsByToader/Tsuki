@@ -176,7 +176,7 @@ struct MangaView: View {
     
     //MARK: - Manga details loader
     func loadMangaInfo() {
-        let loadingDescription = "Loading manga information..."
+        let loadingDescription: LocalizedStringKey = "Loading manga information..."
         appState.loadingQueue.append(loadingDescription)
         
         guard let url = URL(string: "https://mangadex.org/api/manga/\(mangaId)") else {
@@ -244,7 +244,7 @@ struct MangaView: View {
     }
     //MARK: - Update the reading status of the manga
     func updateMangaStatus(statusId: Int) {
-        let loadingDescription = "Updating status..."
+        let loadingDescription: LocalizedStringKey = "Updating status..."
         appState.loadingQueue.append(loadingDescription)
         
         var action: String = ""

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct LibraryLink: View {
-    var linkTitle: String
+    var linkTitle: LocalizedStringKey
     
     var body: some View {
         ZStack(alignment: .leading) {

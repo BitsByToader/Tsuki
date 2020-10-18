@@ -13,7 +13,7 @@ struct AccountView: View {
     @EnvironmentObject var appState: AppState
     @AppStorage("userProfileLink") var userProfileLink: String = ""
     
-    private var logInButtonString: String {
+    private var logInButtonString: LocalizedStringKey {
         return checkLogInStatus() ? "Change account" : "Sign In"
     }
     
@@ -92,7 +92,7 @@ struct AccountView: View {
     }
     
     func loadAccountInformation() {
-        let loadingDescription = "Loading account..."
+        let loadingDescription: LocalizedStringKey = "Loading account..."
         appState.loadingQueue.append(loadingDescription)
         
         guard let url = URL(string: userProfileLink) else {

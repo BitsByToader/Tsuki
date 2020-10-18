@@ -126,7 +126,7 @@ struct LibraryView: View {
     }
     
     func loadLibrary() {
-        let loadingDescription = "Loading library..."
+        let loadingDescription: LocalizedStringKey = "Loading library..."
         appState.loadingQueue.append(loadingDescription)
         
         guard let url = URL(string: MDlListLink) else {

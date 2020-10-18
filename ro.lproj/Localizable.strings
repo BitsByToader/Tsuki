@@ -1,0 +1,116 @@
+/* 
+  Localizable.strings
+  Tsuki
+
+  Created by Tudor Ifrim on 18/10/2020.
+  
+*/
+"Today" = "Astăzi";
+"Newest chapters" = "Ultimele capitole";
+"Featured Manga" = "Manga-uri promovate";
+"New Titles" = "Ultimele titluri";
+"Loading mangas..." = "Încărcăm manga-urile...";
+
+//MARK: - Search view
+"Search" = "Caută";
+"Search by name" = "Caută după nume";
+"The search function will be available once you sign in." = "Căutarea va fi disponibilă după logare.";
+"Loading search tags..." = "Încărcăm criteriile de căutare...";
+"Search with current tags" = "Caută cu criteriile alese";
+"Tags: %lld included, %lld excluded" = "Criterii: %lld inclus, %lld exclus";
+"Tags: %lld included" = "Criterii: %lld inclus";
+"Tags: %lld excluded" = "Criterii: %lld exclus";
+
+//MARK: - Library view
+"Library" = "Colecție";
+"Search library..." = "Căutam în colecție";
+"Latest Updates" = "Ultimele actualizări";
+"Downloaded manga" = "Manga-uri descărcate";
+"Loading library..." = "Încărcam colecția...";
+
+//MARK: - DownloadedManga view
+"Wait a second!" = "Așteaptă o secunda!";
+"This action will delete this downloaded manga, as well as *ALL* chapters associated with it... This action is non-reversable. Are you sure you want to continue?" = "Această acțiune va șterge acest manga descărcat, și toate capitolele asociate cu el... Această acțiune este ireversibilă. Ești sigur că vrei să continui?";
+"You have no downloaded mangas" = "Nu ai nici un manga descărcat.";
+"Chapters downloaded: %lld" = "Capitole descărcate: %lld";
+
+//MARK: - Latest Updates view
+"Loading updates..." = "Încărcăm actualizările...";
+
+//MARK: - Manga view
+"Status" = "Status";
+"Unfollow" = "Nu mai urmări";
+"Reading" = "Citire";
+"Completed" = "Completat";
+"On Hold" = "Pe pauză";
+"Plan to read" = "Plănuiesc să citesc";
+"Dropped" = "Oprit";
+"Re-Reading" = "Recitire";
+"Change reading status to..." = "Schimbă statusul îb...";
+"Resume" = "Reia";
+"Coming soon...™️" = "În curănd...™️";
+"This feature is currently unavailable. It will be coming soon in an update, so hang tight!" = "Această funcție nu este valabilă momentan.";
+"Download" = "Descarcă";
+"Description" = "Descriere";
+"Genres" = "Gen";
+"Chapters" = "Capitole";
+"No chapters available" = "Nu există capitole disponibile";
+"Please select a manga to read" = "Selectați un manga pentru citire";
+"Loading manga information..." = "Încărcam informațiile manga-ului...";
+"Updating status..." = "Actualizăm statutul...";
+"%a ratings" = "%a evaluări";
+
+//MARK: - ChapterSelection view
+"Select chapters" = "Selectează capitolele";
+"Chapters" = "Capitole";
+"All" = "Toate";
+"Until" = "Până la";
+"Inbetween" = "Între";
+"Selected" = "Selectat";
+"Download Chapters" = "Descarcă capitolele";
+"Deselect all" = "Deselectați tot";
+"Gathering chapter info..." = "Obținem informațiile manga-ului...";
+"Downloading chapter(s)..." = "Descărcăm capitolele...";
+
+//MARK: - Chapter View
+"Please select a chapter." = "Selectați un capitol.";
+"%lld of %lld" = "%lld din %lld";
+
+//MARK: - Account view
+"Account" = "Cont";
+"Change account" = "Schimbă contul";
+"Sign In" = "Intră in cont";
+"Sign Out" = "Ieși din cont";
+"Your Account" = "Contul tău";
+"Loading account..." = "Încărcam contul...";
+
+"Oh no :( \nA wild *ERROR* appeared! Tap for more info" = "Oh nu :( \nA Am întâmpinat o problema. Apăsați pentru mai multe detalii";
+
+
+"Vol.%a Ch.%a" = "Vol.%a Ch.%a";
+
+//MARK: - LogIn view
+"Enter your credentials" = "Introduceți datele";
+"Username" ="Utilizator";
+"Password" = "Parolă";
+"2FA code (optional)" = "cod 2FA (opțional)";
+"Signing In..." = "În curs de logare...";
+"Something went wrong!" = "Am întâmpinat o problemă!";
+"Continue without logging in" = "Mergi mai departe fără logare...";
+"Signing in gives you access to searching and saving mangas in the cloud. This action requires a MangaDex account." = "Prin folosirea unui cont, îți poți accessa manga-urile salvate in cont funcția de căutare. Această acțiune necesită un cont MangaDex.";
+"Log In" = "Intră in cont";
+"Final step..." = "Ultimul pas...";
+
+//MARK: - Onboarding view
+"Welcome to Tsuki" = "Bine ai venit";
+"Discover today's hot manga, or the newest chapters. Your pick." = "Descoperă noutățile zilei sau cele mai tari manga-uri. Alegerea ta.";
+"Search for new manga, or maybe go through your favorite genres." = "Caută manga-uri noi sau vizualizeaza genurile tale favorite.";
+"View all of your saved manga, in an instant, on all your devices." = "Vizualizează toate manga-urile tale favorite, instant, pe toate dispozitivele tale.";
+"Manage your MangaDex account and view all relevant stats." = "Manageriază-ți contul tău MangaDex si vizualizează informațiile relevante.";
+"Continue" = "Continuă";
+
+//MARK: - Error view localization
+"Here's your error" = "Eroarea ta";
+"Send to developer" = "Trimite dezvoltatorului";
+"Copy to clipboard" = "Copiază în clipboard";
+"Can't send emails from this device :(" = "Nu poți trimite mail-uri de pe acest dispozitiv :(";
