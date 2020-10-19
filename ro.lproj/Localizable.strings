@@ -34,6 +34,9 @@
 "This action will delete this downloaded manga, as well as *ALL* chapters associated with it... This action is non-reversable. Are you sure you want to continue?" = "Această acțiune va șterge acest manga descărcat, și toate capitolele asociate cu el... Această acțiune este ireversibilă. Ești sigur că vrei să continui?";
 "You have no downloaded mangas" = "Nu ai nici un manga descărcat.";
 "Chapters downloaded: %lld" = "Capitole descărcate: %lld";
+"Sign in..." = "Intră în cont...";
+"Your library will be available once you sign in." = "Colecția va fi disponibilă după logare.";
+"...or you can view your downloaded mangas" = "... sau îți poți vizualiza manga-urile descărcate.";
 
 //MARK: - Latest Updates view
 "Loading updates..." = "Încărcăm actualizările...";

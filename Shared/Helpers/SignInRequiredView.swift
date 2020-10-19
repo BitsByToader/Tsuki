@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SignInRequiredView: View {
-    var description: String
+    var description: LocalizedStringKey
     @Binding var logInViewPresented: Bool
     
     var body: some View {

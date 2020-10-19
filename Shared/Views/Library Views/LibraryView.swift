@@ -113,12 +113,16 @@ struct LibraryView: View {
         } else {
             NavigationView {
                 VStack(spacing: 10) {
+                    Spacer()
+                    
                     SignInRequiredView(description: "Your library will be available once you sign in.", logInViewPresented: $logInViewPresented)
                     
                     NavigationLink(destination: DownloadedMangaView(), label: {
                         Text("...or you can view your downloaded mangas")
                             .multilineTextAlignment(.center)
                     })
+                    Spacer()
+                    Spacer()
                 }
             }.navigationBarHidden(true)
             .navigationBarTitleDisplayMode(.inline)

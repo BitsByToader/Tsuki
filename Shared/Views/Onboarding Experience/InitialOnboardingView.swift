@@ -64,8 +64,8 @@ struct InitialOnboardingView_Previews: PreviewProvider {
 struct OnboardingFeature: View {
     let imageName: String
     let imageColor: Color
-    let featureName: String
-    let featureDescription: String
+    let featureName: LocalizedStringKey
+    let featureDescription: LocalizedStringKey
     
     var body: some View {
         HStack(spacing: 10) {

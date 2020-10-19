@@ -30,6 +30,9 @@
 "Latest Updates" = "Latest Updates";
 "Downloaded manga" = "Downloaded manga";
 "Loading library..." = "Loading library...";
+"Sign in..." = "Sign in...";
+"Your library will be available once you sign in." = "Your library will be available once you sign in.";
+"...or you can view your downloaded mangas" = "...or you can view your downloaded mangas";
 
 //MARK: - DownloadedManga view
 "Wait a second!" = "Wait a second!";
