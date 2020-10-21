@@ -68,7 +68,7 @@ struct LogInView: View {
                         .font(.system(size: 14))
                 })
                 Spacer()
-                Text("Signing in gives you access to searching and saving mangas in the cloud. This action requires a MangaDex account.")
+                Text("Signing in gives you access to searching and saving mangas in the cloud. This action requires an account.")
                     .padding(.horizontal, 20)
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)

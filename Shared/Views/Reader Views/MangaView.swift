@@ -169,7 +169,7 @@ struct MangaView: View {
                 loadMangaInfo()
                 self.reloadContents = false
             }
-        }.navigationTitle(mangaId != "" ? manga.title : "Please select a manga to read")
+        }.navigationTitle(mangaId != "" ? manga.title : "Please select a manga to read.")
         .navigationBarTitleDisplayMode(.inline)
         .listStyle(PlainListStyle())
     }

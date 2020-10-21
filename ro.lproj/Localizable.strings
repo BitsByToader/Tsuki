@@ -101,7 +101,7 @@
 "Signing In..." = "În curs de logare...";
 "Something went wrong!" = "Am întâmpinat o problemă!";
 "Continue without logging in" = "Mergi mai departe fără logare...";
-"Signing in gives you access to searching and saving mangas in the cloud. This action requires a MangaDex account." = "Prin folosirea unui cont, îți poți accessa manga-urile salvate in cont funcția de căutare. Această acțiune necesită un cont MangaDex.";
+"Signing in gives you access to searching and saving mangas in the cloud. This action requires an account." = "Prin folosirea unui cont, îți poți accessa manga-urile salvate in cont funcția de căutare. Această acțiune necesită un cont.";
 "Log In" = "Intră in cont";
 "Final step..." = "Ultimul pas...";
 
@@ -110,7 +110,7 @@
 "Discover today's hot manga, or the newest chapters. Your pick." = "Descoperă noutățile zilei sau cele mai tari manga-uri. Alegerea ta.";
 "Search for new manga, or maybe go through your favorite genres." = "Caută manga-uri noi sau vizualizeaza genurile tale favorite.";
 "View all of your saved manga, in an instant, on all your devices." = "Vizualizează toate manga-urile tale favorite, instant, pe toate dispozitivele tale.";
-"Manage your MangaDex account and view all relevant stats." = "Manageriază-ți contul tău MangaDex si vizualizează informațiile relevante.";
+"Manage your account and view all relevant stats." = "Manageriază-ți contul tău si vizualizează informațiile relevante.";
 "Continue" = "Continuă";
 
 //MARK: - Error view localization

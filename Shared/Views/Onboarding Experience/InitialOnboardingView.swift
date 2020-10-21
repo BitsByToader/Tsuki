@@ -27,7 +27,7 @@ struct InitialOnboardingView: View {
 
                         OnboardingFeature(imageName: "books.vertical.fill", imageColor: Color(.systemBlue), featureName: "Library", featureDescription: "View all of your saved manga, in an instant, on all your devices.")
                         
-                        OnboardingFeature(imageName: "person.crop.circle", imageColor: Color(.systemGray), featureName: "Account", featureDescription: "Manage your MangaDex account and view all relevant stats.")
+                        OnboardingFeature(imageName: "person.crop.circle", imageColor: Color(.systemGray), featureName: "Account", featureDescription: "Manage your account and view all relevant stats.")
                     }.padding(.horizontal, 25)
                 }
                 

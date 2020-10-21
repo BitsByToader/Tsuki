@@ -91,9 +91,9 @@ struct SearchView: View {
                 }
                 
                 
-                MangaView(reloadContents: false, mangaId: "")
+                MangaView(reloadContents: true, mangaId: "30461") //30461
 
-                ChapterView(loadContents: false, remainingChapters: [Chapter(chapterId: "", chapterInfo: ChapterData(volume: "", chapter: "", title: "", langCode: "", timestamp: 0))])
+                ChapterView(loadContents: true, remainingChapters: [Chapter(chapterId: "449568", chapterInfo: ChapterData(volume: "", chapter: "", title: "Please select a chapter to read.", langCode: "", timestamp: 0))])//449711
                 
             }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
             .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
