@@ -101,7 +101,7 @@ struct LibraryView: View {
                 
                 MangaView(reloadContents: true, mangaId: "30461")
 
-                ChapterView(loadContents: true, remainingChapters: [Chapter(chapterId: "449777", chapterInfo: ChapterData(volume: "", chapter: "", title: "< Please select a chapter to read.", langCode: "", timestamp: 0))])
+                ChapterView(loadContents: true, remainingChapters: [ChapterData(chapterId: 449777, volume: "", chapter: "", title: "< Please select a chapter to read.", langCode: "", timestamp: 0)])
                 
             }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
             .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }

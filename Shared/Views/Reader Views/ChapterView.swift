@@ -13,7 +13,7 @@ struct ChapterView: View {
     
     var loadContents: Bool
     
-    var remainingChapters: [Chapter]
+    var remainingChapters: [ChapterData]
     var remainingLocalChapters: [DownloadedChapter] = []
     
     @State private var pageURLs: [String] = []
@@ -28,7 +28,7 @@ struct ChapterView: View {
             if remainingChapters.isEmpty {
                 return "Please select a chapter."
             } else {
-                return remainingChapters[chapterRead].chapterInfo.title! != "" ? remainingChapters[chapterRead].chapterInfo.title! : "Ch. \(remainingChapters[chapterRead].chapterInfo.chapter)"
+                return remainingChapters[chapterRead].title! != "" ? remainingChapters[chapterRead].title! : "Ch. \(remainingChapters[chapterRead].chapter)"
             }
         } else {
             if remainingLocalChapters.isEmpty {
@@ -137,7 +137,7 @@ struct ChapterView: View {
         
         appState.loadingQueue.append(loadingDescription)
         
-        guard let url = URL(string: "https://mangadex.org/api/chapter/\(remainingChapters[currentChapter].chapterId)") else {
+        guard let url = URL(string: "https://mangadex.org/api/v2/chapter/\(remainingChapters[currentChapter].chapterId)") else {
             print("From ChapterView: Invalid URL")
             return
         }
@@ -155,8 +155,8 @@ struct ChapterView: View {
                     
                     var pages: [String] = []
                     
-                    for page in decodedResponse.pages {
-                        pages.append(decodedResponse.baseURL + decodedResponse.mangaHash + "/" + page)
+                    for page in decodedResponse.data.pages {
+                        pages.append(decodedResponse.data.baseURL + decodedResponse.data.mangaHash + "/" + page)
                     }
                     
                     DispatchQueue.main.async {

@@ -7,6 +7,8 @@
 
 import Foundation
 import SwiftUI
+
+#if !os(macOS)
 import MessageUI
 
 struct MailComposer: UIViewControllerRepresentable {
@@ -35,3 +37,4 @@ struct MailComposer: UIViewControllerRepresentable {
     
     typealias UIViewControllerType = MFMailComposeViewController
 }
+#endif

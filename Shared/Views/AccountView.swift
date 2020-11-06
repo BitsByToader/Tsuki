@@ -11,7 +11,7 @@ import SDWebImageSwiftUI
 
 struct AccountView: View {
     @EnvironmentObject var appState: AppState
-    @AppStorage("userProfileLink") var userProfileLink: String = ""
+    @AppStorage("userProfileId") var userProfileId: String = ""
     
     private var logInButtonString: LocalizedStringKey {
         return checkLogInStatus() ? "Change account" : "Sign In"
@@ -21,9 +21,14 @@ struct AccountView: View {
         return checkLogInStatus()
     }
     
-    @State private var profileStats: [ProfileStat] = []
-    @State private var profilePicURL: String = ""
-    @State private var username: String = ""
+    var dateFormatter: DateFormatter {
+        let obj: DateFormatter = DateFormatter()
+        obj.dateStyle = .long
+        
+        return obj
+    }
+    
+    @State private var profileStats: User = User(profilePicURL: "", username: "", joined: 0, lastSeen: 0, userId: 0, premium: false)
     
     @State private var logInViewPresented: Bool = false
     
@@ -32,7 +37,7 @@ struct AccountView: View {
             List {
                 Section {
                     HStack(alignment: .center, spacing: 10) {
-                        WebImage(url: URL(string: profilePicURL))
+                        WebImage(url: URL(string: profileStats.profilePicURL ?? "https://mangadex.org/images/avatars/default1.jpg"))
                             .resizable()
                             .placeholder {
                                 Rectangle().foregroundColor(.gray)
@@ -44,7 +49,7 @@ struct AccountView: View {
                             .frame(height: 75)
                             .cornerRadius(12)
                         
-                        Text(username)
+                        Text(profileStats.username)
                             .bold()
                             .font(.title3)
                             .lineLimit(1)
@@ -52,16 +57,13 @@ struct AccountView: View {
                 }
                 if loggedIn {
                     Section {
-                        ForEach(profileStats, id: \.self) { stat in
-                            HStack {
-                                Text(stat.label)
-                                    .foregroundColor(.gray)
-                                
-                                Spacer()
-                                
-                                Text(stat.value)
-                            }
-                        }
+                        ProfileStat(label: "User ID:", value: "\(profileStats.userId)")
+                        
+                        ProfileStat(label: "Joined:", value: "\(dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(profileStats.joined))))")
+                        
+                        ProfileStat(label: "Last online:", value: "\(dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(profileStats.lastSeen))))")
+                        
+                        ProfileStat(label: "Premium Member:", value: profileStats.premium ? "Yes" : "No")
                     }
                 }
                 
@@ -95,7 +97,7 @@ struct AccountView: View {
         let loadingDescription: LocalizedStringKey = "Loading account..."
         appState.loadingQueue.append(loadingDescription)
         
-        guard let url = URL(string: userProfileLink) else {
+        guard let url = URL(string: "https://www.mangadex.org/api/v2/user/\(userProfileId)") else {
             print("From AccountView: Invalid URL")
             return
         }
@@ -109,52 +111,22 @@ struct AccountView: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
-                    
-                    let username: String = try doc.select("span.mx-1").text()
-                    
-                    let profileData = try doc.getElementsByClass("row edit").first()?.children().array()
-                    
-                    let profilePic: String = try profileData![0].select("div").first()!.select("img").attr("src")
-                    
-                    let profile = try profileData![1].select("div").first()?.children().array()
-                    var stats: [ProfileStat] = []
-                    
-                    for index in 0...4 {
-                        let label: String = try profile![index].child(0).text()
-                        let value: String = try profile![index].child(1).text()
-                        
-                        stats.append(ProfileStat(label: label, value: value))
-                    }
+                    let decodedResponse = try JSONDecoder().decode(DecodedUser.self, from: data)
                     
                     DispatchQueue.main.async {
-                        self.profilePicURL = profilePic
-                        self.profileStats = stats
-                        self.username = username
+                        self.profileStats = decodedResponse.data
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
-                } catch Exception.Error(let type, let message) {
-                    print ("Error of type \(type): \(message)")
-                    DispatchQueue.main.async {
-                        appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        }
-                    }
-                    return
                 } catch {
-                    print ("error")
                     DispatchQueue.main.async {
-                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
+                        appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
-                    return
                 }
             }
             DispatchQueue.main.async {
@@ -173,9 +145,7 @@ struct AccountView: View {
         logOutUser()
         
         DispatchQueue.main.async {
-            self.username = ""
-            self.profilePicURL = ""
-            self.profileStats = []
+            profileStats = User(profilePicURL: "", username: "", joined: 0, lastSeen: 0, userId: 0, premium: false)
         }
     }
 }
@@ -186,7 +156,18 @@ struct AccountView_Previews: PreviewProvider {
     }
 }
 
-struct ProfileStat: Hashable {
-    let label: String
-    let value: String
+struct ProfileStat: View {
+    let label: LocalizedStringKey
+    let value: LocalizedStringKey
+    
+    var body: some View {
+        HStack {
+            Text(label)
+                .foregroundColor(.gray)
+            
+            Spacer()
+            
+            Text(value)
+        }
+    }
 }

@@ -32,7 +32,7 @@ struct MangaViewTitle: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(2)
                 
-                Text(manga.artist)
+                Text(manga.artist[0])
                     .font(.body)
                     .lineLimit(1)
                     .foregroundColor(Color(.gray))
@@ -41,16 +41,16 @@ struct MangaViewTitle: View {
                 
                 HStack {
                     ForEach((1..<6)) { index in
-                        if Float(index * 2) <= Float(manga.rating.bayesian) ?? 0.0 {
+                        if Float(index * 2) <= manga.rating.bayesian {
                             Image(systemName: "star.fill")
-                        } else if Float(index * 2) - 1  <= Float(manga.rating.bayesian) ?? 0.0 {
+                        } else if Float(index * 2) - 1  <= manga.rating.bayesian {
                             Image(systemName: "star.lefthalf.fill")
                         } else {
                             Image(systemName: "star")
                         }
                     }
                     
-                    Text("\(manga.rating.bayesian)")
+                    Text(String(format: "%.2f", manga.rating.bayesian))
                         .foregroundColor(Color(.gray))
                 }
                 

@@ -8,24 +8,17 @@
 import Foundation
 
 struct MangaDataModel: Codable {
-    let manga: Manga
-    var chapters: [Chapter] {
-        return chapter.values
+    struct Data: Codable {
+        var manga: Manga
+        var chapters: [ChapterData]
     }
     
-    var chapter: Chapter.List
-}
-
-extension MangaDataModel {
-    enum CodingKeys: CodingKey {
-        case manga
-        case chapter
-    }
+    var data: Data
 }
 
 struct Manga: Codable {
     let title: String
-    let artist: String
+    let artist: [String]
     var coverURL: String
     let description: String
     let rating: Rating
@@ -33,16 +26,16 @@ struct Manga: Codable {
     
     init() {
         self.title = ""
-        self.artist = ""
+        self.artist = [""]
         self.coverURL = ""
         self.description = ""
-        self.rating = Rating(bayesian: "", users: "")
+        self.rating = Rating(bayesian: 1, users: 0)
         self.tags = []
     }
     
     init( title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [Int]) {
         self.title = title
-        self.artist = artist
+        self.artist = [artist]
         self.coverURL = coverURL
         self.description = description
         self.rating = rating
@@ -51,25 +44,25 @@ struct Manga: Codable {
     
     init(fromDownloadedManga manga: DownloadedManga) {
         title = manga.wrappedMangaTitle
-        artist = manga.wrappedMangaArtist
+        artist = [manga.wrappedMangaArtist]
         coverURL = manga.wrappedMangaCoverURL
         description = manga.wrappedMangaDescription
-        rating = Rating(bayesian: manga.wrappedMangaRating, users: manga.wrappedUsersRated)
+        rating = Rating(bayesian: Float(manga.wrappedMangaRating) ?? 1, users: Int(manga.wrappedUsersRated) ?? 0)
         tags = manga.wrappedMangaTags
     }
     
     enum CodingKeys: String, CodingKey {
         case title
         case artist
-        case coverURL = "cover_url"
+        case coverURL = "mainCover"
         case description
         case rating
-        case tags = "genres"
+        case tags
     }
     
     struct Rating: Codable {
-        let bayesian: String
-        let users: String
+        let bayesian: Float
+        let users: Int
     }
 }
 
@@ -77,19 +70,4 @@ struct ReturnedManga: Hashable {
     let title: String
     let coverArtURL: String
     let id: String
-}
-
-extension Chapter {
-    struct List: Codable {
-            let values: [Chapter]
-
-            init(from decoder: Decoder) throws {
-                let container = try decoder.singleValueContainer()
-                let dictionary = try container.decode([String : ChapterData].self)
-
-                values = dictionary.map { key, value in
-                    Chapter(chapterId: key, chapterInfo: value)
-                }
-            }
-        }
 }

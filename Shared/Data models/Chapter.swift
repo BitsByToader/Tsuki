@@ -13,6 +13,7 @@ struct Chapter: Codable, Hashable {
 }
 
 struct ChapterData: Codable, Hashable {
+    let chapterId: Int
     let volume: String?
     let chapter: String
     let title: String?
@@ -21,22 +22,27 @@ struct ChapterData: Codable, Hashable {
     
     
     enum CodingKeys: String, CodingKey {
+        case chapterId = "id"
         case volume
         case chapter
         case title
-        case langCode = "lang_code"
+        case langCode = "language"
         case timestamp
     }
 }
 
 struct PageData: Codable {
-    let baseURL: String
-    let mangaHash: String
-    let pages: [String]
+    let data: Data
     
-    enum CodingKeys: String, CodingKey {
-        case baseURL = "server"
-        case mangaHash = "hash"
-        case pages = "page_array"
+    struct Data: Codable {
+        let baseURL: String
+        let mangaHash: String
+        let pages: [String]
+        
+        enum CodingKeys: String, CodingKey {
+            case baseURL = "server"
+            case mangaHash = "hash"
+            case pages
+        }
     }
 }

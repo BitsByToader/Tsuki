@@ -12,7 +12,7 @@ import SwiftSoup
 struct LogInView: View {
     @EnvironmentObject var appState: AppState
     
-    @AppStorage("userProfileLink") var userProfileLink: String = ""
+    @AppStorage("userProfileId") var userProfileId: String = ""
     @AppStorage("MDListLink") var MDlListLink: String = ""
     
     @Binding var isPresented: Bool
@@ -135,14 +135,14 @@ struct LogInView: View {
                     let linkList = try doc.getElementById("homepage_cog")?.siblingElements().first()?.select("div").first()?.children().array()
                     
                     var tempLink: String? = try linkList?[0].attr("href")
-                    let userProfile: String = tempLink == nil ? "" : "https://mangadex.org" + (tempLink ?? "")
+                    let userProfile: String = tempLink == nil ? "" : (tempLink ?? "")
                     
                     tempLink = try linkList?[4].attr("href")
                     let MDList: String = tempLink == nil ? "" : "https://mangadex.org" + (tempLink ?? "")
                     
                     DispatchQueue.main.async {
                         self.MDlListLink = MDList
-                        self.userProfileLink = userProfile
+                        self.userProfileId = userProfile.components(separatedBy: "/")[2]
                         self.loading = false
                         self.isPresented = false
                     }

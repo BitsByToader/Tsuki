@@ -15,7 +15,7 @@ struct MangaView: View {
     
     @State var manga: Manga = Manga()
     
-    @State var chapters: [Chapter] = [] //chapters -- remoteChapters
+    @State var chapters: [ChapterData] = [] //chapters -- remoteChapters
     @State var localChapters: [DownloadedChapter] = []
     
     @State var reloadContents: Bool
@@ -179,7 +179,7 @@ struct MangaView: View {
         let loadingDescription: LocalizedStringKey = "Loading manga information..."
         appState.loadingQueue.append(loadingDescription)
         
-        guard let url = URL(string: "https://mangadex.org/api/manga/\(mangaId)") else {
+        guard let url = URL(string: "https://mangadex.org/api/v2/manga/\(mangaId)?include=chapters") else {
             print("From MangaView: Invalid URL")
             return
         }
@@ -195,10 +195,10 @@ struct MangaView: View {
                 do {
                     let decodedResponse = try JSONDecoder().decode(MangaDataModel.self, from: data)
                     
-                    var filteredChapters: [Chapter] = []
+                    var filteredChapters: [ChapterData] = []
                     
-                    for chapter in decodedResponse.chapters {
-                        if ( chapter.chapterInfo.langCode == "gb" ) {
+                    for chapter in decodedResponse.data.chapters {
+                        if ( chapter.langCode == "gb" ) {
                             filteredChapters.append(chapter)
                         }
                     }
@@ -210,12 +210,12 @@ struct MangaView: View {
                     //And will leave the chapters without a volume last (even though they might be first)
                     
                     filteredChapters = filteredChapters.sorted {
-                        return Double($0.chapterInfo.chapter) ?? 0 > Double($1.chapterInfo.chapter) ?? 0
+                        return Double($0.chapter) ?? 0 > Double($1.chapter) ?? 0
                     }
                     
                     DispatchQueue.main.async {
-                        self.manga = decodedResponse.manga
-                        self.manga.coverURL = "https://mangadex.org" + decodedResponse.manga.coverURL
+                        self.manga = decodedResponse.data.manga
+                        self.manga.coverURL = decodedResponse.data.manga.coverURL
                         self.chapters = filteredChapters
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }

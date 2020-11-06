@@ -12,7 +12,7 @@ struct ChapterSelectionView: View {
     
     @Binding var isPresented: Bool
     var manga: Manga
-    var chapters: [Chapter]
+    var chapters: [ChapterData]
     
     @State var selectedChapters: [Bool]
     private var numberOfSelectedChapters: Int {
@@ -45,7 +45,7 @@ struct ChapterSelectionView: View {
     
     struct Pages: Equatable {
         var array: [Page]
-        let chapter: Chapter
+        let chapter: ChapterData
         
         struct Page: Equatable {
             let pagePath: String
@@ -95,7 +95,7 @@ struct ChapterSelectionView: View {
                             selection = .selectedChapters
                         }) {
                             HStack {
-                                Text("Vol.\(chapter.chapterInfo.volume ?? "") Ch.\(chapter.chapterInfo.chapter)")
+                                Text("Vol.\(chapter.volume ?? "") Ch.\(chapter.chapter)")
                                 
                                 Spacer()
                                 
@@ -208,7 +208,7 @@ struct ChapterSelectionView: View {
         gatheringInfo = true
         for index in 0..<selectedChapters.count {
             if ( selectedChapters[index] ) {
-                getChapterPages(chapter: chapters[index], chapterId: chapters[index].chapterId)
+                getChapterPages(chapter: chapters[index], chapterId: "\(chapters[index].chapterId)")
             }
         }
     }
@@ -216,22 +216,22 @@ struct ChapterSelectionView: View {
     func saveChapters() {
         let mangaToDownload = DownloadedManga(context: moc)
 
-        mangaToDownload.mangaArtist = manga.artist
+        mangaToDownload.mangaArtist = manga.artist[0]
         mangaToDownload.mangaCoverURL = manga.coverURL
         mangaToDownload.mangaId = UUID()
         mangaToDownload.mangaTitle = manga.title
-        mangaToDownload.mangaRating = manga.rating.bayesian
+        mangaToDownload.mangaRating = "\(manga.rating.bayesian)"
         mangaToDownload.mangaTags = manga.tags
         mangaToDownload.mangaDescription = manga.description
-        mangaToDownload.usersRated = manga.rating.users
+        mangaToDownload.usersRated = "\(manga.rating.users)"
 
         for index in 0..<pages.count {
             let chapter = DownloadedChapter(context: moc)
 
-            chapter.title = self.pages[index].chapter.chapterInfo.title
-            chapter.chapter = self.pages[index].chapter.chapterInfo.chapter
-            chapter.volume = self.pages[index].chapter.chapterInfo.volume
-            chapter.timestamp = self.pages[index].chapter.chapterInfo.timestamp!
+            chapter.title = self.pages[index].chapter.title
+            chapter.chapter = self.pages[index].chapter.chapter
+            chapter.volume = self.pages[index].chapter.volume
+            chapter.timestamp = self.pages[index].chapter.timestamp!
 
             //insert string array here that contains image url paths
             var imagePaths: [String] = []
@@ -292,22 +292,22 @@ struct ChapterSelectionView: View {
     func saveChaptersAsync() {
         let mangaToDownload = DownloadedManga(context: moc)
         
-        mangaToDownload.mangaArtist = manga.artist
+        mangaToDownload.mangaArtist = manga.artist[0]
         mangaToDownload.mangaCoverURL = manga.coverURL
         mangaToDownload.mangaId = UUID()
         mangaToDownload.mangaTitle = manga.title
-        mangaToDownload.mangaRating = manga.rating.bayesian
+        mangaToDownload.mangaRating = "\(manga.rating.bayesian)"
         mangaToDownload.mangaTags = manga.tags
         mangaToDownload.mangaDescription = manga.description
-        mangaToDownload.usersRated = manga.rating.users
+        mangaToDownload.usersRated = "\(manga.rating.users)"
         
         for index in 0..<pages.count {
             let chapter = DownloadedChapter(context: moc)
             
-            chapter.title = self.pages[index].chapter.chapterInfo.title
-            chapter.chapter = self.pages[index].chapter.chapterInfo.chapter
-            chapter.volume = self.pages[index].chapter.chapterInfo.volume
-            chapter.timestamp = self.pages[index].chapter.chapterInfo.timestamp!
+            chapter.title = self.pages[index].chapter.title
+            chapter.chapter = self.pages[index].chapter.chapter
+            chapter.volume = self.pages[index].chapter.volume
+            chapter.timestamp = self.pages[index].chapter.timestamp!
             
             print("Starting to download chapter: \(chapter.wrappedChapter)")
             //insert string array here that contains image url paths
@@ -379,10 +379,10 @@ struct ChapterSelectionView: View {
         }
     }
     
-    func getChapterPages(chapter: Chapter, chapterId: String) {
+    func getChapterPages(chapter: ChapterData, chapterId: String) {
         //appState.isLoading = true
         
-        guard let url = URL(string: "https://mangadex.org/api/chapter/\(chapterId)") else {
+        guard let url = URL(string: "https://mangadex.org/api/v2/chapter/\(chapterId)") else {
             print("From ChapterSelectionView: Invalid URL")
             return
         }
@@ -400,8 +400,8 @@ struct ChapterSelectionView: View {
                     
                     var pages: [Pages.Page] = []
                     
-                    for page in decodedResponse.pages {
-                        let pageToAppend: Pages.Page = Pages.Page(pagePath: decodedResponse.baseURL + decodedResponse.mangaHash + "/" + page, pageSaved: false)
+                    for page in decodedResponse.data.pages {
+                        let pageToAppend: Pages.Page = Pages.Page(pagePath: decodedResponse.data.baseURL + decodedResponse.data.mangaHash + "/" + page, pageSaved: false)
                         pages.append(pageToAppend)
                     }
                     

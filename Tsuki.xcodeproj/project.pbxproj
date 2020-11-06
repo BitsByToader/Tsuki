@@ -20,6 +20,8 @@
 		8B31D35324D2054200A17C94 /* Chapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B31D35124D2054200A17C94 /* Chapter.swift */; };
 		8B31D35624D2245500A17C94 /* ChapterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B31D35524D2245500A17C94 /* ChapterView.swift */; };
 		8B31D35724D2245500A17C94 /* ChapterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B31D35524D2245500A17C94 /* ChapterView.swift */; };
+		8B333512254DB8CF0040041F /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 8B333511254DB8CF0040041F /* SwiftSoup */; };
+		8B333514254DB8D40040041F /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8B333513254DB8D40040041F /* SDWebImageSwiftUI */; };
 		8B36F36C250E88210085F52D /* WidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F36B250E88210085F52D /* WidgetURL.swift */; };
 		8B36F36D250E88210085F52D /* WidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F36B250E88210085F52D /* WidgetURL.swift */; };
 		8B49D61B24C77EAC007D1FFE /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B49D61A24C77EAC007D1FFE /* Tests_iOS.swift */; };
@@ -85,6 +87,8 @@
 		8BBC668825331FC000340042 /* PlaceholderManga.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBC668625331FC000340042 /* PlaceholderManga.swift */; };
 		8BBE441B24F6B8DC00DA19CF /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBE441A24F6B8DC00DA19CF /* TodayView.swift */; };
 		8BBE441C24F6B8DC00DA19CF /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBE441A24F6B8DC00DA19CF /* TodayView.swift */; };
+		8BBEA24E2555DEFA009C03F6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBEA24D2555DEFA009C03F6 /* User.swift */; };
+		8BBEA24F2555DEFA009C03F6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBEA24D2555DEFA009C03F6 /* User.swift */; };
 		8BE0851C24F4FAD70074F4C2 /* MangaViewTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0851B24F4FAD70074F4C2 /* MangaViewTags.swift */; };
 		8BE0851D24F4FAD70074F4C2 /* MangaViewTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0851B24F4FAD70074F4C2 /* MangaViewTags.swift */; };
 		8BE0851F24F4FE300074F4C2 /* MangaViewChapterList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0851E24F4FE300074F4C2 /* MangaViewChapterList.swift */; };
@@ -190,6 +194,7 @@
 		8BBA7D5A24CF6176004BAF63 /* MangaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaView.swift; sourceTree = "<group>"; };
 		8BBC668625331FC000340042 /* PlaceholderManga.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderManga.swift; sourceTree = "<group>"; };
 		8BBE441A24F6B8DC00DA19CF /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		8BBEA24D2555DEFA009C03F6 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		8BE0851B24F4FAD70074F4C2 /* MangaViewTags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaViewTags.swift; sourceTree = "<group>"; };
 		8BE0851E24F4FE300074F4C2 /* MangaViewChapterList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaViewChapterList.swift; sourceTree = "<group>"; };
 		8BE0852124F4FFB50074F4C2 /* MangaViewTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MangaViewTitle.swift; sourceTree = "<group>"; };
@@ -222,6 +227,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B333514254DB8D40040041F /* SDWebImageSwiftUI in Frameworks */,
+				8B333512254DB8CF0040041F /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -419,6 +426,7 @@
 				8B31D35124D2054200A17C94 /* Chapter.swift */,
 				8B9A363524CB6B8000518294 /* Tag.swift */,
 				8B36F36B250E88210085F52D /* WidgetURL.swift */,
+				8BBEA24D2555DEFA009C03F6 /* User.swift */,
 			);
 			path = "Data models";
 			sourceTree = "<group>";
@@ -503,6 +511,10 @@
 			dependencies = (
 			);
 			name = macOS;
+			packageProductDependencies = (
+				8B333511254DB8CF0040041F /* SwiftSoup */,
+				8B333513254DB8D40040041F /* SDWebImageSwiftUI */,
+			);
 			productName = macOS;
 			productReference = 8B49D60E24C77EAC007D1FFE /* Tsuki.app */;
 			productType = "com.apple.product-type.application";
@@ -689,6 +701,7 @@
 				8BB93FBA24EC5E2700FAFEFC /* ErrorView.swift in Sources */,
 				8BBA7D5824CF606B004BAF63 /* Manga.swift in Sources */,
 				8BBE441B24F6B8DC00DA19CF /* TodayView.swift in Sources */,
+				8BBEA24E2555DEFA009C03F6 /* User.swift in Sources */,
 				8B49D62824C77EAC007D1FFE /* TsukiApp.swift in Sources */,
 				8B75DBD924FC2911009FBCF1 /* DownloadedMangaListRow.swift in Sources */,
 				8B8560DD25018E7B00243543 /* DownloadedManga+CoreDataClass.swift in Sources */,
@@ -731,6 +744,7 @@
 				8BB93FBB24EC5E2700FAFEFC /* ErrorView.swift in Sources */,
 				8BBA7D5924CF606B004BAF63 /* Manga.swift in Sources */,
 				8BBE441C24F6B8DC00DA19CF /* TodayView.swift in Sources */,
+				8BBEA24F2555DEFA009C03F6 /* User.swift in Sources */,
 				8B49D62924C77EAC007D1FFE /* TsukiApp.swift in Sources */,
 				8B75DBDA24FC2911009FBCF1 /* DownloadedMangaListRow.swift in Sources */,
 				8B8560DE25018E7B00243543 /* DownloadedManga+CoreDataClass.swift in Sources */,
@@ -804,6 +818,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -827,6 +843,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -968,6 +986,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.toader.Tsuki;
 				PRODUCT_NAME = Tsuki;
 				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -993,6 +1012,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.toader.Tsuki;
 				PRODUCT_NAME = Tsuki;
 				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -1016,7 +1036,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.16;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.toader.Tsuki;
 				PRODUCT_NAME = Tsuki;
 				SDKROOT = macosx;
@@ -1041,7 +1061,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.16;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.toader.Tsuki;
 				PRODUCT_NAME = Tsuki;
 				SDKROOT = macosx;
@@ -1217,6 +1237,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8B333511254DB8CF0040041F /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B9862FC24CA29B100AC3AF9 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		8B333513254DB8D40040041F /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B6504CB24CCDFCE00BFAD22 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
 		8B6504CC24CCDFCE00BFAD22 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8B6504CB24CCDFCE00BFAD22 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;

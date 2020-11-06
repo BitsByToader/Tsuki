@@ -8,8 +8,6 @@
 import SwiftUI
 import CoreData
 
-#warning("When first testing on Big Sur, check to make sure that it supports sizeClasses. Else use the compiler directive (os) to check for the operating system and adjust the nav view accordingly.")
-
 @main
 struct TsukiApp: App {
     @StateObject var appState: AppState = AppState()

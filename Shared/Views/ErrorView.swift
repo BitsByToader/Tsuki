@@ -6,7 +6,9 @@
 //
 
 import SwiftUI
+#if !os(macOS)
 import MessageUI
+#endif
 
 struct ErrorView: View {
     @EnvironmentObject var appState: AppState
@@ -38,6 +40,7 @@ struct ErrorView: View {
             }
             
             VStack(spacing: 15) {
+                #if !os(macOS)
                 Text("Send to developer")
                     .bold()
                     .truncationMode(.tail)
@@ -58,6 +61,7 @@ struct ErrorView: View {
                             Text("Can't send emails from this device :(")
                         }
                     }
+                #endif
                 
                 Text("Copy to clipboard")
                     .foregroundColor(Color.accentColor)
