@@ -10,6 +10,7 @@ import SDWebImageSwiftUI
 
 struct ChapterView: View {
     @EnvironmentObject var appState: AppState
+    @AppStorage("readingDataSaver") var readingDataSaver: Bool = false
     
     var loadContents: Bool
     
@@ -137,7 +138,7 @@ struct ChapterView: View {
         
         appState.loadingQueue.append(loadingDescription)
         
-        guard let url = URL(string: "https://mangadex.org/api/v2/chapter/\(remainingChapters[currentChapter].chapterId)") else {
+        guard let url = URL(string: "https://mangadex.org/api/v2/chapter/\(remainingChapters[currentChapter].chapterId)?saver=\(readingDataSaver)") else {
             print("From ChapterView: Invalid URL")
             return
         }

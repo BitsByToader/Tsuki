@@ -12,6 +12,8 @@ import SDWebImageSwiftUI
 struct AccountView: View {
     @EnvironmentObject var appState: AppState
     @AppStorage("userProfileId") var userProfileId: String = ""
+    @AppStorage("readingDataSaver") var readingDataSaver: Bool = false
+    @AppStorage("downloadingDataSaver") var downloadingDataSaver: Bool = false
     
     private var logInButtonString: LocalizedStringKey {
         return checkLogInStatus() ? "Change account" : "Sign In"
@@ -65,6 +67,12 @@ struct AccountView: View {
                         
                         ProfileStat(label: "Premium Member:", value: profileStats.premium ? "Yes" : "No")
                     }
+                }
+                
+                Section(header: Text("Data Saver"), footer: Text("When enabling data saver, the chapter pages will be of a lesser quality, in an attempt to save bandwith. This may result in a worse reading experience.")) {
+                    Toggle("Save data when reading", isOn: $readingDataSaver)
+                    
+                    Toggle("Save data when downloading", isOn: $downloadingDataSaver)
                 }
                 
                 Section {

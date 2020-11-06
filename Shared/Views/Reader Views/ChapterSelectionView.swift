@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ChapterSelectionView: View {
     @Environment(\.managedObjectContext) var moc
+    @AppStorage("downloadingDataSaver") var downloadingDataSaver: Bool = false
     
     @Binding var isPresented: Bool
     var manga: Manga
@@ -382,7 +383,7 @@ struct ChapterSelectionView: View {
     func getChapterPages(chapter: ChapterData, chapterId: String) {
         //appState.isLoading = true
         
-        guard let url = URL(string: "https://mangadex.org/api/v2/chapter/\(chapterId)") else {
+        guard let url = URL(string: "https://mangadex.org/api/v2/chapter/\(chapterId)?mark_read=false&saver=\(downloadingDataSaver)") else {
             print("From ChapterSelectionView: Invalid URL")
             return
         }
