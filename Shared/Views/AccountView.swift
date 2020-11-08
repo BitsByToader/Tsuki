@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
-import SwiftSoup
 import SDWebImageSwiftUI
+
+#warning("DON'T FORGET TO LOCALIZE THE NEW ACCOUNT STRINGS")
 
 struct AccountView: View {
     @EnvironmentObject var appState: AppState

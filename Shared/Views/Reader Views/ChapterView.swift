@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
+import Introspect
 
 struct ChapterView: View {
     @EnvironmentObject var appState: AppState
@@ -23,6 +24,8 @@ struct ChapterView: View {
     @State private var currentPage: Int = 0
     @State private var extraProgressIsShown: Bool = false
     @State private var chapterRead: Int = 0
+    
+    @State private var navBarHidden: Bool = false
     
     var navTitle: String {
         if loadContents {
@@ -67,6 +70,11 @@ struct ChapterView: View {
                                         hapticFeedback.impactOccurred()
                                     }
                                 }
+                                .onTapGesture {
+                                    withAnimation {
+                                        navBarHidden.toggle()
+                                    }
+                                }
                         } else {
                             Image(uiImage: UIImage(contentsOfFile: page)!)
                                 .resizable()
@@ -88,6 +96,7 @@ struct ChapterView: View {
                     }
                 }
             }
+            
             GeometryReader { geometry in
                 VStack(alignment: .leading, spacing: 5) {
                     Rectangle()
@@ -113,12 +122,16 @@ struct ChapterView: View {
                     .onTapGesture {
                         extraProgressIsShown.toggle()
                     }
-                }
+                }.opacity(navBarHidden ? 0 : 1)
             }
-        }.onAppear {
+        }.introspectTabBarController { (UITabBarController) in
+            UITabBarController.tabBar.isHidden = navBarHidden
+        }
+        .onAppear {
             loadChapter(currentChapter: 0)
         }.navigationBarTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(navBarHidden)
     }
     
     func loadChapter(currentChapter: Int) {

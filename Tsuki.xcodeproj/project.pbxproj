@@ -89,6 +89,7 @@
 		8BBE441C24F6B8DC00DA19CF /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBE441A24F6B8DC00DA19CF /* TodayView.swift */; };
 		8BBEA24E2555DEFA009C03F6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBEA24D2555DEFA009C03F6 /* User.swift */; };
 		8BBEA24F2555DEFA009C03F6 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBEA24D2555DEFA009C03F6 /* User.swift */; };
+		8BBEA2572555F4AB009C03F6 /* Introspect in Frameworks */ = {isa = PBXBuildFile; productRef = 8BBEA2562555F4AB009C03F6 /* Introspect */; };
 		8BE0851C24F4FAD70074F4C2 /* MangaViewTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0851B24F4FAD70074F4C2 /* MangaViewTags.swift */; };
 		8BE0851D24F4FAD70074F4C2 /* MangaViewTags.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0851B24F4FAD70074F4C2 /* MangaViewTags.swift */; };
 		8BE0851F24F4FE300074F4C2 /* MangaViewChapterList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BE0851E24F4FE300074F4C2 /* MangaViewChapterList.swift */; };
@@ -219,6 +220,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B6504CD24CCDFCE00BFAD22 /* SDWebImageSwiftUI in Frameworks */,
+				8BBEA2572555F4AB009C03F6 /* Introspect in Frameworks */,
 				8B9862FE24CA29B200AC3AF9 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -493,6 +495,7 @@
 			packageProductDependencies = (
 				8B9862FD24CA29B200AC3AF9 /* SwiftSoup */,
 				8B6504CC24CCDFCE00BFAD22 /* SDWebImageSwiftUI */,
+				8BBEA2562555F4AB009C03F6 /* Introspect */,
 			);
 			productName = iOS;
 			productReference = 8B49D60624C77EAC007D1FFE /* Tsuki.app */;
@@ -596,6 +599,7 @@
 			packageReferences = (
 				8B9862FC24CA29B100AC3AF9 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				8B6504CB24CCDFCE00BFAD22 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				8BBEA2552555F4AB009C03F6 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
 			);
 			productRefGroup = 8B49D60724C77EAC007D1FFE /* Products */;
 			projectDirPath = "";
@@ -982,7 +986,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.toader.Tsuki;
 				PRODUCT_NAME = Tsuki;
 				SDKROOT = iphoneos;
@@ -1008,7 +1012,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.toader.Tsuki;
 				PRODUCT_NAME = Tsuki;
 				SDKROOT = iphoneos;
@@ -1234,6 +1238,14 @@
 				minimumVersion = 2.3.2;
 			};
 		};
+		8BBEA2552555F4AB009C03F6 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/SwiftUI-Introspect";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1261,6 +1273,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8B9862FC24CA29B100AC3AF9 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
 			productName = SwiftSoup;
+		};
+		8BBEA2562555F4AB009C03F6 /* Introspect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BBEA2552555F4AB009C03F6 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */;
+			productName = Introspect;
 		};
 /* End XCSwiftPackageProductDependency section */
 
