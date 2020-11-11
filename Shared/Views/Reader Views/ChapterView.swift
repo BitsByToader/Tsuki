@@ -50,12 +50,24 @@ struct ChapterView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            ScrollReader(pages: pageURLs,
-                         contentIsRemote: loadContents,
-                         currentPage: $currentPage,
-                         currentChapter: $chapterRead,
-                         remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
-                         loadChapter: loadChapter)
+//            ScrollReader(pages: pageURLs,
+//                         contentIsRemote: loadContents,
+//                         currentPage: $currentPage,
+//                         currentChapter: $chapterRead,
+//                         remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
+//                         loadChapter: loadChapter)
+            Divider()
+                .onAppear {
+                    loadChapter(currentChapter: chapterRead)
+                }
+            if !pageURLs.isEmpty {
+                SwipeReader(pages: pageURLs,
+                            contentIsRemote: loadContents,
+                            currentPage: $currentPage,
+                            currentChapter: $chapterRead,
+                            remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
+                            loadChapter: loadChapter)
+            }
             
             GeometryReader { geometry in
                 VStack(alignment: .leading, spacing: 5) {
