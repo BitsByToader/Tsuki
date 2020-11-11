@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import SDWebImageSwiftUI
 import Introspect
 
 struct ChapterView: View {
@@ -20,7 +19,13 @@ struct ChapterView: View {
     
     @State private var pageURLs: [String] = []
     
-    @State private var readingProgress: Int = 0
+    private var readingProgress: Int {
+        if pageURLs.count == 0 {
+            return 0
+        } else {
+            return ( (currentPage + 1) *  100 ) / pageURLs.count
+        }
+    }
     @State private var currentPage: Int = 0
     @State private var extraProgressIsShown: Bool = false
     @State private var chapterRead: Int = 0
@@ -45,57 +50,12 @@ struct ChapterView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-            ScrollView {
-                LazyVStack {
-                    ForEach(Array(pageURLs.enumerated()), id: \.offset) { index, page in
-                        if loadContents {
-                            WebImage(url: URL(string: page))
-                                .resizable()
-                                .placeholder {
-                                    Rectangle().foregroundColor(.gray)
-                                        .opacity(0.2)
-                                }
-                                .indicator(.activity)
-                                .transition(.fade(duration: 0.5))
-                                .scaledToFit()
-                                .onAppear {
-                                    currentPage = index + 1
-                                    getReadingStatus(index: index+1)
-                                    
-                                    if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != (loadContents ? remainingChapters.count : remainingLocalChapters.count) ) {
-                                        chapterRead += 1
-                                        loadChapter(currentChapter: chapterRead)
-                                        
-                                        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
-                                        hapticFeedback.impactOccurred()
-                                    }
-                                }
-                                .onTapGesture {
-                                    withAnimation {
-                                        navBarHidden.toggle()
-                                    }
-                                }
-                        } else {
-                            Image(uiImage: UIImage(contentsOfFile: page)!)
-                                .resizable()
-                                .transition(.fade(duration:0.5))
-                                .scaledToFit()
-                                .onAppear {
-                                    currentPage = index + 1
-                                    getReadingStatus(index: index+1)
-                                    
-                                    if ( currentPage + 1 == pageURLs.count && chapterRead + 1 != (loadContents ? remainingChapters.count : remainingLocalChapters.count) ) {
-                                        chapterRead += 1
-                                        loadChapter(currentChapter: chapterRead)
-                                        
-                                        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
-                                        hapticFeedback.impactOccurred()
-                                    }
-                                }
-                        }
-                    }
-                }
-            }
+            ScrollReader(pages: pageURLs,
+                         contentIsRemote: loadContents,
+                         currentPage: $currentPage,
+                         currentChapter: $chapterRead,
+                         remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
+                         loadChapter: loadChapter)
             
             GeometryReader { geometry in
                 VStack(alignment: .leading, spacing: 5) {
@@ -124,7 +84,12 @@ struct ChapterView: View {
                     }
                 }.opacity(navBarHidden ? 0 : 1)
             }
-        }.introspectTabBarController { (UITabBarController) in
+        }.onTapGesture {
+            withAnimation {
+                navBarHidden.toggle()
+            }
+        }
+        .introspectTabBarController { (UITabBarController) in
             UITabBarController.tabBar.isHidden = navBarHidden
         }
         .onAppear {
@@ -200,15 +165,4 @@ struct ChapterView: View {
             }
         }.resume()
     }
-    
-    func getReadingStatus(index: Int) {
-        readingProgress = ( index *  100 ) / pageURLs.count
-        print("Index is \(index), thus progress is: \(readingProgress)")
-    }
 }
-
-//struct ChapterView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ChapterView()
-//    }
-//}
