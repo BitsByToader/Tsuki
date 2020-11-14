@@ -5,6 +5,7 @@
 //  Created by Tudor Ifrim on 11.11.2020.
 //
 import SwiftUI
+import SDWebImage
 
 struct SwipeReader: UIViewControllerRepresentable {
     var pages: [String]
@@ -18,16 +19,32 @@ struct SwipeReader: UIViewControllerRepresentable {
     var controllers: [UIViewController] {
         var controllerArray: [UIViewController] = []
         
-        for page in pages {
+        for _ in pages {
             let image: UIImageView = UIImageView()
-            image.image = UIImage(contentsOfFile: page)
             image.translatesAutoresizingMaskIntoConstraints = false
+            
+//            if ( contentIsRemote ) {
+//                image.load(url: URL(string: page)!)
+//            } else {
+//                image.image = UIImage(contentsOfFile: page)
+//            }
             
             let controller = UIViewController()
             controller.view.addSubview(image)
             image.pinEdges(to: controller.view)
             
             controllerArray.append(controller)
+        }
+        
+        #warning("Check here if there is a second page")
+        if ( contentIsRemote ) {
+            (controllerArray[pages.count-1].view!.subviews[0] as! UIImageView).load(url: URL(string: pages[pages.count-1])!)
+            (controllerArray[0].view!.subviews[0] as! UIImageView).load(url: URL(string: pages[0])!)
+            (controllerArray[1].view!.subviews[0] as! UIImageView).load(url: URL(string: pages[1])!)
+        } else {
+            (controllerArray[pages.count-1].view!.subviews[0] as! UIImageView).image = UIImage(contentsOfFile: pages[pages.count-1])
+            (controllerArray[0].view!.subviews[0] as! UIImageView).image = UIImage(contentsOfFile: pages[0])
+            (controllerArray[1].view!.subviews[0] as! UIImageView).image = UIImage(contentsOfFile: pages[1])
         }
         
         return controllerArray
@@ -43,16 +60,29 @@ struct SwipeReader: UIViewControllerRepresentable {
             navigationOrientation: .horizontal)
         pageViewController.dataSource = context.coordinator
         pageViewController.delegate = context.coordinator
-
+        
         return pageViewController
     }
     
     func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
+        pageViewController.setViewControllers([makeController(index: currentPage)], direction: .forward, animated: true)
+    }
+    
+    func makeController(index: Int) -> UIViewController {
+        let image: UIImageView = UIImageView()
+        image.translatesAutoresizingMaskIntoConstraints = false
         
-//        (controllers[currentPage].view.subviews[0] as! UIImageView ).load(url: URL(string:pages[currentPage])!)
+        if ( contentIsRemote ) {
+            image.load(url: URL(string: pages[index])!)
+        } else {
+            image.image = UIImage(contentsOfFile: pages[index])
+        }
         
-        pageViewController.setViewControllers(
-            [controllers[currentPage]], direction: .forward, animated: true)
+        let controller = UIViewController()
+        controller.view.addSubview(image)
+        image.pinEdges(to: controller.view)
+        
+        return controller
     }
     
     class Coordinator: NSObject, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
@@ -63,25 +93,49 @@ struct SwipeReader: UIViewControllerRepresentable {
         }
         
         func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-            if parent.currentPage == 0 {
-                parent.currentPage = parent.controllers.count - 1
-                return parent.controllers.last
-            }
-            
             parent.currentPage -= 1
             
-            return parent.controllers[parent.currentPage]
+            if parent.currentPage == -1 {
+                parent.currentPage = parent.pages.count - 1
+            }
+            
+            let image: UIImageView = UIImageView()
+            image.translatesAutoresizingMaskIntoConstraints = false
+            
+            if ( parent.contentIsRemote ) {
+                image.load(url: URL(string: parent.pages[parent.currentPage])!)
+            } else {
+                image.image = UIImage(contentsOfFile: parent.pages[parent.currentPage])
+            }
+            
+            let controller = UIViewController()
+            controller.view.addSubview(image)
+            image.pinEdges(to: controller.view)
+            
+            return controller
         }
         
         func pageViewController( _ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-            if parent.currentPage + 1 == parent.controllers.count {
-                parent.currentPage = 0
-                return parent.controllers.first
-            }
-            
             parent.currentPage += 1
             
-            return parent.controllers[parent.currentPage]
+            if parent.currentPage == parent.pages.count {
+                parent.currentPage = 0
+            }
+            
+            let image: UIImageView = UIImageView()
+            image.translatesAutoresizingMaskIntoConstraints = false
+            
+            if ( parent.contentIsRemote ) {
+                image.load(url: URL(string: parent.pages[parent.currentPage])!)
+            } else {
+                image.image = UIImage(contentsOfFile: parent.pages[parent.currentPage])
+            }
+            
+            let controller = UIViewController()
+            controller.view.addSubview(image)
+            image.pinEdges(to: controller.view)
+            
+            return controller
         }
         
         func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {

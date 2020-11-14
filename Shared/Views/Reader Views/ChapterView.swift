@@ -23,6 +23,7 @@ struct ChapterView: View {
         if pageURLs.count == 0 {
             return 0
         } else {
+            print("\(( (currentPage + 1) *  100 ) / pageURLs.count)")
             return ( (currentPage + 1) *  100 ) / pageURLs.count
         }
     }
