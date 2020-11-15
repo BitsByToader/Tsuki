@@ -8,7 +8,7 @@ import SwiftUI
 import SDWebImage
 
 struct SwipeReader: UIViewControllerRepresentable {
-    var pages: [String]
+    @Binding var pages: [String]
     var contentIsRemote: Bool
     @Binding var currentPage: Int
     @Binding var currentChapter: Int
@@ -16,56 +16,34 @@ struct SwipeReader: UIViewControllerRepresentable {
     
     let loadChapter: (Int) -> Void
     
-    var controllers: [UIViewController] {
-        var controllerArray: [UIViewController] = []
-        
-        for _ in pages {
-            let image: UIImageView = UIImageView()
-            image.translatesAutoresizingMaskIntoConstraints = false
-            
-//            if ( contentIsRemote ) {
-//                image.load(url: URL(string: page)!)
-//            } else {
-//                image.image = UIImage(contentsOfFile: page)
-//            }
-            
-            let controller = UIViewController()
-            controller.view.addSubview(image)
-            image.pinEdges(to: controller.view)
-            
-            controllerArray.append(controller)
-        }
-        
-        #warning("Check here if there is a second page")
-        if ( contentIsRemote ) {
-            (controllerArray[pages.count-1].view!.subviews[0] as! UIImageView).load(url: URL(string: pages[pages.count-1])!)
-            (controllerArray[0].view!.subviews[0] as! UIImageView).load(url: URL(string: pages[0])!)
-            (controllerArray[1].view!.subviews[0] as! UIImageView).load(url: URL(string: pages[1])!)
-        } else {
-            (controllerArray[pages.count-1].view!.subviews[0] as! UIImageView).image = UIImage(contentsOfFile: pages[pages.count-1])
-            (controllerArray[0].view!.subviews[0] as! UIImageView).image = UIImage(contentsOfFile: pages[0])
-            (controllerArray[1].view!.subviews[0] as! UIImageView).image = UIImage(contentsOfFile: pages[1])
-        }
-        
-        return controllerArray
-    }
+    let controllers: [UIViewController] = []
     
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
     
     func makeUIViewController(context: Context) -> UIPageViewController {
-        let pageViewController = UIPageViewController(
-            transitionStyle: .pageCurl,
-            navigationOrientation: .horizontal)
+        let pageViewController = UIPageViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
         pageViewController.dataSource = context.coordinator
         pageViewController.delegate = context.coordinator
+        
+        //Go through all of the Gestures used by the UIPageViewController and disable the tap gesture.
+        //This hack works because UIPageViewController used the tap to move between pages and doesn't do
+        //anything more fancy than that.
+        for gesture in pageViewController.gestureRecognizers {
+            if gesture.isKind(of: UITapGestureRecognizer.classForCoder()) {
+                gesture.isEnabled = false
+            }
+        }
+        
+        pageViewController.setViewControllers([makeController(index: currentPage)], direction: .forward, animated: true)
         
         return pageViewController
     }
     
     func updateUIViewController(_ pageViewController: UIPageViewController, context: Context) {
-        pageViewController.setViewControllers([makeController(index: currentPage)], direction: .forward, animated: true)
+        //stub function
+        //blank for now
     }
     
     func makeController(index: Int) -> UIViewController {
@@ -78,9 +56,29 @@ struct SwipeReader: UIViewControllerRepresentable {
             image.image = UIImage(contentsOfFile: pages[index])
         }
         
+        let scrollView: UIScrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+//        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: CGFloat())
+        scrollView.alwaysBounceVertical = true
+        scrollView.bouncesZoom = true
+        scrollView.bounces = true
+        scrollView.addSubview(image)
+        
         let controller = UIViewController()
-        controller.view.addSubview(image)
-        image.pinEdges(to: controller.view)
+        controller.view.addSubview(scrollView)
+        
+        NSLayoutConstraint.activate([
+            scrollView.leadingAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.leadingAnchor, constant: 0),
+            scrollView.topAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.topAnchor, constant: 0),
+            scrollView.trailingAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.trailingAnchor, constant: 0),
+            scrollView.bottomAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
+            
+            image.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+            image.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+            image.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+            image.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+            image.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+        ])
         
         return controller
     }
@@ -99,20 +97,7 @@ struct SwipeReader: UIViewControllerRepresentable {
                 parent.currentPage = parent.pages.count - 1
             }
             
-            let image: UIImageView = UIImageView()
-            image.translatesAutoresizingMaskIntoConstraints = false
-            
-            if ( parent.contentIsRemote ) {
-                image.load(url: URL(string: parent.pages[parent.currentPage])!)
-            } else {
-                image.image = UIImage(contentsOfFile: parent.pages[parent.currentPage])
-            }
-            
-            let controller = UIViewController()
-            controller.view.addSubview(image)
-            image.pinEdges(to: controller.view)
-            
-            return controller
+            return parent.makeController(index: parent.currentPage)
         }
         
         func pageViewController( _ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
@@ -122,20 +107,12 @@ struct SwipeReader: UIViewControllerRepresentable {
                 parent.currentPage = 0
             }
             
-            let image: UIImageView = UIImageView()
-            image.translatesAutoresizingMaskIntoConstraints = false
-            
-            if ( parent.contentIsRemote ) {
-                image.load(url: URL(string: parent.pages[parent.currentPage])!)
-            } else {
-                image.image = UIImage(contentsOfFile: parent.pages[parent.currentPage])
+            if (parent.currentPage == parent.pages.count - 2 && parent.currentChapter + 1 != parent.remainingChapters) {
+                parent.currentChapter += 1
+                parent.loadChapter(parent.currentChapter)
             }
             
-            let controller = UIViewController()
-            controller.view.addSubview(image)
-            image.pinEdges(to: controller.view)
-            
-            return controller
+            return parent.makeController(index: parent.currentPage)
         }
         
         func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {

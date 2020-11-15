@@ -57,12 +57,8 @@ struct ChapterView: View {
 //                         currentChapter: $chapterRead,
 //                         remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
 //                         loadChapter: loadChapter)
-            Divider()
-                .onAppear {
-                    loadChapter(currentChapter: chapterRead)
-                }
             if !pageURLs.isEmpty {
-                SwipeReader(pages: pageURLs,
+                SwipeReader(pages: $pageURLs,
                             contentIsRemote: loadContents,
                             currentPage: $currentPage,
                             currentChapter: $chapterRead,
