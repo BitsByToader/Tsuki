@@ -17,6 +17,7 @@ struct SwipeReader: UIViewControllerRepresentable {
     let loadChapter: (Int) -> Void
     
     let controllers: [UIViewController] = []
+    var pageBeforeTransition: Int = 0
     
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
@@ -27,6 +28,8 @@ struct SwipeReader: UIViewControllerRepresentable {
         pageViewController.dataSource = context.coordinator
         pageViewController.delegate = context.coordinator
         
+        pageViewController.setViewControllers([makeController(index: currentPage)], direction: .forward, animated: true)
+        
         //Go through all of the Gestures used by the UIPageViewController and disable the tap gesture.
         //This hack works because UIPageViewController used the tap to move between pages and doesn't do
         //anything more fancy than that.
@@ -35,8 +38,6 @@ struct SwipeReader: UIViewControllerRepresentable {
                 gesture.isEnabled = false
             }
         }
-        
-        pageViewController.setViewControllers([makeController(index: currentPage)], direction: .forward, animated: true)
         
         return pageViewController
     }
@@ -58,7 +59,6 @@ struct SwipeReader: UIViewControllerRepresentable {
         
         let scrollView: UIScrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-//        scrollView.contentSize = CGSize(width: UIScreen.main.bounds.width, height: CGFloat())
         scrollView.alwaysBounceVertical = true
         scrollView.bouncesZoom = true
         scrollView.bounces = true
@@ -91,6 +91,7 @@ struct SwipeReader: UIViewControllerRepresentable {
         }
         
         func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+            parent.pageBeforeTransition = parent.currentPage
             parent.currentPage -= 1
             
             if parent.currentPage == -1 {
@@ -101,6 +102,7 @@ struct SwipeReader: UIViewControllerRepresentable {
         }
         
         func pageViewController( _ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+            parent.pageBeforeTransition = parent.currentPage
             parent.currentPage += 1
             
             if parent.currentPage == parent.pages.count {
@@ -116,11 +118,11 @@ struct SwipeReader: UIViewControllerRepresentable {
         }
         
         func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-            if completed,
-                let visibleViewController = pageViewController.viewControllers?.first,
-                let index = parent.controllers.firstIndex(of: visibleViewController)
-            {
-                parent.currentPage = index
+            //So apparently, if the user beings a swipe but doesn't finish it (the page remains the same) the viewControllerAfter/Before will be called, but the
+            //reverse function of it won't (viewControllerBefore/After). Thus, the currentPage will  start being out of sync and needs to be reverted if the
+            //transition did finish but not complete
+            if finished && !completed {
+                parent.currentPage = parent.pageBeforeTransition
             }
         }
     }

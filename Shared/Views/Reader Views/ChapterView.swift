@@ -11,6 +11,7 @@ import Introspect
 struct ChapterView: View {
     @EnvironmentObject var appState: AppState
     @AppStorage("readingDataSaver") var readingDataSaver: Bool = false
+    @AppStorage("readerStyle") var readerStyle: String = ReaderSettings.ReaderStyle.Scroll.rawValue
     
     var loadContents: Bool
     
@@ -32,6 +33,7 @@ struct ChapterView: View {
     @State private var chapterRead: Int = 0
     
     @State private var navBarHidden: Bool = false
+    @State private var settingsPresented: Bool = false
     
     var navTitle: String {
         if loadContents {
@@ -51,19 +53,32 @@ struct ChapterView: View {
     
     var body: some View {
         ZStack(alignment: .top) {
-//            ScrollReader(pages: pageURLs,
-//                         contentIsRemote: loadContents,
-//                         currentPage: $currentPage,
-//                         currentChapter: $chapterRead,
-//                         remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
-//                         loadChapter: loadChapter)
             if !pageURLs.isEmpty {
-                SwipeReader(pages: $pageURLs,
-                            contentIsRemote: loadContents,
-                            currentPage: $currentPage,
-                            currentChapter: $chapterRead,
-                            remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
-                            loadChapter: loadChapter)
+                if readerStyle == "Scroll" {
+                    ScrollReader(pages: pageURLs,
+                                 contentIsRemote: loadContents,
+                                 currentPage: $currentPage,
+                                 currentChapter: $chapterRead,
+                                 remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
+                                 loadChapter: loadChapter)
+                        .onTapGesture {
+                            withAnimation {
+                                navBarHidden.toggle()
+                            }
+                        }
+                } else if readerStyle == "Swipe" {
+                    SwipeReader(pages: $pageURLs,
+                                contentIsRemote: loadContents,
+                                currentPage: $currentPage,
+                                currentChapter: $chapterRead,
+                                remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
+                                loadChapter: loadChapter)
+                        .onTapGesture {
+                            withAnimation {
+                                navBarHidden.toggle()
+                            }
+                        }
+                }
             }
             
             GeometryReader { geometry in
@@ -93,17 +108,16 @@ struct ChapterView: View {
                     }
                 }.opacity(navBarHidden ? 0 : 1)
             }
-        }.onTapGesture {
-            withAnimation {
-                navBarHidden.toggle()
-            }
-        }
-        .introspectTabBarController { (UITabBarController) in
+        }.introspectTabBarController { (UITabBarController) in
             UITabBarController.tabBar.isHidden = navBarHidden
+        }
+        .sheet(isPresented: $settingsPresented) {
+            ReaderSettings(settingsPresented: $settingsPresented)
         }
         .onAppear {
             loadChapter(currentChapter: 0)
-        }.navigationBarTitle(navTitle)
+        }.navigationBarItems(trailing: Button(action: {settingsPresented.toggle()}, label: {Image(systemName: "gear")}))
+        .navigationBarTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(navBarHidden)
     }
