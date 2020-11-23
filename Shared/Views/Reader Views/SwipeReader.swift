@@ -8,6 +8,9 @@ import SwiftUI
 import SDWebImage
 
 struct SwipeReader: UIViewControllerRepresentable {
+    @State var fancyAnimations: Bool
+    @State var readerOrientation: ReaderSettings.ReaderOrientation.RawValue
+    
     @Binding var pages: [String]
     var contentIsRemote: Bool
     @Binding var currentPage: Int
@@ -24,7 +27,8 @@ struct SwipeReader: UIViewControllerRepresentable {
     }
     
     func makeUIViewController(context: Context) -> UIPageViewController {
-        let pageViewController = UIPageViewController(transitionStyle: .pageCurl, navigationOrientation: .horizontal)
+        let pageViewController = UIPageViewController(transitionStyle: fancyAnimations ? .pageCurl : .scroll, navigationOrientation: readerOrientation == "Horizontal" ? .horizontal : .vertical)
+        
         pageViewController.dataSource = context.coordinator
         pageViewController.delegate = context.coordinator
         
@@ -68,10 +72,10 @@ struct SwipeReader: UIViewControllerRepresentable {
         controller.view.addSubview(scrollView)
         
         NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.leadingAnchor, constant: 0),
-            scrollView.topAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.topAnchor, constant: 0),
-            scrollView.trailingAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.trailingAnchor, constant: 0),
-            scrollView.bottomAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.bottomAnchor, constant: 0),
+            scrollView.leadingAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.leadingAnchor),
+            scrollView.topAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.topAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: controller.view.bottomAnchor),
             
             image.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
             image.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),

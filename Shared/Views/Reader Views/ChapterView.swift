@@ -12,8 +12,13 @@ struct ChapterView: View {
     @EnvironmentObject var appState: AppState
     @AppStorage("readingDataSaver") var readingDataSaver: Bool = false
     @AppStorage("readerStyle") var readerStyle: String = ReaderSettings.ReaderStyle.Scroll.rawValue
+    @AppStorage("readerOrientation") var readerOrientation: String = ReaderSettings.ReaderOrientation.Horizontal.rawValue
+    @AppStorage("fancyAnimations") var fancyAnimations: Bool = true
     
     var loadContents: Bool
+    
+    //Set to nil to dismiss the current view, like when the user finished reading (don't do this tho, just an example)
+    @Binding var isViewPresented: Int?
     
     var remainingChapters: [ChapterData]
     var remainingLocalChapters: [DownloadedChapter] = []
@@ -67,7 +72,9 @@ struct ChapterView: View {
                             }
                         }
                 } else if readerStyle == "Swipe" {
-                    SwipeReader(pages: $pageURLs,
+                    SwipeReader(fancyAnimations: fancyAnimations,
+                                readerOrientation: readerOrientation,
+                                pages: $pageURLs,
                                 contentIsRemote: loadContents,
                                 currentPage: $currentPage,
                                 currentChapter: $chapterRead,
@@ -123,6 +130,15 @@ struct ChapterView: View {
     }
     
     func loadChapter(currentChapter: Int) {
+        //Check if the chapter to be loaded isn't a scheldued chapter
+        if ( !remainingChapters.isEmpty && Date().timeIntervalSince1970 - (remainingChapters[currentChapter].timestamp ?? 0) < 0 ) {
+            if ( currentChapter == 0 ) {
+                isViewPresented = nil
+            }
+            
+            return
+        }
+        
         let loadingDescription: LocalizedStringKey = "Loading chapter..."
         
         if !loadContents && !remainingLocalChapters.isEmpty {
