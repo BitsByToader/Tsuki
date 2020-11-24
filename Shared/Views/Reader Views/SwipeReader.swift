@@ -72,16 +72,13 @@ struct SwipeReader: UIViewControllerRepresentable {
         controller.view.addSubview(scrollView)
         
         NSLayoutConstraint.activate([
-            scrollView.leadingAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.leadingAnchor),
-            scrollView.topAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.topAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: controller.view.bottomAnchor),
+            image.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            image.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            image.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
             
-            image.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
-            image.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-            image.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
-            image.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
-            image.widthAnchor.constraint(equalTo: scrollView.frameLayoutGuide.widthAnchor)
+            scrollView.topAnchor.constraint(equalTo: controller.view.topAnchor),
+            scrollView.widthAnchor.constraint(equalTo: controller.view.widthAnchor),
+            scrollView.heightAnchor.constraint(equalTo: controller.view.heightAnchor)
         ])
         
         return controller
