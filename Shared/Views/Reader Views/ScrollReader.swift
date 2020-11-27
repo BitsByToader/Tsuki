@@ -68,7 +68,6 @@ struct ScrollReader: View {
                     }
                 }
             }.onChange(of: readerStyle) { _ in
-                print("style changed")
                 withAnimation {
                     value.scrollTo(currentPage, anchor: .top)
                 }
