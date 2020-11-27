@@ -29,7 +29,7 @@ struct ChapterView: View {
         if pageURLs.count == 0 {
             return 0
         } else {
-            print("\(( (currentPage + 1) *  100 ) / pageURLs.count)")
+            print("Reading progress is: \(( (currentPage + 1) *  100 ) / pageURLs.count)")
             return ( (currentPage + 1) *  100 ) / pageURLs.count
         }
     }
@@ -60,7 +60,9 @@ struct ChapterView: View {
         ZStack(alignment: .top) {
             if !pageURLs.isEmpty {
                 if readerStyle == "Scroll" {
-                    ScrollReader(pages: pageURLs,
+                    ScrollReader(readerStyle: $readerStyle,
+                                 navBarHidden: $navBarHidden,
+                                 pages: pageURLs,
                                  contentIsRemote: loadContents,
                                  currentPage: $currentPage,
                                  currentChapter: $chapterRead,
@@ -103,7 +105,7 @@ struct ChapterView: View {
                             .cornerRadius(5)
                             .frame(minWidth: 50)
                         
-                        Text("\(currentPage) of \(pageURLs.count)")
+                        Text("\(currentPage + 1) of \(pageURLs.count)")
                             .foregroundColor(Color(.systemGray))
                             .bold()
                     }.frame(minWidth: 50, maxWidth: 100, maxHeight: 25)
