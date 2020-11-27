@@ -21,63 +21,60 @@ struct ScrollReader: View {
     let loadChapter: (Int) -> Void
     
     var body: some View {
-        ScrollView {
-                ScrollViewReader { value in
-                    Rectangle()
-                        .frame(width: 0, height: 0)
-//                        .onChange(of: readerStyle) { newValue in
-//                            withAnimation {
-//                                value.scrollTo(currentPage)
-//                            }
-//                        }.onChange(of: navBarHidden) { newValue in
-//                            print("wow such change")
-//                                value.scrollTo(currentPage)
-//                            
-//                        }
-                    
-                    LazyVStack {
-                        ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
-                            if contentIsRemote {
-                                WebImage(url: URL(string: page))
-                                    .resizable()
-                                    .placeholder {
-                                        Rectangle().foregroundColor(.gray)
-                                            .opacity(0.2)
-                                    }
-                                    .indicator(.activity)
-                                    .transition(.fade(duration: 0.5))
-                                    .scaledToFit()
-                                    .id(index)
-                                    .onAppear {
-                                        currentPage = index
+        ScrollViewReader { value in
+            ScrollView {
+                LazyVStack {
+                    ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
+                        if contentIsRemote {
+                            WebImage(url: URL(string: page))
+                                .resizable()
+                                .placeholder {
+                                    Rectangle().foregroundColor(.gray)
+                                        .opacity(0.2)
+                                }
+                                .indicator(.activity)
+                                .transition(.fade(duration: 0.5))
+                                .scaledToFit()
+                                .id(index)
+                                .onAppear {
+                                    currentPage = index
+                                    
+                                    if ( currentPage + 2 == pages.count && currentChapter + 1 != remainingChapters ) {
+                                        currentChapter += 1
+                                        loadChapter(currentChapter)
                                         
-                                        if ( currentPage + 2 == pages.count && currentChapter + 1 != remainingChapters ) { //(contentIsRemote ? remainingChapters.count : remainingLocalChapters.count)
-                                            currentChapter += 1
-                                            loadChapter(currentChapter)
-                                            
-                                            let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
-                                            hapticFeedback.impactOccurred()
-                                        }
+                                        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+                                        hapticFeedback.impactOccurred()
                                     }
-                            } else {
-                                Image(uiImage: UIImage(contentsOfFile: page)!)
-                                    .resizable()
-                                    .transition(.fade(duration:0.5))
-                                    .scaledToFit()
-                                    .id(index)
-                                    .onAppear {
-                                        currentPage = index
+                                }
+                        } else {
+                            Image(uiImage: UIImage(contentsOfFile: page)!)
+                                .resizable()
+                                .transition(.fade(duration:0.5))
+                                .scaledToFit()
+                                .id(index)
+                                .onAppear {
+                                    currentPage = index
+                                    
+                                    if ( currentPage + 2 == pages.count && currentChapter + 1 != remainingChapters ) {
+                                        currentChapter += 1
+                                        loadChapter(currentChapter)
                                         
-                                        if ( currentPage + 2 == pages.count && currentChapter + 1 != remainingChapters ) {
-                                            currentChapter += 1
-                                            loadChapter(currentChapter)
-                                            
-                                            let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
-                                            hapticFeedback.impactOccurred()
-                                        }
+                                        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+                                        hapticFeedback.impactOccurred()
                                     }
-                            }
+                                }
+                        }
                     }
+                }
+            }.onChange(of: readerStyle) { _ in
+                print("style changed")
+                withAnimation {
+                    value.scrollTo(currentPage, anchor: .top)
+                }
+            }.onChange(of: navBarHidden) { _ in
+                withAnimation {
+                    value.scrollTo(currentPage, anchor: .top)
                 }
             }
         }

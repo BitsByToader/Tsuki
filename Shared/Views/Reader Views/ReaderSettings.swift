@@ -36,7 +36,7 @@ struct ReaderSettings: View {
                 }
                 
                 if readerStyle == "Swipe" {
-                    Section(header: Text("Swipe-based reader options"), footer: Text("These changes will take effect only after reloading the reader or switching to scrolling mode and back")) {
+                    Section(header: Text("Swipe-based reader options"), footer: Text("These changes will take effect only after reloading the reader,switching to scrolling mode and back, or toggling the fullscreen mode.")) {
                         HStack {
                             Text("Reader orientation")
                                 .padding(.trailing, 20)

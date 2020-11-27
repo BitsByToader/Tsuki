@@ -72,7 +72,7 @@ struct ChapterView: View {
                             withAnimation {
                                 navBarHidden.toggle()
                             }
-                        }.if(navBarHidden) { $0.edgesIgnoringSafeArea(.all) }
+                        }
                 } else if readerStyle == "Swipe" {
                     SwipeReader(fancyAnimations: fancyAnimations,
                                 readerOrientation: readerOrientation,
