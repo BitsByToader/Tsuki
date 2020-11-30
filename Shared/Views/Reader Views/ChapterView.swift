@@ -34,6 +34,12 @@ struct ChapterView: View {
         }
     }
     @State private var currentPage: Int = 0
+    
+    //Keep this backup of currentPage if the user changes from SwipeReader to ScrollReader.
+    //When making this change, the currentPage will be overwritten a couple of times, and so the
+    //reading progress will be lost
+    @State private var currentPageBeforeChange: Int = 0
+    
     @State private var extraProgressIsShown: Bool = false
     @State private var chapterRead: Int = 0
     
@@ -60,11 +66,13 @@ struct ChapterView: View {
         ZStack(alignment: .top) {
             if !pageURLs.isEmpty {
                 if readerStyle == "Scroll" {
-                    ScrollReader(readerStyle: $readerStyle,
+                    ScrollReader(readerSettingsPresented: $settingsPresented,
+                                 readerStyle: $readerStyle,
                                  navBarHidden: $navBarHidden,
                                  pages: pageURLs,
                                  contentIsRemote: loadContents,
                                  currentPage: $currentPage,
+                                 currentPageBackup: $currentPageBeforeChange,
                                  currentChapter: $chapterRead,
                                  remainingChapters: (loadContents ? remainingChapters.count : remainingLocalChapters.count),
                                  loadChapter: loadChapter)
@@ -125,7 +133,12 @@ struct ChapterView: View {
         }
         .onAppear {
             loadChapter(currentChapter: 0)
-        }.navigationBarItems(trailing: Button(action: {settingsPresented.toggle()}, label: {Image(systemName: "gear")}))
+        }.navigationBarItems(trailing: Button(action: {
+            if !settingsPresented {
+                currentPageBeforeChange = currentPage
+            }
+            settingsPresented.toggle()
+        }, label: {Image(systemName: "gear")}))
         .navigationBarTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarHidden(navBarHidden)
