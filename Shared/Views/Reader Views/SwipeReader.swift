@@ -52,34 +52,8 @@ struct SwipeReader: UIViewControllerRepresentable {
     }
     
     func makeController(index: Int) -> UIViewController {
-        let image: UIImageView = UIImageView()
-        image.translatesAutoresizingMaskIntoConstraints = false
-        
-        if ( contentIsRemote ) {
-            image.load(url: URL(string: pages[index])!)
-        } else {
-            image.image = UIImage(contentsOfFile: pages[index])
-        }
-        
-        let scrollView: UIScrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.alwaysBounceVertical = true
-        scrollView.bouncesZoom = true
-        scrollView.bounces = true
-        scrollView.addSubview(image)
-        
-        let controller = UIViewController()
-        controller.view.addSubview(scrollView)
-        
-        NSLayoutConstraint.activate([
-            image.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            image.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            image.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            
-            scrollView.topAnchor.constraint(equalTo: controller.view.topAnchor),
-            scrollView.widthAnchor.constraint(equalTo: controller.view.widthAnchor),
-            scrollView.heightAnchor.constraint(equalTo: controller.view.heightAnchor)
-        ])
+        let swiftUIImage = SwipeReaderImage(contentIsRemote: contentIsRemote, imageURL: pages[index])
+        let controller = UIHostingController(rootView: swiftUIImage)
         
         return controller
     }
