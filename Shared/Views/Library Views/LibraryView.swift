@@ -70,7 +70,7 @@ struct LibraryView: View {
                     }.padding(.horizontal)
                     .animation(.default)
                     //MARK: - Links
-                    NavigationLink(destination: LatestUpdatesView(), isActive: $shouldOpenLatestUpdates) {
+                    NavigationLink(destination: LatestUpdatesView().environmentObject(widgetURL).environmentObject(appState), isActive: $shouldOpenLatestUpdates) {
                         LibraryLink(linkTitle: "Latest Updates")
                     }
                     

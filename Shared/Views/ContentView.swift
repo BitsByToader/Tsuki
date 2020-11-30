@@ -38,6 +38,7 @@ struct ContentView: View {
                             Image(systemName: "books.vertical.fill")
                             Text("Library")
                         }
+                        .environmentObject(widgetURL)
                         .tag(2)
                     
                     AccountView()
