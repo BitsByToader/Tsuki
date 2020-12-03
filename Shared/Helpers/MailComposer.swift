@@ -15,26 +15,36 @@ struct MailComposer: UIViewControllerRepresentable {
     @EnvironmentObject private var appState: AppState
     @Binding var viewDismissed: Bool
     
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
         let mail = MFMailComposeViewController()
         mail.setToRecipients(["tudorifrim@icloud.com"])
         mail.setMessageBody("The following log was emitted: \n" + appState.errorMessage, isHTML: false)
         mail.setSubject("Error log emitted by Tsuki manga reader app")
         
+        mail.mailComposeDelegate = context.coordinator
+        
         return mail
-    }
-    
-    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
-        appState.errorOccured = false
-        print("tried to dismiss")
-        viewDismissed = true
-        controller.dismiss(animated: false)
     }
     
     func updateUIViewController(_ uiViewController: MFMailComposeViewController, context: Context) {
         //
     }
     
-    typealias UIViewControllerType = MFMailComposeViewController
+    class Coordinator: NSObject, MFMailComposeViewControllerDelegate {
+        var parent: MailComposer
+        
+        init(_ mailViewController: MailComposer) {
+            self.parent = mailViewController
+        }
+        
+        func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+            //Dismiss the SheetView from SwiftUI
+            parent.viewDismissed = false
+        }
+    }
 }
 #endif
