@@ -30,7 +30,7 @@ struct LatestUpdatesView: View {
     var body: some View {
         
         ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 110))], spacing: 10) {
                 if result.isEmpty {
                     ForEach(0..<12) { _ in
                         PlaceholderManga()

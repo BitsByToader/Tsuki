@@ -12,7 +12,7 @@ struct MangaGrid: View {
     var dataSource: [ReturnedManga]
     
     var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 10) {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 110))], spacing: 10) {
             if dataSource.isEmpty {
                 ForEach(0..<12) { _ in
                     PlaceholderManga()
