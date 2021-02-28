@@ -24,6 +24,7 @@ struct PlaceholderManga: View {
             Spacer()
         }.frame(width: 125, height: 250)
         .redacted(reason: .placeholder)
+        .cornerRadius(8)
     }
 }
 

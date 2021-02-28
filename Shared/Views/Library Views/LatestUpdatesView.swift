@@ -150,9 +150,11 @@ struct UpdatedManga: View {
                         .opacity(0.2)
                 }
                 .indicator(.activity)
+                .cornerRadius(8)
                 .transition(.fade(duration: 0.5))
                 .scaledToFit()
                 .frame(height: 180)
+                
             
             Label(labelText: manga.timeOfUpdate)
             Label(labelText: manga.volumeAndChapter)
