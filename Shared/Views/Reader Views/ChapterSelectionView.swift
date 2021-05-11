@@ -13,7 +13,7 @@ struct ChapterSelectionView: View {
     
     @Binding var isPresented: Bool
     var manga: Manga
-    var chapters: [ChapterData]
+    var chapters: [Chapter]
     
     @State var selectedChapters: [Bool]
     private var numberOfSelectedChapters: Int {
@@ -46,7 +46,7 @@ struct ChapterSelectionView: View {
     
     struct Pages: Equatable {
         var array: [Page]
-        let chapter: ChapterData
+        let chapter: Chapter
         
         struct Page: Equatable {
             let pagePath: String
@@ -96,7 +96,7 @@ struct ChapterSelectionView: View {
                             selection = .selectedChapters
                         }) {
                             HStack {
-                                Text("Vol.\(chapter.volume ?? "") Ch.\(chapter.chapter)")
+                                Text("Vol.\(chapter.volume) Ch.\(chapter.chapter)")
                                 
                                 Spacer()
                                 
@@ -209,7 +209,7 @@ struct ChapterSelectionView: View {
         gatheringInfo = true
         for index in 0..<selectedChapters.count {
             if ( selectedChapters[index] ) {
-                getChapterPages(chapter: chapters[index], chapterId: "\(chapters[index].chapterId)")
+                getChapterPages(chapter: chapters[index])
             }
         }
     }
@@ -232,7 +232,7 @@ struct ChapterSelectionView: View {
             chapter.title = self.pages[index].chapter.title
             chapter.chapter = self.pages[index].chapter.chapter
             chapter.volume = self.pages[index].chapter.volume
-            chapter.timestamp = self.pages[index].chapter.timestamp!
+            chapter.timestamp = self.pages[index].chapter.timestamp
 
             //insert string array here that contains image url paths
             var imagePaths: [String] = []
@@ -308,7 +308,7 @@ struct ChapterSelectionView: View {
             chapter.title = self.pages[index].chapter.title
             chapter.chapter = self.pages[index].chapter.chapter
             chapter.volume = self.pages[index].chapter.volume
-            chapter.timestamp = self.pages[index].chapter.timestamp!
+            chapter.timestamp = self.pages[index].chapter.timestamp
             
             print("Starting to download chapter: \(chapter.wrappedChapter)")
             //insert string array here that contains image url paths
@@ -380,10 +380,10 @@ struct ChapterSelectionView: View {
         }
     }
     
-    func getChapterPages(chapter: ChapterData, chapterId: String) {
+    func getChapterPages(chapter: Chapter) {
         //appState.isLoading = true
         
-        guard let url = URL(string: "https://mangadex.org/api/v2/chapter/\(chapterId)?mark_read=false&saver=\(downloadingDataSaver)") else {
+        guard let url = URL(string: "https://api.mangadex.org/at-home/server/\(chapter.chapterId)") else {
             print("From ChapterSelectionView: Invalid URL")
             return
         }
@@ -397,13 +397,26 @@ struct ChapterSelectionView: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    let decodedResponse = try JSONDecoder().decode(PageData.self, from: data)
+                    struct Result: Decodable {
+                        let baseUrl: String
+                    }
+                    
+                    let decodedResponse = try JSONDecoder().decode(Result.self, from: data)
                     
                     var pages: [Pages.Page] = []
                     
-                    for page in decodedResponse.data.pages {
-                        let pageToAppend: Pages.Page = Pages.Page(pagePath: decodedResponse.data.baseURL + decodedResponse.data.mangaHash + "/" + page, pageSaved: false)
-                        pages.append(pageToAppend)
+                    if downloadingDataSaver {
+                        for chapterPage in chapter.dataSaverPages {
+                            let pagePath: String = decodedResponse.baseUrl + "/data-saver/" + chapter.hash + "/" + chapterPage
+                            let pageToAppend: Pages.Page = Pages.Page(pagePath: pagePath, pageSaved: false)
+                            pages.append(pageToAppend)
+                        }
+                    } else {
+                        for chapterPage in chapter.dataPages {
+                            let pagePath: String = decodedResponse.baseUrl + "/data/" + chapter.hash + "/" + chapterPage
+                            let pageToAppend: Pages.Page = Pages.Page(pagePath: pagePath, pageSaved: false)
+                            pages.append(pageToAppend)
+                        }
                     }
                     
                     DispatchQueue.main.async {

@@ -24,7 +24,6 @@
 		8B31D35324D2054200A17C94 /* Chapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B31D35124D2054200A17C94 /* Chapter.swift */; };
 		8B31D35624D2245500A17C94 /* ChapterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B31D35524D2245500A17C94 /* ChapterView.swift */; };
 		8B31D35724D2245500A17C94 /* ChapterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B31D35524D2245500A17C94 /* ChapterView.swift */; };
-		8B333512254DB8CF0040041F /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 8B333511254DB8CF0040041F /* SwiftSoup */; };
 		8B333514254DB8D40040041F /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8B333513254DB8D40040041F /* SDWebImageSwiftUI */; };
 		8B36F36C250E88210085F52D /* WidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F36B250E88210085F52D /* WidgetURL.swift */; };
 		8B36F36D250E88210085F52D /* WidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F36B250E88210085F52D /* WidgetURL.swift */; };
@@ -45,6 +44,7 @@
 		8B6504CD24CCDFCE00BFAD22 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8B6504CC24CCDFCE00BFAD22 /* SDWebImageSwiftUI */; };
 		8B6A6B7D24F4330D00D4E9D8 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6A6B7C24F4330D00D4E9D8 /* AppState.swift */; };
 		8B6A6B7E24F4330D00D4E9D8 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6A6B7C24F4330D00D4E9D8 /* AppState.swift */; };
+		8B6F085D2649B8EE00461A1F /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 8B6F085C2649B8EE00461A1F /* SwiftKeychainWrapper */; };
 		8B75DB7D24FBF999009FBCF1 /* Tsuki.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8B75DB7B24FBF999009FBCF1 /* Tsuki.xcdatamodeld */; };
 		8B75DB7E24FBF999009FBCF1 /* Tsuki.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 8B75DB7B24FBF999009FBCF1 /* Tsuki.xcdatamodeld */; };
 		8B75DB8024FBFB88009FBCF1 /* LibraryLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B75DB7F24FBFB88009FBCF1 /* LibraryLink.swift */; };
@@ -72,7 +72,6 @@
 		8B96E18124ED9CDC00717DCC /* MailComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B96E17F24ED9CDC00717DCC /* MailComposer.swift */; };
 		8B9718F324E9314400E5563F /* LatestUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9718F224E9314400E5563F /* LatestUpdatesView.swift */; };
 		8B9718F424E9314400E5563F /* LatestUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9718F224E9314400E5563F /* LatestUpdatesView.swift */; };
-		8B9862FE24CA29B200AC3AF9 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 8B9862FD24CA29B200AC3AF9 /* SwiftSoup */; };
 		8B9A363624CB6B8000518294 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A363524CB6B8000518294 /* Tag.swift */; };
 		8B9A363724CB6B8000518294 /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A363524CB6B8000518294 /* Tag.swift */; };
 		8B9A363924CB6E9200518294 /* SearchByNameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B9A363824CB6E9200518294 /* SearchByNameView.swift */; };
@@ -80,7 +79,6 @@
 		8BACBB0224C8632C005D5F08 /* LogInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BACBB0124C8632C005D5F08 /* LogInView.swift */; };
 		8BACBB0324C8632C005D5F08 /* LogInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BACBB0124C8632C005D5F08 /* LogInView.swift */; };
 		8BB899D2250C04A700968FF1 /* UpdatedMangas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB899D1250C04A700968FF1 /* UpdatedMangas.swift */; };
-		8BB899D5250C106400968FF1 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 8BB899D4250C106400968FF1 /* SwiftSoup */; };
 		8BB93FBA24EC5E2700FAFEFC /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB93FB924EC5E2700FAFEFC /* ErrorView.swift */; };
 		8BB93FBB24EC5E2700FAFEFC /* ErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB93FB924EC5E2700FAFEFC /* ErrorView.swift */; };
 		8BBA7D5824CF606B004BAF63 /* Manga.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBA7D5724CF606B004BAF63 /* Manga.swift */; };
@@ -223,7 +221,6 @@
 			files = (
 				8B0F72A3250BED3C000E5F41 /* SwiftUI.framework in Frameworks */,
 				8B0F72A2250BED3C000E5F41 /* WidgetKit.framework in Frameworks */,
-				8BB899D5250C106400968FF1 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,7 +230,7 @@
 			files = (
 				8B6504CD24CCDFCE00BFAD22 /* SDWebImageSwiftUI in Frameworks */,
 				8BBEA2572555F4AB009C03F6 /* Introspect in Frameworks */,
-				8B9862FE24CA29B200AC3AF9 /* SwiftSoup in Frameworks */,
+				8B6F085D2649B8EE00461A1F /* SwiftKeychainWrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,7 +239,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B333514254DB8D40040041F /* SDWebImageSwiftUI in Frameworks */,
-				8B333512254DB8CF0040041F /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,7 +483,6 @@
 			);
 			name = LatestUpdatesWidgetExtension;
 			packageProductDependencies = (
-				8BB899D4250C106400968FF1 /* SwiftSoup */,
 			);
 			productName = LatestUpdatesWidgetExtension;
 			productReference = 8B0F72A1250BED3C000E5F41 /* LatestUpdatesWidgetExtension.appex */;
@@ -509,9 +504,9 @@
 			);
 			name = iOS;
 			packageProductDependencies = (
-				8B9862FD24CA29B200AC3AF9 /* SwiftSoup */,
 				8B6504CC24CCDFCE00BFAD22 /* SDWebImageSwiftUI */,
 				8BBEA2562555F4AB009C03F6 /* Introspect */,
+				8B6F085C2649B8EE00461A1F /* SwiftKeychainWrapper */,
 			);
 			productName = iOS;
 			productReference = 8B49D60624C77EAC007D1FFE /* Tsuki.app */;
@@ -531,7 +526,6 @@
 			);
 			name = macOS;
 			packageProductDependencies = (
-				8B333511254DB8CF0040041F /* SwiftSoup */,
 				8B333513254DB8D40040041F /* SDWebImageSwiftUI */,
 			);
 			productName = macOS;
@@ -613,9 +607,9 @@
 			);
 			mainGroup = 8B49D5F924C77EAB007D1FFE;
 			packageReferences = (
-				8B9862FC24CA29B100AC3AF9 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				8B6504CB24CCDFCE00BFAD22 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 				8BBEA2552555F4AB009C03F6 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */,
+				8B6F085B2649B8EE00461A1F /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */,
 			);
 			productRefGroup = 8B49D60724C77EAC007D1FFE /* Products */;
 			projectDirPath = "";
@@ -1011,7 +1005,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.4;
+				MARKETING_VERSION = 1.2.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.toader.Tsuki;
 				PRODUCT_NAME = Tsuki;
 				SDKROOT = iphoneos;
@@ -1038,7 +1032,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.4;
+				MARKETING_VERSION = 1.2.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.toader.Tsuki;
 				PRODUCT_NAME = Tsuki;
 				SDKROOT = iphoneos;
@@ -1256,12 +1250,12 @@
 				minimumVersion = 1.5.0;
 			};
 		};
-		8B9862FC24CA29B100AC3AF9 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+		8B6F085B2649B8EE00461A1F /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			repositoryURL = "https://github.com/jrendel/SwiftKeychainWrapper";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.3.2;
+				minimumVersion = 4.0.1;
 			};
 		};
 		8BBEA2552555F4AB009C03F6 /* XCRemoteSwiftPackageReference "SwiftUI-Introspect" */ = {
@@ -1275,11 +1269,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		8B333511254DB8CF0040041F /* SwiftSoup */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8B9862FC24CA29B100AC3AF9 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
-			productName = SwiftSoup;
-		};
 		8B333513254DB8D40040041F /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8B6504CB24CCDFCE00BFAD22 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
@@ -1290,15 +1279,10 @@
 			package = 8B6504CB24CCDFCE00BFAD22 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
 			productName = SDWebImageSwiftUI;
 		};
-		8B9862FD24CA29B200AC3AF9 /* SwiftSoup */ = {
+		8B6F085C2649B8EE00461A1F /* SwiftKeychainWrapper */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 8B9862FC24CA29B100AC3AF9 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
-			productName = SwiftSoup;
-		};
-		8BB899D4250C106400968FF1 /* SwiftSoup */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8B9862FC24CA29B100AC3AF9 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
-			productName = SwiftSoup;
+			package = 8B6F085B2649B8EE00461A1F /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
+			productName = SwiftKeychainWrapper;
 		};
 		8BBEA2562555F4AB009C03F6 /* Introspect */ = {
 			isa = XCSwiftPackageProductDependency;

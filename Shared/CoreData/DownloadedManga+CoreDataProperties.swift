@@ -21,7 +21,7 @@ extension DownloadedManga {
     @NSManaged public var mangaDescription: String?
     @NSManaged public var mangaId: UUID?
     @NSManaged public var mangaRating: String?
-    @NSManaged public var mangaTags: [Int]?
+    @NSManaged public var mangaTags: [String]?
     @NSManaged public var mangaTitle: String?
     @NSManaged public var usersRated: String?
     @NSManaged public var chapter: NSSet?
@@ -46,7 +46,7 @@ extension DownloadedManga {
         mangaRating ?? "0"
     }
     
-    public var wrappedMangaTags: [Int] {
+    public var wrappedMangaTags: [String] {
         mangaTags ?? []
     }
     

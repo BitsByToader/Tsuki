@@ -17,9 +17,9 @@ extension DownloadedChapter {
     }
 
     @NSManaged public var title: String?
-    @NSManaged public var timestamp: Double
+    @NSManaged public var timestamp: String
     @NSManaged public var chapter: String?
-    @NSManaged public var volume: String?
+    @NSManaged public var volume: String
     @NSManaged public var pages: [String]?
     @NSManaged public var origin: DownloadedManga?
     
@@ -27,7 +27,7 @@ extension DownloadedChapter {
         title ?? "Unknown title"
     }
     
-    public var wrappedTimeStamp: Double {
+    public var wrappedTimeStamp: String {
         timestamp
     }
     
@@ -36,7 +36,7 @@ extension DownloadedChapter {
     }
     
     public var wrappedVolume: String {
-        volume ?? "Unknown volume"
+        volume
     }
     
     public var wrappedPages: [String] {

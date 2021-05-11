@@ -66,17 +66,4 @@ extension View {
         
         return sessionCookieFound && remindMeCookieFound
     }
-    
-    func logOutUser() {
-        let cookies: [HTTPCookie] = (URLSession.shared.configuration.httpCookieStorage?.cookies)!
-        
-        for cookie in cookies {
-            if ( cookie.name == "mangadex_session" || cookie.name == "mangadex_rememberme_token" ) {
-                URLSession.shared.configuration.httpCookieStorage?.deleteCookie(cookie)
-            }
-        }
-        
-        UserDefaults.standard.setValue("", forKey: "userProfileLink")
-        UserDefaults.standard.setValue("", forKey: "MDListLink")
-    }
 }

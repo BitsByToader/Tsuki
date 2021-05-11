@@ -6,26 +6,18 @@
 //
 
 import SwiftUI
-import SwiftSoup
 import SDWebImageSwiftUI
 
-struct ReturnedUpdatedManga: Hashable {
-    let title: String
-    let coverArtURL: String
-    let id: String
-    let timeOfUpdate: String
-    let volumeAndChapter: String
-}
-
+//MARK: - LatestUpdates View
 struct LatestUpdatesView: View {
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var widgetURL: WidgetURL
     @EnvironmentObject var appState: AppState
     
-    private var loggedIn: Bool {
-        return checkLogInStatus()
-    }
+    @State private var result: [Chapter] = []
     
-    @State private var result: [ReturnedUpdatedManga] = []
+    var mangaTitleDict: [String: String] = [:]
+    var coverArtDict: [String: String] = [:]
     
     var body: some View {
         
@@ -37,8 +29,8 @@ struct LatestUpdatesView: View {
                     }
                 } else {
                     ForEach(result, id: \.self) { manga in
-                        NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
-                            UpdatedManga(manga: manga)
+                        NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.mangaId)) {
+                            UpdatedManga(manga: manga, coverArt: coverArtDict[manga.mangaId] ?? "", mangaTitle: mangaTitleDict[manga.mangaId] ?? "")
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
@@ -48,23 +40,69 @@ struct LatestUpdatesView: View {
                 .navigationTitle(Text("Latest Updates"))
         }.onAppear {
             self.widgetURL.openedWithURL = false
-            if (loggedIn) {
-                loadManga()
+            
+            let loadingDescription: LocalizedStringKey = "Checking for account..."
+            DispatchQueue.main.async {
+                appState.loadingQueue.append(loadingDescription)
+            }
+            
+            MDAuthentification.standard.logInProcedure { isLoggedIn in
+                if isLoggedIn {
+                    print("Loading library...")
+                    
+                    
+                    loadManga()
+                    
+                    DispatchQueue.main.async {
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                } else {
+                    print("Showing log in view...")
+                    
+                    DispatchQueue.main.async {
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        
+                        //Should never reach here, because we already do this check in the previous view (LibraryView)
+                        //But if we do, just pop the view from the stack.
+                        self.presentationMode.wrappedValue.dismiss()
+                    }
+                }
             }
         }.onOpenURL { url in
             if ( url == URL(string: "tsuki:///latestupdates") ) {
-                if ( loggedIn ) {
-                    loadManga()
+                let loadingDescription: LocalizedStringKey = "Checking for account..."
+                DispatchQueue.main.async {
+                    appState.loadingQueue.append(loadingDescription)
+                }
+                
+                MDAuthentification.standard.logInProcedure { isLoggedIn in
+                    if isLoggedIn {
+                        loadManga()
+                        
+                        DispatchQueue.main.async {
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    } else {
+                        print("Showing log in view...")
+                        
+                        DispatchQueue.main.async {
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                            print("mhm wut?")
+                        }
+                    }
                 }
             }
         }
     }
     
+    //MARK: - Load manga method
     func loadManga() {
         let loadingDescription: LocalizedStringKey = "Loading updates..."
-        appState.loadingQueue.append(loadingDescription)
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
         
-        guard let url = URL(string: "https://mangadex.org") else {
+        guard let url = URL(string: "https://api.mangadex.org/user/follows/manga/feed?locales[]=en") else {
             print("From LatestUpdatesView: Invalid URL")
             return
         }
@@ -73,48 +111,30 @@ struct LatestUpdatesView: View {
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(MDAuthentification.standard.getSessionToken())", forHTTPHeaderField: "Authorization")
+        
         print("From LatestUpdatesView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    
-                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
-                    
-                    let returnedMangas = try doc.getElementById("follows_update")?.child(0).children().array()
-                    
-                    var mangas: [ReturnedUpdatedManga] = []
-                    
-                    for manga in returnedMangas ?? [] {
-                        let title: String = try manga.child(1).getElementsByClass("manga_title").first()!.text()
-                        
-                        let mangaLink: String = try manga.child(1).getElementsByClass("manga_title").first()!.attr("href")
-                        let mangaId: String = mangaLink.components(separatedBy: "/")[2]
-                        
-                        let coverArt: String = try manga.getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
-                        
-                        let timeOfUpdate: String = try manga.children().array()[2].select("a").text()
-                        let chapter: String = try manga.children().array()[4].text()
-                        
-                        mangas.append(ReturnedUpdatedManga(title: title, coverArtURL: coverArt, id: mangaId, timeOfUpdate: timeOfUpdate, volumeAndChapter: chapter))
+                    struct Results: Decodable {
+                        let results: [Chapter]
                     }
                     
+                    let decodedResponse = try JSONDecoder().decode(Results.self, from: data)
+                    
+                    
                     DispatchQueue.main.async {
-                        self.result = mangas
+                        self.result = decodedResponse.results.sorted {
+                            return (ISO8601DateFormatter().date(from: $0.timestamp) ?? Date()).timeIntervalSince1970 > (ISO8601DateFormatter().date(from: $1.timestamp) ?? Date()).timeIntervalSince1970
+                        }
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
-                } catch Exception.Error(let type, let message) {
-                    print ("Error of type \(type): \(message)")
-                    DispatchQueue.main.async {
-                        appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        }
-                    }
-                } catch {
+                }  catch {
                     print ("error")
                     DispatchQueue.main.async {
                         appState.errorMessage += "Unknown error when parsing response from server.\n\n"
@@ -138,12 +158,16 @@ struct LatestUpdatesView: View {
     }
 }
 
+//MARK: - UpdatedMangaView
 struct UpdatedManga: View {
-    let manga: ReturnedUpdatedManga
+    let manga: Chapter
+    
+    let coverArt: String
+    let mangaTitle: String
     
     var body: some View {
         VStack {
-            WebImage(url: URL(string: manga.coverArtURL))
+            WebImage(url: URL(string: coverArt))
                 .resizable()
                 .placeholder {
                     Rectangle().foregroundColor(.gray)
@@ -156,10 +180,10 @@ struct UpdatedManga: View {
                 .frame(height: 180)
                 
             
-            Label(labelText: manga.timeOfUpdate)
-            Label(labelText: manga.volumeAndChapter)
+            Label(labelText:   (ISO8601DateFormatter().date(from: manga.timestamp) ?? Date()).timeAgoDisplay(style: .short)  )
+            Label(labelText: "Vol. \(manga.volume) Ch. \(manga.chapter)")
             
-            Text(manga.title)
+            Text(mangaTitle)
                 .multilineTextAlignment(.center)
             
             Spacer()
@@ -167,6 +191,7 @@ struct UpdatedManga: View {
     }
 }
 
+//MARK: - Label View struct
 struct Label: View {
     var labelText: String
     
@@ -187,5 +212,14 @@ struct Label: View {
         .padding(.top, 0)
         .padding(.bottom, 0)
         .frame(height: 15)
+    }
+}
+
+extension Date {
+    func timeAgoDisplay(style: RelativeDateTimeFormatter.UnitsStyle) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .short
+        formatter.formattingContext = .standalone
+        return formatter.localizedString(for: self, relativeTo: Date())
     }
 }

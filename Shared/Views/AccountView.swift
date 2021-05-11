@@ -17,11 +17,7 @@ struct AccountView: View {
     @AppStorage("downloadingDataSaver") var downloadingDataSaver: Bool = false
     
     private var logInButtonString: LocalizedStringKey {
-        return checkLogInStatus() ? "Change account" : "Sign In"
-    }
-    
-    private var loggedIn: Bool {
-        return checkLogInStatus()
+        return loggedIn ? "Change account" : "Sign In"
     }
     
     var dateFormatter: DateFormatter {
@@ -31,7 +27,9 @@ struct AccountView: View {
         return obj
     }
     
-    @State private var profileStats: User = User(profilePicURL: "", username: "", joined: 0, lastSeen: 0, userId: 0, premium: false)
+    @State private var loggedIn: Bool = false
+    
+//    @State private var profileStats: User = User(profilePicURL: "", username: "", joined: 0, lastSeen: 0, userId: 0, premium: false)
     
     @State private var logInViewPresented: Bool = false
     
@@ -40,7 +38,7 @@ struct AccountView: View {
             List {
                 Section {
                     HStack(alignment: .center, spacing: 10) {
-                        WebImage(url: URL(string: profileStats.profilePicURL ?? "https://mangadex.org/images/avatars/default1.jpg"))
+                        WebImage(url: URL(string: ""))
                             .resizable()
                             .placeholder {
                                 Rectangle().foregroundColor(.gray)
@@ -52,7 +50,7 @@ struct AccountView: View {
                             .frame(height: 75)
                             .cornerRadius(12)
                         
-                        Text(profileStats.username)
+                        Text("username")
                             .bold()
                             .font(.title3)
                             .lineLimit(1)
@@ -60,13 +58,13 @@ struct AccountView: View {
                 }
                 if loggedIn {
                     Section {
-                        ProfileStat(label: "User ID:", value: "\(profileStats.userId)")
+                        ProfileStat(label: "User ID:", value: "1234")
                         
-                        ProfileStat(label: "Joined:", value: "\(dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(profileStats.joined))))")
+                        ProfileStat(label: "Joined:", value: "May, 20th, 1969.")
                         
-                        ProfileStat(label: "Last online:", value: "\(dateFormatter.string(from: Date(timeIntervalSince1970: TimeInterval(profileStats.lastSeen))))")
+                        ProfileStat(label: "Last online:", value: "May, 20th 1969")
                         
-                        ProfileStat(label: "Premium Member:", value: profileStats.premium ? "Yes" : "No")
+                        ProfileStat(label: "Premium Member:", value: "No")
                     }
                 }
                 
@@ -84,7 +82,10 @@ struct AccountView: View {
                     }
                     
                     if loggedIn {
-                        Button(action: logOut, label: {
+                        Button(action: {
+                            MDAuthentification.standard.logOut()
+                            loggedIn = false
+                        }, label: {
                             Text("Sign Out")
                                 .foregroundColor(Color(.systemRed))
                         })
@@ -96,17 +97,37 @@ struct AccountView: View {
             .transition(.fade)
         }.navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
-            if (loggedIn) {
-                loadAccountInformation()
+            let loadingDescription: LocalizedStringKey = "Loading account..."
+            appState.loadingQueue.append(loadingDescription)
+            
+            MDAuthentification.standard.logInProcedure { isLoggedIn in
+                if isLoggedIn {
+                    print("Loading account information")
+                    
+                    //loadAccountInformation()
+                    
+                    DispatchQueue.main.async {
+                        loggedIn = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                } else {
+                    print("Showing log in view...")
+                    
+                    DispatchQueue.main.async {
+                        loggedIn = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        logInViewPresented = true
+                    }
+                }
             }
         }
     }
     
-    func loadAccountInformation() {
+    /*func loadAccountInformation() {
         let loadingDescription: LocalizedStringKey = "Loading account..."
         appState.loadingQueue.append(loadingDescription)
         
-        guard let url = URL(string: "https://www.mangadex.org/api/v2/user/\(userProfileId)") else {
+        guard let url = URL(string: "https://api.mangadex.org/v2/user/\(userProfileId)") else {
             print("From AccountView: Invalid URL")
             return
         }
@@ -148,15 +169,7 @@ struct AccountView: View {
             }
             return
         }.resume()
-    }
-    
-    func logOut() {
-        logOutUser()
-        
-        DispatchQueue.main.async {
-            profileStats = User(profilePicURL: "", username: "", joined: 0, lastSeen: 0, userId: 0, premium: false)
-        }
-    }
+    }*/
 }
 
 struct AccountView_Previews: PreviewProvider {

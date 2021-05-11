@@ -15,7 +15,7 @@ struct MangaView: View {
     
     @State var manga: Manga = Manga()
     
-    @State var chapters: [ChapterData] = [] //chapters -- remoteChapters
+    @State var chapters: [Chapter] = [] //chapters -- remoteChapters
     @State var localChapters: [DownloadedChapter] = []
     
     @State var reloadContents: Bool
@@ -166,8 +166,14 @@ struct MangaView: View {
             }
         }.onAppear{
             if reloadContents {
-                loadMangaInfo()
-                self.reloadContents = false
+                DispatchQueue.global(qos: .utility).async {
+                    loadMangaInfo { wasSuccesfull in
+                        if wasSuccesfull {
+                            loadChapters()
+                        }
+                    }
+                    self.reloadContents = false
+                }
             }
         }.navigationTitle(mangaId != "" ? manga.title : "Please select a manga to read.")
         .navigationBarTitleDisplayMode(.inline)
@@ -175,11 +181,13 @@ struct MangaView: View {
     }
     
     //MARK: - Manga details loader
-    func loadMangaInfo() {
+    func loadMangaInfo(completion: @escaping (Bool) -> Void) {
         let loadingDescription: LocalizedStringKey = "Loading manga information..."
-        appState.loadingQueue.append(loadingDescription)
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
         
-        guard let url = URL(string: "https://mangadex.org/api/v2/manga/\(mangaId)?include=chapters") else {
+        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)") else {
             print("From MangaView: Invalid URL")
             return
         }
@@ -193,44 +201,25 @@ struct MangaView: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    let decodedResponse = try JSONDecoder().decode(MangaDataModel.self, from: data)
-                    
-                    var filteredChapters: [ChapterData] = []
-                    
-                    for chapter in decodedResponse.data.chapters {
-                        if ( chapter.langCode == "gb" ) {
-                            filteredChapters.append(chapter)
-                        }
-                    }
-                    
-                    //Sort the array based on the chapter...
-                    //Would've liked to also sort based on volume as well (like when a
-                    //chapter's number gets reset with the volume, like how it is in actual books
-                    //But mangas that don't have a volume number, will get their sort all messed up
-                    //And will leave the chapters without a volume last (even though they might be first)
-                    
-                    filteredChapters = filteredChapters.sorted {
-                        return Double($0.chapter) ?? 0 > Double($1.chapter) ?? 0
-                    }
+                    let decodedResponse = try JSONDecoder().decode(Manga.self, from: data)
                     
                     DispatchQueue.main.async {
-                        self.manga = decodedResponse.data.manga
-                        self.manga.coverURL = decodedResponse.data.manga.coverURL
-                        self.chapters = filteredChapters
+                        self.manga = decodedResponse
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
-                    
-                    return
+                    completion(true)
                 } catch {
                     DispatchQueue.main.async {
-                        appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
+                        appState.errorMessage += "From Manga (manga loading).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
+                    
+                    completion(false)
                 }
-                
+            } else {
                 DispatchQueue.main.async {
                     print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
@@ -239,6 +228,69 @@ struct MangaView: View {
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
+                
+                completion(false)
+            }
+        }.resume()
+    }
+    //MARK: - Chapter loader
+    func loadChapters() {
+        let loadingDescription: LocalizedStringKey = "Loading manga chapters..."
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
+        
+        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)/feed?locales[]=en") else {
+            print("From MangaView: Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.httpShouldHandleCookies = true
+        
+        print(url.absoluteString)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    struct Results: Decodable {
+                        let results: [Chapter]
+                    }
+                    
+                    let decodedResponse = try JSONDecoder().decode(Results.self, from: data)
+                    
+                    DispatchQueue.main.async {
+                        self.chapters = decodedResponse.results.sorted {
+                            return Double($0.chapter) ?? 0 > Double($1.chapter) ?? 0
+                        }
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                } catch {
+                    print(error)
+                    
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "From Manga (chapter loading).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                    
+                    return
+                }
+                return
+            } else {
+                DispatchQueue.main.async {
+                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                    withAnimation {
+                        appState.errorOccured = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
+                
+                return
             }
         }.resume()
     }

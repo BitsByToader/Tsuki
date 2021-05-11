@@ -11,7 +11,6 @@
 // on a navigationview with a list inside of it
 
 import SwiftUI
-import SwiftSoup
 import SDWebImageSwiftUI
 
 struct LibraryView: View {
@@ -20,9 +19,7 @@ struct LibraryView: View {
     @EnvironmentObject var appState: AppState
     @AppStorage("MDListLink") var MDlListLink: String = ""
 
-     private var loggedIn: Bool {
-        checkLogInStatus()
-    }
+    @State private var loggedIn: Bool = false
     
     @State private var shouldOpenLatestUpdates: Bool = false
     
@@ -32,6 +29,9 @@ struct LibraryView: View {
     var tagsToSearch: String = ""
     
     @State private var searchResult: [ReturnedManga] = []
+    
+    @State private var mangaTitleByIdDict: [String: String] = [:]
+    @State private var coverArtByIdDict: [String: String] = [:]
     
     var body: some View {
         if loggedIn {
@@ -70,7 +70,7 @@ struct LibraryView: View {
                     }.padding(.horizontal)
                     .animation(.default)
                     //MARK: - Links
-                    NavigationLink(destination: LatestUpdatesView().environmentObject(widgetURL).environmentObject(appState), isActive: $shouldOpenLatestUpdates) {
+                    NavigationLink(destination: LatestUpdatesView(mangaTitleDict: mangaTitleByIdDict, coverArtDict: coverArtByIdDict).environmentObject(widgetURL).environmentObject(appState), isActive: $shouldOpenLatestUpdates) {
                         LibraryLink(linkTitle: "Latest Updates")
                     }
                     
@@ -93,15 +93,11 @@ struct LibraryView: View {
                     if ( widgetURL.openedWithURL ) {
                         shouldOpenLatestUpdates = true
                     }
-                    
-                    if (loggedIn) {
-                        loadLibrary()
-                    }
                 }
                 
                 MangaView(reloadContents: true, mangaId: "30461")
 
-                ChapterView(loadContents: true, isViewPresented: .constant(1), remainingChapters: [ChapterData(chapterId: 449777, volume: "", chapter: "", title: "< Please select a chapter to read.", langCode: "", timestamp: 0)])
+                ChapterView(loadContents: true, isViewPresented: .constant(1), remainingChapters: [])
                 
             }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
             .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
@@ -126,14 +122,44 @@ struct LibraryView: View {
                 }
             }.navigationBarHidden(true)
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                let loadingDescription: LocalizedStringKey = "Checking for account..."
+                DispatchQueue.main.async {
+                    appState.loadingQueue.append(loadingDescription)
+                }
+                
+                MDAuthentification.standard.logInProcedure { isLoggedIn in
+                    if isLoggedIn {
+                        print("Loading library...")
+                        
+                        
+                        loadLibrary()
+                        
+                        DispatchQueue.main.async {
+                            loggedIn = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    } else {
+                        print("Showing log in view...")
+                        
+                        DispatchQueue.main.async {
+                            loggedIn = false
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                            logInViewPresented = true
+                        }
+                    }
+                }
+            }
         }
     }
     
     func loadLibrary() {
         let loadingDescription: LocalizedStringKey = "Loading library..."
-        appState.loadingQueue.append(loadingDescription)
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
         
-        guard let url = URL(string: MDlListLink) else {
+        guard let url = URL(string: "https://api.mangadex.org/user/follows/manga?limit=100") else {
             print("From LibraryView: Invalid URL")
             return
         }
@@ -142,44 +168,27 @@ struct LibraryView: View {
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(MDAuthentification.standard.getSessionToken())", forHTTPHeaderField: "Authorization")
+        
         print("From LibraryView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
+                    let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
                     
-                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
-                    
-                    let returnedMangas = try doc.getElementsByClass("manga-entry").array()
-                    
-                    var mangas: [ReturnedManga] = []
-                    
-                    for manga in returnedMangas {
-                        let title: String = try manga.getElementsByClass("manga_title").first()!.text()
-                        let mangaId: String = try manga.attr("data-id")
-                        
-                        var coverArt: String = try manga.getElementsByClass("large_logo").first()!.select("a").select("img").attr("src")
-                        coverArt = "https://mangadex.org" + coverArt
-                        
-                        
-                        mangas.append(ReturnedManga(title: title, coverArtURL: coverArt, id: mangaId))
+                    for manga in decodedResponse.results {
+                        mangaTitleByIdDict[manga.id] = manga.title
+                        coverArtByIdDict[manga.id] = manga.coverArtURL
                     }
                     
                     DispatchQueue.main.async {
-                        searchResult = mangas
+                        searchResult = decodedResponse.results
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
-                } catch Exception.Error(let type, let message) {
-                    print ("Error of type \(type): \(message)")
-                    DispatchQueue.main.async {
-                        appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        }
-                    }
                 } catch {
                     print ("error")
                     DispatchQueue.main.async {

@@ -20,7 +20,7 @@ struct ChapterView: View {
     //Set to nil to dismiss the current view, like when the user finished reading (don't do this tho, just an example)
     @Binding var isViewPresented: Int?
     
-    var remainingChapters: [ChapterData]
+    var remainingChapters: [Chapter]
     var remainingLocalChapters: [DownloadedChapter] = []
     
     @State private var pageURLs: [String] = []
@@ -51,7 +51,7 @@ struct ChapterView: View {
             if remainingChapters.isEmpty {
                 return "Please select a chapter."
             } else {
-                return remainingChapters[chapterRead].title! != "" ? remainingChapters[chapterRead].title! : "Ch. \(remainingChapters[chapterRead].chapter)"
+                return remainingChapters[chapterRead].title != "" ? remainingChapters[chapterRead].title : "Ch. \(remainingChapters[chapterRead].chapter)"
             }
         } else {
             if remainingLocalChapters.isEmpty {
@@ -146,7 +146,7 @@ struct ChapterView: View {
     
     func loadChapter(currentChapter: Int) {
         //Check if the chapter to be loaded isn't a scheldued chapter
-        if ( !remainingChapters.isEmpty && Date().timeIntervalSince1970 - (remainingChapters[currentChapter].timestamp ?? 0) < 0 ) {
+        if ( !remainingChapters.isEmpty && Date().timeIntervalSince1970 - ( ISO8601DateFormatter().date(from: remainingChapters[currentChapter].timestamp)?.timeIntervalSince1970 ?? Date().timeIntervalSince1970 ) < 0 ) {
             if ( currentChapter == 0 ) {
                 isViewPresented = nil
             }
@@ -168,9 +168,11 @@ struct ChapterView: View {
             return
         }
         
-        appState.loadingQueue.append(loadingDescription)
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
         
-        guard let url = URL(string: "https://mangadex.org/api/v2/chapter/\(remainingChapters[currentChapter].chapterId)?saver=\(readingDataSaver)") else {
+        guard let url = URL(string: "https://api.mangadex.org/at-home/server/\(remainingChapters[currentChapter].chapterId)") else {
             print("From ChapterView: Invalid URL")
             return
         }
@@ -184,12 +186,24 @@ struct ChapterView: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    let decodedResponse = try JSONDecoder().decode(PageData.self, from: data)
+                    struct Result: Decodable {
+                        let baseUrl: String
+                    }
+                    
+                    let decodedResponse = try JSONDecoder().decode(Result.self, from: data)
                     
                     var pages: [String] = []
                     
-                    for page in decodedResponse.data.pages {
-                        pages.append(decodedResponse.data.baseURL + decodedResponse.data.mangaHash + "/" + page)
+                    if readingDataSaver {
+                        for chapterPage in remainingChapters[currentChapter].dataSaverPages {
+                            let page: String = decodedResponse.baseUrl + "/data-saver/" + remainingChapters[currentChapter].hash + "/" + chapterPage
+                            pages.append(page)
+                        }
+                    } else {
+                        for chapterPage in remainingChapters[currentChapter].dataPages {
+                            let page: String = decodedResponse.baseUrl + "/data/" + remainingChapters[currentChapter].hash + "/" + chapterPage
+                            pages.append(page)
+                        }
                     }
                     
                     DispatchQueue.main.async {

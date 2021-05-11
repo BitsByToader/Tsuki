@@ -6,14 +6,13 @@
 //
 
 import SwiftUI
-import SwiftSoup
 
 struct TodayView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var appState: AppState
     @State private var loadingMangas: Bool = true
     
-    @State private var newChapters: [ReturnedUpdatedManga] = []
+//    @State private var newChapters: [] = []
     @State private var featuredDisplayedMangas: [ReturnedManga] = []
     @State private var newDisplayedMangas: [ReturnedManga] = []
     
@@ -33,12 +32,12 @@ struct TodayView: View {
                                     PlaceholderManga()
                                 }
                             } else {
-                                ForEach(newChapters, id: \.self) { manga in
+                                /*ForEach(newChapters, id: \.self) { manga in
                                     NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
                                         UpdatedManga(manga: manga)
                                     }.buttonStyle(PlainButtonStyle())
                                     .frame(width: 125)
-                                }
+                                }*/
                             }
                         }
                     }
@@ -98,7 +97,7 @@ struct TodayView: View {
         }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
         .if( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
         .onAppear {
-            loadUpdates()
+            //loadUpdates()
         }
     }
     
@@ -123,62 +122,52 @@ struct TodayView: View {
             if let data = data {
                 do {
                     
-                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
-                    
-                    //MARK: - Retrieve latest updated manga
-                    let latestUpdatedChapters = try doc.getElementById("latest_update")?.child(0).children().array()
-                    var latestUpdatedMangas: [ReturnedUpdatedManga] = []
-                    for manga in latestUpdatedChapters ?? [] {
-                        let title: String = try manga.child(1).getElementsByClass("manga_title").first()!.text()
-                        
-                        let mangaLink: String = try manga.child(1).getElementsByClass("manga_title").first()!.attr("href")
-                        let mangaId: String = mangaLink.components(separatedBy: "/")[2]
-                        
-                        let coverArt: String = try manga.getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
-                        
-                        let timeOfUpdate: String = try manga.children().array()[2].select("a").text()
-                        let chapter: String = try manga.children().array()[4].text()
-                        
-                        latestUpdatedMangas.append(ReturnedUpdatedManga(title: title, coverArtURL: coverArt, id: mangaId, timeOfUpdate: timeOfUpdate, volumeAndChapter: chapter))
-                    }
-                    
-                    //MARK: - Retrieve featured titles
-                    let featuredTitles = try doc.getElementById("hled_titles_owl_carousel")?.children().array()
-                    var featuredMangas: [ReturnedManga] = []
-                    for manga in featuredTitles ?? [] {
-                        let result: ReturnedManga =  try extractMangaFromCarousel(element: manga)
-                        
-                        featuredMangas.append(result)
-                    }
-                    
-                    //MARK: - Retrieve featured titles
-                    let newTitles = try doc.getElementById("new_titles_owl_carousel")?.children().array()
-                    var newMangas: [ReturnedManga] = []
-                    for manga in newTitles ?? [] {
-                        let result: ReturnedManga =  try extractMangaFromCarousel(element: manga)
-                        
-                        newMangas.append(result)
-                    }
-                    
-                    //MARK: - Update View
-                    DispatchQueue.main.async {
-                        self.newChapters = latestUpdatedMangas
-                        self.featuredDisplayedMangas = featuredMangas
-                        self.newDisplayedMangas = newMangas
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        self.loadingMangas = false
-                    }
+//                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
+//
+//                    //MARK: - Retrieve latest updated manga
+//                    let latestUpdatedChapters = try doc.getElementById("latest_update")?.child(0).children().array()
+//                    var latestUpdatedMangas: [ReturnedUpdatedManga] = []
+//                    for manga in latestUpdatedChapters ?? [] {
+//                        let title: String = try manga.child(1).getElementsByClass("manga_title").first()!.text()
+//
+//                        let mangaLink: String = try manga.child(1).getElementsByClass("manga_title").first()!.attr("href")
+//                        let mangaId: String = mangaLink.components(separatedBy: "/")[2]
+//
+//                        let coverArt: String = try manga.getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
+//
+//                        let timeOfUpdate: String = try manga.children().array()[2].select("a").text()
+//                        let chapter: String = try manga.children().array()[4].text()
+//
+//                        latestUpdatedMangas.append(ReturnedUpdatedManga(title: title, coverArtURL: coverArt, id: mangaId, timeOfUpdate: timeOfUpdate, volumeAndChapter: chapter))
+//                    }
+//
+//                    //MARK: - Retrieve featured titles
+//                    let featuredTitles = try doc.getElementById("hled_titles_owl_carousel")?.children().array()
+//                    var featuredMangas: [ReturnedManga] = []
+//                    for manga in featuredTitles ?? [] {
+//                        let result: ReturnedManga =  try extractMangaFromCarousel(element: manga)
+//
+//                        featuredMangas.append(result)
+//                    }
+//
+//                    //MARK: - Retrieve featured titles
+//                    let newTitles = try doc.getElementById("new_titles_owl_carousel")?.children().array()
+//                    var newMangas: [ReturnedManga] = []
+//                    for manga in newTitles ?? [] {
+//                        let result: ReturnedManga =  try extractMangaFromCarousel(element: manga)
+//
+//                        newMangas.append(result)
+//                    }
+//
+//                    //MARK: - Update View
+//                    DispatchQueue.main.async {
+//                        self.newChapters = latestUpdatedMangas
+//                        self.featuredDisplayedMangas = featuredMangas
+//                        self.newDisplayedMangas = newMangas
+//                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+//                        self.loadingMangas = false
+//                    }
                     //MARK: -
-                    return
-                } catch Exception.Error(let type, let message) {
-                    print ("Error of type \(type): \(message)")
-                    DispatchQueue.main.async {
-                        appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        }
-                    }
                     return
                 } catch {
                     print ("error")
@@ -205,19 +194,19 @@ struct TodayView: View {
         }.resume()
     }
     
-    func extractMangaFromCarousel(element: Element) throws -> ReturnedManga {
-        let mangaTitle: Element = try element.child(1)
-            .select("p").first()!.getElementsByClass("manga_title").first()!
-        
-        let title: String = try mangaTitle.text()
-        
-        let mangaLink: String = try mangaTitle.attr("href")
-        let mangaId: String = mangaLink.components(separatedBy: "/")[2]
-        
-        let coverArt: String = try element.child(0).select("a").select("img").attr("data-src")
-        
-        return ReturnedManga(title: title, coverArtURL: coverArt, id: mangaId)
-    }
+//    func extractMangaFromCarousel(element: Element) throws -> ReturnedManga {
+//        let mangaTitle: Element = try element.child(1)
+//            .select("p").first()!.getElementsByClass("manga_title").first()!
+//        
+//        let _: String = try mangaTitle.text()
+//
+//        let mangaLink: String = try mangaTitle.attr("href")
+//        let _: String = mangaLink.components(separatedBy: "/")[2]
+//
+//        let _: String = try element.child(0).select("a").select("img").attr("data-src")
+//
+//        return ReturnedManga(title: "title", coverArtURL: "coverArt", id: "mangaId")
+//    }
 }
 
 extension View {

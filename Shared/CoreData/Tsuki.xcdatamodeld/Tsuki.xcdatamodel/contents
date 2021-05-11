@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17189" systemVersion="19G2021" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="18154" systemVersion="20E241" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="DownloadedChapter" representedClassName="DownloadedChapter" syncable="YES">
         <attribute name="chapter" optional="YES" attributeType="String"/>
         <attribute name="pages" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName="[String]"/>
-        <attribute name="timestamp" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
-        <attribute name="volume" optional="YES" attributeType="String"/>
+        <attribute name="volume" optional="YES" attributeType="String" customClassName="Int"/>
         <relationship name="origin" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="DownloadedManga" inverseName="chapter" inverseEntity="DownloadedManga"/>
     </entity>
     <entity name="DownloadedManga" representedClassName=".DownloadedManga" syncable="YES">
@@ -14,13 +14,13 @@
         <attribute name="mangaDescription" optional="YES" attributeType="String"/>
         <attribute name="mangaId" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="mangaRating" optional="YES" attributeType="String"/>
-        <attribute name="mangaTags" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName=".[Int]"/>
+        <attribute name="mangaTags" optional="YES" attributeType="Transformable" valueTransformerName="NSSecureUnarchiveFromData" customClassName=".[String]"/>
         <attribute name="mangaTitle" optional="YES" attributeType="String"/>
         <attribute name="usersRated" optional="YES" attributeType="String"/>
         <relationship name="chapter" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="DownloadedChapter" inverseName="origin" inverseEntity="DownloadedChapter"/>
     </entity>
     <elements>
-        <element name="DownloadedChapter" positionX="-63" positionY="45" width="128" height="133"/>
-        <element name="DownloadedManga" positionX="-63" positionY="-18" width="128" height="178"/>
+        <element name="DownloadedChapter" positionX="-63" positionY="45" width="128" height="119"/>
+        <element name="DownloadedManga" positionX="-63" positionY="-18" width="128" height="164"/>
     </elements>
 </model>

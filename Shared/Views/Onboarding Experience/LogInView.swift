@@ -7,7 +7,6 @@
 
 import SwiftUI
 import SDWebImageSwiftUI
-import SwiftSoup
 
 struct LogInView: View {
     @EnvironmentObject var appState: AppState
@@ -15,11 +14,18 @@ struct LogInView: View {
     @AppStorage("userProfileId") var userProfileId: String = ""
     @AppStorage("MDListLink") var MDlListLink: String = ""
     
+    #warning("Move these to the Keychain.")
+    @AppStorage("MDSessionToken") var sessionToken: String = ""
+    @AppStorage("MDRefreshToken") var refreshToken: String = ""
+    
     @Binding var isPresented: Bool
     
     @State private var twoFactorCode: String = ""
     @State private var username: String = ""
     @State private var password: String = ""
+    
+    var testUsername: String = "ToaderTheBoi"
+    var testPassword: String = "Pr0z6Po58jm3"
     
     @State private var loading: Bool = false
     @State private var errorOccured: Bool = false
@@ -74,7 +80,19 @@ struct LogInView: View {
                     .multilineTextAlignment(.center)
                     .font(.system(size: 12))
                 
-                Button(action: logIntoMD, label: {
+                Button(action: {
+                    MDAuthentification.standard.logInToMD(username: username, password: password) { logInSuccessfull in
+                        if logInSuccessfull {
+                            DispatchQueue.main.async {
+                                self.loading = false
+                                self.isPresented = false
+                            }
+                        } else {
+                            self.loading = false
+                            self.errorOccured = true
+                        }
+                    }
+                }, label: {
                     Text("Log In")
                         .bold()
                         .font(.system(size: 18))
@@ -100,8 +118,6 @@ struct LogInView: View {
             loading = true
             errorOccured = false
         }
-        
-        logOutUser()
         
         guard let url = URL(string: "https://mangadex.org/ajax/actions.ajax.php?function=login&nojs=1") else {
             print("From LogInVIew: Invalid URL")
@@ -130,43 +146,31 @@ struct LogInView: View {
                 
                 //Grab the user page URL (for the account view) and the mdlist url (for the library view)
                 do {
-                    let doc: Document = try SwiftSoup.parse(String(data: data ?? Data(), encoding: .utf8) ?? "")
+//                    let doc: Document = try SwiftSoup.parse(String(data: data ?? Data(), encoding: .utf8) ?? "")
+//
+//                    let linkList = try doc.getElementById("homepage_cog")?.siblingElements().first()?.select("div").first()?.children().array()
+//
+//                    var tempLink: String? = try linkList?[0].attr("href")
+//                    let userProfile: String = tempLink == nil ? "" : (tempLink ?? "")
+//
+//                    tempLink = try linkList?[4].attr("href")
+//                    let MDList: String = tempLink == nil ? "" : "https://mangadex.org" + (tempLink ?? "")
+//
+//                    DispatchQueue.main.async {
+//                        self.MDlListLink = MDList
+//                        self.userProfileId = userProfile.components(separatedBy: "/")[2]
+//                        self.loading = false
+//                        self.isPresented = false
+//                    }
+//
+//                    //Copy the cookies in a shared container, so the widget can access them as well
+//                    let widgetCookieStorage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "group.TsukiApp")
+//                    for cookie in URLSession.shared.configuration.httpCookieStorage?.cookies ?? [] {
+//                        if ( cookie.name == "mangadex_session" || cookie.name == "mangadex_rememberme_token" ) {
+//                            widgetCookieStorage.setCookie(cookie)
+//                        }
+//                    }
                     
-                    let linkList = try doc.getElementById("homepage_cog")?.siblingElements().first()?.select("div").first()?.children().array()
-                    
-                    var tempLink: String? = try linkList?[0].attr("href")
-                    let userProfile: String = tempLink == nil ? "" : (tempLink ?? "")
-                    
-                    tempLink = try linkList?[4].attr("href")
-                    let MDList: String = tempLink == nil ? "" : "https://mangadex.org" + (tempLink ?? "")
-                    
-                    DispatchQueue.main.async {
-                        self.MDlListLink = MDList
-                        self.userProfileId = userProfile.components(separatedBy: "/")[2]
-                        self.loading = false
-                        self.isPresented = false
-                    }
-                    
-                    //Copy the cookies in a shared container, so the widget can access them as well
-                    let widgetCookieStorage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "group.TsukiApp")
-                    for cookie in URLSession.shared.configuration.httpCookieStorage?.cookies ?? [] {
-                        if ( cookie.name == "mangadex_session" || cookie.name == "mangadex_rememberme_token" ) {
-                            widgetCookieStorage.setCookie(cookie)
-                        }
-                    }
-                    
-                    return
-                }
-                catch Exception.Error(let type, let message) {
-                    print ("Error of type \(type): \(message)")
-                    DispatchQueue.main.async {
-                        self.loading = false
-                        self.errorOccured = true
-                        appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                        }
-                    }
                     return
                 } catch {
                     print ("error")

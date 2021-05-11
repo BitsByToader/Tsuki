@@ -7,7 +7,6 @@
 
 import Foundation
 import WidgetKit
-import SwiftSoup
 
 struct UpdatedMangas {
     let mangas: [UpdatedManga]
@@ -44,7 +43,7 @@ struct UpdatedMangas {
         session.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
+                    /*let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
                     
                     let returnedMangas = try doc.getElementById("follows_update")?.child(0).children().array()
                     
@@ -56,10 +55,10 @@ struct UpdatedMangas {
                     var mangaIds: [String] = []
                     
                     for index in 0 ..< numberOfMangas {
-                        let title: String = try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.text()
-                        let coverArt: String = try (returnedMangas ?? [])[index].getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
+                        let title: String = "try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.text()"
+                        let coverArt: String = "try (returnedMangas ?? [])[index].getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")"
                         
-                        let mangaLink: String = try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.attr("href")
+                        let mangaLink: String = "try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.attr("href")"
                         let mangaId: String = mangaLink.components(separatedBy: "/")[2]
                         
                         mangas.append(UpdatedManga(title: title, cover: coverArt, id: mangaId))
@@ -84,8 +83,8 @@ struct UpdatedMangas {
                     for _ in mangas.count ..< 6 {
                         mangas.append(UpdatedManga(title: "", cover: "", id: "", isPlaceholder: true))
                     }
-                    
-                    completion(UpdatedMangas(mangas: mangas, placeholder: false, relevance: relevance), nil)
+                    */
+                    completion(UpdatedMangas(mangas: [], placeholder: false, relevance: 0), nil)
                 } catch {
                     completion(nil, error.localizedDescription)
                 }

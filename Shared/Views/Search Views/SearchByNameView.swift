@@ -11,14 +11,14 @@
 // on a navigationview with a list inside of it
 
 import SwiftUI
-import SwiftSoup
 import SDWebImageSwiftUI
 
 struct SearchByNameView: View {
     @EnvironmentObject var appState: AppState
     
     @State private var searchInput: String = ""
-    var tagsToSearch: String = ""
+    var includedTagsToSearch: [String] = []
+    var excludedTagsToSearch: [String] = []
     var preloadManga: Bool = false
     var sectionName: String = ""
     
@@ -63,15 +63,32 @@ struct SearchByNameView: View {
         let loadingDescription: LocalizedStringKey = "Loading mangas..."
         appState.loadingQueue.append(loadingDescription)
         
-        let stringToSearch: String = searchInput
-        
         var urlComponents = URLComponents()
-        let q1 = URLQueryItem(name: "title", value: stringToSearch)
-        let q2 = URLQueryItem(name: "tags", value: tagsToSearch)
-        urlComponents.queryItems = [q1, q2]
+        urlComponents.queryItems = []
+        
+        
+        if ( searchInput != "" ) {
+            let q1 = URLQueryItem(name: "title", value: searchInput)
+            urlComponents.queryItems?.append(q1)
+        }
+        
+        if ( !includedTagsToSearch.isEmpty ) {
+            for tag in includedTagsToSearch {
+                let q = URLQueryItem(name: "includedTags[]", value: tag)
+                urlComponents.queryItems?.append(q)
+            }
+        }
+        
+        if ( !excludedTagsToSearch.isEmpty ) {
+            for tag in excludedTagsToSearch {
+                let q = URLQueryItem(name: "excludedTags[]", value: tag)
+                urlComponents.queryItems?.append(q)
+            }
+        }
+        
         let payload = urlComponents.percentEncodedQuery
         
-        guard let url = URL(string: "https://mangadex.org/search?\(payload ?? "")") else {
+        guard let url = URL(string: "https://api.mangadex.org/manga?\(payload ?? "")") else {
             print("From SearchByName: Invalid URL")
             return
         }
@@ -85,57 +102,35 @@ struct SearchByNameView: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    
-                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
-                    
-                    let returnedMangas = try doc.getElementsByClass("manga-entry").array()
-                    
-                    var mangas: [ReturnedManga] = []
-                    
-                    for manga in returnedMangas {
-                        let title: String = try manga.getElementsByClass("manga_title").first()!.text()
-                        let mangaId: String = try manga.attr("data-id")
-                                                
-                        var coverArt: String = try manga.getElementsByClass("large_logo").first()!.select("a").select("img").attr("src")
-                        coverArt = "https://mangadex.org" + coverArt
-                        
-                        
-                        mangas.append(ReturnedManga(title: title, coverArtURL: coverArt, id: mangaId))
-                    }
+                    let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
                     
                     DispatchQueue.main.async {
-                        searchResult = mangas
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        self.searchResult = decodedResponse.results
+                        appState.removeFromLoadingQueue(loadingState: "Loading mangas...")
                     }
                     
                     return
-                } catch Exception.Error(let type, let message) {
-                    print ("Error of type \(type): \(message)")
-                    DispatchQueue.main.async {
-                        appState.errorMessage += "Error when parsing response from server. \nType: \(type) \nMessage: \(message)\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        }
-                    }
                 } catch {
-                    print ("error")
+                    print(error)
+                    
                     DispatchQueue.main.async {
-                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
+                        appState.errorMessage += "Error from SearchByName.\nUnknown error when parsing response from server: \n\n \(error)"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
+                    
+                    return
                 }
-                
-                DispatchQueue.main.async {
-                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
-                    withAnimation {
-                        appState.errorOccured = true
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                    }
+            }
+            
+            DispatchQueue.main.async {
+                print("Error from SearchByName.\nFetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                withAnimation {
+                    appState.errorOccured = true
+                    appState.removeFromLoadingQueue(loadingState: loadingDescription)
                 }
             }
         }.resume()
