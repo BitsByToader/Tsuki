@@ -70,7 +70,7 @@ struct LibraryView: View {
                     }.padding(.horizontal)
                     .animation(.default)
                     //MARK: - Links
-                    NavigationLink(destination: LatestUpdatesView(mangaTitleDict: mangaTitleByIdDict, coverArtDict: coverArtByIdDict).environmentObject(widgetURL).environmentObject(appState), isActive: $shouldOpenLatestUpdates) {
+                    NavigationLink(destination: LatestUpdatesView(mangaTitleDict: mangaTitleByIdDict, coverArtDict: coverArtByIdDict).environmentObject(widgetURL).environmentObject(appState)) { //, isActive: $shouldOpenLatestUpdates broken atm
                         LibraryLink(linkTitle: "Latest Updates")
                     }
                     

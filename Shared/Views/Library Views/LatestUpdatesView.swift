@@ -64,13 +64,15 @@ struct LatestUpdatesView: View {
                         
                         //Should never reach here, because we already do this check in the previous view (LibraryView)
                         //But if we do, just pop the view from the stack.
-                        self.presentationMode.wrappedValue.dismiss()
+//                        self.presentationMode.wrappedValue.dismiss()
                     }
                 }
             }
         }.onOpenURL { url in
             if ( url == URL(string: "tsuki:///latestupdates") ) {
-                let loadingDescription: LocalizedStringKey = "Checking for account..."
+                //Broken atm...
+                
+                /*let loadingDescription: LocalizedStringKey = "Checking for account..."
                 DispatchQueue.main.async {
                     appState.loadingQueue.append(loadingDescription)
                 }
@@ -90,7 +92,7 @@ struct LatestUpdatesView: View {
                             print("mhm wut?")
                         }
                     }
-                }
+                }*/
             }
         }
     }
