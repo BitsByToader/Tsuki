@@ -91,7 +91,7 @@ struct UpdatedMangas {
             } else {
                 completion(nil, "There was an error retrieving the library.")
             }
-        }.resume()
+        }//.resume()
     }
     
     init(numberOfPlaceholder: Int) {
