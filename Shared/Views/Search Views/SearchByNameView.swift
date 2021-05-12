@@ -114,7 +114,7 @@ struct SearchByNameView: View {
                     print(error)
                     
                     DispatchQueue.main.async {
-                        appState.errorMessage += "Error from SearchByName.\nUnknown error when parsing response from server: \n\n \(error)"
+                        appState.errorMessage += "Error from SearchByName.\nUnknown error when parsing response from server: \n\n \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)

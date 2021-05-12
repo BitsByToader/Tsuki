@@ -214,7 +214,7 @@ struct ChapterView: View {
                     return
                 } catch {
                     DispatchQueue.main.async {
-                        appState.errorMessage += "An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
+                        appState.errorMessage += "(From Chapter) An error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)

@@ -139,7 +139,7 @@ struct LatestUpdatesView: View {
                 }  catch {
                     print ("error")
                     DispatchQueue.main.async {
-                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
+                        appState.errorMessage += "(From LatestUpdates) Unknown error when parsing response from server.\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)

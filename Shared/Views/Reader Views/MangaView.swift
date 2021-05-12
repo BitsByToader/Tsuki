@@ -210,7 +210,7 @@ struct MangaView: View {
                     completion(true)
                 } catch {
                     DispatchQueue.main.async {
-                        appState.errorMessage += "From Manga (manga loading).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
+                        appState.errorMessage += "From Manga (manga loading).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)
@@ -270,7 +270,7 @@ struct MangaView: View {
                     print(error)
                     
                     DispatchQueue.main.async {
-                        appState.errorMessage += "From Manga (chapter loading).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n"
+                        appState.errorMessage += "From Manga (chapter loading).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)

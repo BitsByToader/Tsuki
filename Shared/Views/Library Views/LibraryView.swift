@@ -95,7 +95,7 @@ struct LibraryView: View {
                     }
                 }
                 
-                MangaView(reloadContents: true, mangaId: "30461")
+                MangaView(reloadContents: true, mangaId: "d1c0d3f9-f359-467c-8474-0b2ea8e06f3d")
 
                 ChapterView(loadContents: true, isViewPresented: .constant(1), remainingChapters: [])
                 
@@ -192,7 +192,7 @@ struct LibraryView: View {
                 } catch {
                     print ("error")
                     DispatchQueue.main.async {
-                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
+                        appState.errorMessage += "Unknown error when parsing response from server.\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)

@@ -90,7 +90,7 @@ struct SearchView: View {
                 }
                 
                 
-                MangaView(reloadContents: true, mangaId: "30461") //30461
+                MangaView(reloadContents: true, mangaId: "d1c0d3f9-f359-467c-8474-0b2ea8e06f3d") //30461
 
                 ChapterView(loadContents: true, isViewPresented: .constant(1),remainingChapters: [])//449711
                 
