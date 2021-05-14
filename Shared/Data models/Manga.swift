@@ -10,7 +10,7 @@ import Foundation
 //MARK: - Manga Data Model Struct
 struct Manga: Decodable {
     let title: String
-    let artist: [String]
+    var artist: [String]
     var coverURL: String
     let description: String
     let rating: Rating
@@ -92,9 +92,10 @@ struct Manga: Decodable {
         let relationshipsContainer = try container.decode([MDRelationship].self, forKey: .relationships)
         
         var artistArr: [String] = []
+        artistArr.append("Author Name")
         for relation in relationshipsContainer {
             if ( relation.type == "author" || relation.type == "artist" ) {
-                artistArr += [relation.id]
+                artistArr.append(relation.id)
             }
         }
         self.artist = artistArr
