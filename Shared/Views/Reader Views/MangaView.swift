@@ -30,7 +30,7 @@ struct MangaView: View {
         
         if mangaId != "" {
             statusButtons.append(.destructive(Text("Unfollow"), action: {
-                updateMangaStatus(statusId: Int(mangaId)!)
+                updateMangaStatus(statusId: 0)
                 currentStatus = "Status"
             }))
         }
@@ -38,7 +38,6 @@ struct MangaView: View {
         for index in 1..<MangaStatus.allCases.count {
             statusButtons.append(.default(Text(MangaStatus.allCases[index].rawValue), action: {
                 updateMangaStatus(statusId: index)
-                currentStatus = MangaStatus.allCases[index].rawValue
             }))
         }
         
@@ -58,6 +57,16 @@ struct MangaView: View {
         case dropped = "Dropped"
         case reReading = "Re-Reading"
     }
+    
+    let MDMangaStatus: [MangaStatus: String] = [
+        .reading : "reading",
+        .completed: "completed",
+        .dropped: "dropped",
+        .onHold: "on_hold",
+        .planning: "plan_to_read",
+        .reReading: "re_reading",
+        .unfollow: "unfollow"
+    ]
     
     var body: some View {
         List {
@@ -170,6 +179,7 @@ struct MangaView: View {
                     loadMangaInfo { wasSuccesfull in
                         if wasSuccesfull {
                             loadChapters()
+                            getMangaStatus()
                         }
                     }
                     self.reloadContents = false
@@ -252,6 +262,16 @@ struct MangaView: View {
         print(url.absoluteString)
         
         URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 204 {
+                    DispatchQueue.main.async {
+                        self.chapters = []
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                    return
+                }
+            }
+            
             if let data = data {
                 do {
                     struct Results: Decodable {
@@ -297,39 +317,66 @@ struct MangaView: View {
     //MARK: - Update the reading status of the manga
     func updateMangaStatus(statusId: Int) {
         let loadingDescription: LocalizedStringKey = "Updating status..."
-        appState.loadingQueue.append(loadingDescription)
-        
-        var action: String = ""
-        if ( statusId == Int(mangaId)! ) {
-            action = "manga_unfollow"
-        } else {
-            action = "manga_follow"
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string :"https://mangadex.org/ajax/actions.ajax.php?function=\(action)&id=\(mangaId)&type=\(statusId)") else {
+        guard let url = URL(string :"https://api.mangadex.org/manga/\(mangaId)/status") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.httpShouldHandleCookies = true
-        request.setValue("XMLHttpRequest", forHTTPHeaderField: "X-Requested-With")
+        request.httpMethod = "POST"
         
+        request.setValue("Bearer \(MDAuthentification.standard.getSessionToken())", forHTTPHeaderField: "Authorization")
+        
+        let status: String = statusId != 0 ? "\"\(MDMangaStatus[MangaStatus.allCases[statusId]] ?? "reading")\"" : "null"
+        let payload = Data("{\"status\":\(status)}".utf8)
+        
+        print(status)
         print(url.absoluteString)
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
+        URLSession.shared.uploadTask(with: request, from: payload) { data, response, error in
             if let data = data {
-                print(String(bytes: data, encoding: .utf8) as Any)
-                DispatchQueue.main.async {
-                    withAnimation {
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        
-                        let hapticFeedback = UINotificationFeedbackGenerator.init()
-                        hapticFeedback.notificationOccurred(.success)
+                do {
+                    struct Response: Decodable {
+                        let result: String
                     }
+                    
+                    let decodedResponse = try JSONDecoder().decode(Response.self, from: data)
+                    
+                    print(decodedResponse.result)
+                    
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                            
+                            let hapticFeedback = UINotificationFeedbackGenerator.init()
+                            
+                            if ( decodedResponse.result == "ok" ) {
+                                hapticFeedback.notificationOccurred(.success)
+                                currentStatus = MangaStatus.allCases[statusId].rawValue
+                            }
+                        }
+                    }
+                    return
+                } catch {
+                    print(error)
+                    
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "From Manga (manga status update).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        withAnimation {
+                            let hapticFeedback = UINotificationFeedbackGenerator.init()
+                            hapticFeedback.notificationOccurred(.error)
+                            
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                    
+                    return
                 }
-                return
             }
             
             DispatchQueue.main.async {
@@ -342,6 +389,75 @@ struct MangaView: View {
                     appState.errorOccured = true
                     appState.removeFromLoadingQueue(loadingState: loadingDescription)
                 }
+            }
+        }.resume()
+    }
+    
+    //MARK: - Get manga status method
+    func getMangaStatus() {
+        let loadingDescription: LocalizedStringKey = "Loading status..."
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
+        
+        guard let url = URL(string :"https://api.mangadex.org/manga/\(mangaId)/status") else {
+            print("from updateMangaStatus: Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        request.setValue("Bearer \(MDAuthentification.standard.getSessionToken())", forHTTPHeaderField: "Authorization")
+        
+        print(url.absoluteString)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    struct Response: Decodable {
+                        let result: String
+                        let status: String?
+                    }
+                    
+                    let decodedResponse = try JSONDecoder().decode(Response.self, from: data)
+                    
+                    var newStatus: String = "Status"
+                    for key in MDMangaStatus.keys {
+                        if ( MDMangaStatus[key] == (decodedResponse.status ?? "unfollow") ) {
+                            newStatus = key.rawValue
+                            break
+                        }
+                    }
+                    
+                    DispatchQueue.main.async {
+                        currentStatus = newStatus
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                } catch {
+                    print(error)
+                    
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "From Manga (status retrieval).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                    
+                    return
+                }
+            } else {
+                DispatchQueue.main.async {
+                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                    withAnimation {
+                        appState.errorOccured = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
+                
+                return
             }
         }.resume()
     }

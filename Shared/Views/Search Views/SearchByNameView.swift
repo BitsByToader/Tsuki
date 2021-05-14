@@ -66,6 +66,7 @@ struct SearchByNameView: View {
         var urlComponents = URLComponents()
         urlComponents.queryItems = []
         
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "30"))
         
         if ( searchInput != "" ) {
             let q1 = URLQueryItem(name: "title", value: searchInput)

@@ -45,10 +45,10 @@ struct Chapter: Decodable, Hashable {
         self.hash = try attributes.decode(String.self, forKey: .hash)
         
         self.volume = ( try? attributes.decode(String.self, forKey: .volume) ) ?? "1"
-        self.chapter = try attributes.decode(String.self, forKey: .chapter)
+        self.chapter = ( try? attributes.decode(String.self, forKey: .chapter) ) ?? "1"
         
-        self.dataPages = try attributes.decode([String].self, forKey: .data)
-        self.dataSaverPages = try attributes.decode([String].self, forKey: .dataSaver)
+        self.dataPages = ( try? attributes.decode([String].self, forKey: .data) ) ?? []
+        self.dataSaverPages = ( try? attributes.decode([String].self, forKey: .dataSaver) ) ?? []
         
         self.timestamp = try attributes.decode(String.self, forKey: .publishAt)
         

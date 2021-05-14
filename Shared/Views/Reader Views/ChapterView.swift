@@ -9,6 +9,7 @@ import SwiftUI
 import Introspect
 
 struct ChapterView: View {
+    //MARK: - Variables
     @EnvironmentObject var appState: AppState
     @AppStorage("readingDataSaver") var readingDataSaver: Bool = false
     @AppStorage("readerStyle") var readerStyle: String = ReaderSettings.ReaderStyle.Scroll.rawValue
@@ -46,6 +47,7 @@ struct ChapterView: View {
     @State private var navBarHidden: Bool = false
     @State private var settingsPresented: Bool = false
     
+    //MARK: - SwiftUI views
     var navTitle: String {
         if loadContents {
             if remainingChapters.isEmpty {
@@ -144,6 +146,7 @@ struct ChapterView: View {
         .navigationBarHidden(navBarHidden)
     }
     
+    //MARK: - Load new chapter method
     func loadChapter(currentChapter: Int) {
         //Check if the chapter to be loaded isn't a scheldued chapter
         if ( !remainingChapters.isEmpty && Date().timeIntervalSince1970 - ( ISO8601DateFormatter().date(from: remainingChapters[currentChapter].timestamp)?.timeIntervalSince1970 ?? Date().timeIntervalSince1970 ) < 0 ) {
