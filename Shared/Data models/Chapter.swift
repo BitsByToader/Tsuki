@@ -21,6 +21,8 @@ struct Chapter: Decodable, Hashable {
     
     let timestamp: String
     
+    var isRead: Bool = false
+    
     enum CodingKeys: String, CodingKey {
         case data, relationships
     }

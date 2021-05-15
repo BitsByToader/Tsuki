@@ -119,6 +119,16 @@ struct LatestUpdatesView: View {
         print("From LatestUpdatesView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 204 {
+                    DispatchQueue.main.async {
+                        self.result = []
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                    return
+                }
+            }
+            
             if let data = data {
                 do {
                     struct Results: Decodable {

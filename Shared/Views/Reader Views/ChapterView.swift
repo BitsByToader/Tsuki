@@ -212,6 +212,7 @@ struct ChapterView: View {
                     DispatchQueue.main.async {
                         self.pageURLs += pages
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        markChapterAsRead(chapterToMark: currentChapter)
                     }
                     
                     return
@@ -235,5 +236,44 @@ struct ChapterView: View {
                 }
             }
         }.resume()
+    }
+    
+    func markChapterAsRead(chapterToMark: Int) {
+        let loadingDescription: LocalizedStringKey = "Marking chapter as read..."
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
+        
+        guard let url = URL(string :"https://api.mangadex.org/chapter/\(remainingChapters[chapterToMark].chapterId)/read") else {
+            print("from updateMangaStatus: Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        
+        request.setValue("Bearer \(MDAuthentification.standard.getSessionToken())", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                print( String(data: data, encoding: .utf8))
+                
+                //OK
+                DispatchQueue.main.async {
+                    appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                }
+            } else {
+                DispatchQueue.main.async {
+                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                    withAnimation {
+                        appState.errorOccured = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
+            }
+        }.resume()
+        
+        print(url.absoluteString)
     }
 }

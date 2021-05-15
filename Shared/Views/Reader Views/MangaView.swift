@@ -251,7 +251,7 @@ struct MangaView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)/feed?locales[]=en") else {
+        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)/feed?locales[]=en&limit=500") else {
             print("From MangaView: Invalid URL")
             return
         }
@@ -286,6 +286,7 @@ struct MangaView: View {
                             return Double($0.chapter) ?? 0 > Double($1.chapter) ?? 0
                         }
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        getReadMarkers()
                     }
                 } catch {
                     print(error)
@@ -301,6 +302,87 @@ struct MangaView: View {
                     return
                 }
                 return
+            } else {
+                DispatchQueue.main.async {
+                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                    withAnimation {
+                        appState.errorOccured = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
+                
+                return
+            }
+        }.resume()
+    }
+    //MARK: - Get list of read markers
+    func getReadMarkers() {
+        let loadingDescription: LocalizedStringKey = "Loading read markers..."
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
+        
+        guard let url = URL(string :"https://api.mangadex.org/manga/\(mangaId)/read") else {
+            print("from updateMangaStatus: Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        request.setValue("Bearer \(MDAuthentification.standard.getSessionToken())", forHTTPHeaderField: "Authorization")
+        
+        print(url.absoluteString)
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                print( String(data: data, encoding: .utf8) )
+                
+                do {
+                    struct Response: Decodable {
+                        let data: [String]
+                    }
+                    
+                    let decodedResponse = try JSONDecoder().decode(Response.self, from: data)
+                    
+                    let chaptersReadCount = decodedResponse.data.count
+                    print(chaptersReadCount)
+                    var counter: Int = 0
+                    
+                    for (index, chapter) in self.chapters.enumerated() {
+                        for id in decodedResponse.data {
+                            if ( chapter.chapterId == id ) {
+                                DispatchQueue.main.async {
+                                    self.chapters[index].isRead = true
+                                }
+                                counter += 1
+                                break
+                            }
+                        }
+                        
+                        if ( chaptersReadCount == counter ) {
+                            break
+                        }
+                    }
+                    
+                    DispatchQueue.main.async {
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                    
+                } catch {
+                    print(error)
+                    
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "From Manga (read marker loading).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                    
+                    return
+                }
             } else {
                 DispatchQueue.main.async {
                     print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
@@ -357,7 +439,11 @@ struct MangaView: View {
                             
                             if ( decodedResponse.result == "ok" ) {
                                 hapticFeedback.notificationOccurred(.success)
-                                currentStatus = MangaStatus.allCases[statusId].rawValue
+                                if ( MangaStatus.allCases[statusId].rawValue == "Unfollow" ) {
+                                    currentStatus = "Status"
+                                } else {
+                                    currentStatus = MangaStatus.allCases[statusId].rawValue
+                                }
                             }
                         }
                     }
@@ -426,7 +512,11 @@ struct MangaView: View {
                     var newStatus: String = "Status"
                     for key in MDMangaStatus.keys {
                         if ( MDMangaStatus[key] == (decodedResponse.status ?? "unfollow") ) {
-                            newStatus = key.rawValue
+                            if ( key.rawValue == "Unfollow" ) {
+                                newStatus = "Status"
+                            } else {
+                                newStatus = key.rawValue
+                            }
                             break
                         }
                     }

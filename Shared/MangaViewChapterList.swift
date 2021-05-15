@@ -33,7 +33,8 @@ struct MangaViewChapterList: View {
                                        chapter: chapter.chapter,
                                        title: chapter.title,
                                        date: "\(formatterToString.string(from: formatterFromString.date(from: chapter.timestamp) ?? Date() ))",
-                                       localizedTime: (formatterFromString.date(from: chapter.timestamp) ?? Date()).timeAgoDisplay(style: .full) )
+                                       localizedTime: (formatterFromString.date(from: chapter.timestamp) ?? Date()).timeAgoDisplay(style: .full),
+                                       isRead: chapter.isRead)
                     }
                 }
             } else {
@@ -43,7 +44,8 @@ struct MangaViewChapterList: View {
                                        chapter: chapter.wrappedChapter,
                                        title: chapter.wrappedTitle,
                                        date: "Downloaded",
-                                       localizedTime: "\(formatterToString.string(from: formatterFromString.date(from: chapter.timestamp) ?? Date() ))")
+                                       localizedTime: "\(formatterToString.string(from: formatterFromString.date(from: chapter.timestamp) ?? Date() ))",
+                                       isRead: false)
                     }
                 }
             }
@@ -60,11 +62,18 @@ struct ChapterListRow: View {
     let date: String
     let localizedTime: String
     
+    let isRead: Bool
+    
     var body: some View {
         VStack(spacing: 5) {
             HStack {
                 Text("Vol.\(volume) Ch.\(chapter)")
                     .font(.subheadline)
+                
+                Image(systemName: "checkmark")
+                    .opacity(isRead ? 0.5 : 0)
+                    .animation(.default)
+                
                 Spacer()
                 Text("\(title)")
                     .allowsTightening(true)

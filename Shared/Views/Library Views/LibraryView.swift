@@ -174,6 +174,16 @@ struct LibraryView: View {
         print("From LibraryView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 204 {
+                    DispatchQueue.main.async {
+                        self.searchResult = []
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                    return
+                }
+            }
+            
             if let data = data {
                 do {
                     let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
