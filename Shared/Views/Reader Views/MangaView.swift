@@ -337,21 +337,18 @@ struct MangaView: View {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
-                print( String(data: data, encoding: .utf8) )
-                
                 do {
                     struct Response: Decodable {
-                        let data: [String]
+                        let data: [String]?
                     }
                     
                     let decodedResponse = try JSONDecoder().decode(Response.self, from: data)
                     
-                    let chaptersReadCount = decodedResponse.data.count
-                    print(chaptersReadCount)
+                    let chaptersReadCount = (decodedResponse.data ?? []).count
                     var counter: Int = 0
                     
                     for (index, chapter) in self.chapters.enumerated() {
-                        for id in decodedResponse.data {
+                        for id in ( decodedResponse.data ?? [] ) {
                             if ( chapter.chapterId == id ) {
                                 DispatchQueue.main.async {
                                     self.chapters[index].isRead = true

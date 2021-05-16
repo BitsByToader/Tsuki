@@ -14,10 +14,6 @@ struct LogInView: View {
     @AppStorage("userProfileId") var userProfileId: String = ""
     @AppStorage("MDListLink") var MDlListLink: String = ""
     
-    #warning("Move these to the Keychain.")
-    @AppStorage("MDSessionToken") var sessionToken: String = ""
-    @AppStorage("MDRefreshToken") var refreshToken: String = ""
-    
     @Binding var isPresented: Bool
     
     @State private var twoFactorCode: String = ""
@@ -172,18 +168,18 @@ struct LogInView: View {
 //                    }
                     
                     return
-                } catch {
-                    print ("error")
-                    DispatchQueue.main.async {
-                        self.loading = false
-                        self.errorOccured = true
-                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                        }
-                    }
-                    return
-                }
+                }// catch {
+//                    print ("error")
+//                    DispatchQueue.main.async {
+//                        self.loading = false
+//                        self.errorOccured = true
+//                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
+//                        withAnimation {
+//                            appState.errorOccured = true
+//                        }
+//                    }
+//                    return
+//                }
             } else {
                 //Couldn't log in for some reaseon
                 DispatchQueue.main.async {

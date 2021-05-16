@@ -119,7 +119,7 @@ struct TodayView: View {
         print("From TodayView: \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
+            if let _ = data {
                 do {
                     
 //                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
@@ -169,17 +169,17 @@ struct TodayView: View {
 //                    }
                     //MARK: -
                     return
-                } catch {
-                    print ("error")
-                    DispatchQueue.main.async {
-                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        }
-                    }
-                    return
-                }
+                } //catch {
+//                    print ("error")
+//                    DispatchQueue.main.async {
+//                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
+//                        withAnimation {
+//                            appState.errorOccured = true
+//                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+//                        }
+//                    }
+//                    return
+//                }
             }
             
             DispatchQueue.main.async {

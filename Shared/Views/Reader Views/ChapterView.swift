@@ -237,7 +237,7 @@ struct ChapterView: View {
             }
         }.resume()
     }
-    
+    //MARK: - Chapter mark method
     func markChapterAsRead(chapterToMark: Int) {
         let loadingDescription: LocalizedStringKey = "Marking chapter as read..."
         DispatchQueue.main.async {
@@ -255,9 +255,7 @@ struct ChapterView: View {
         request.setValue("Bearer \(MDAuthentification.standard.getSessionToken())", forHTTPHeaderField: "Authorization")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
-                print( String(data: data, encoding: .utf8))
-                
+            if let _ = data {
                 //OK
                 DispatchQueue.main.async {
                     appState.removeFromLoadingQueue(loadingState: loadingDescription)
