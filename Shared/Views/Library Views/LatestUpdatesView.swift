@@ -104,7 +104,7 @@ struct LatestUpdatesView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "https://api.mangadex.org/user/follows/manga/feed?locales[]=en") else {
+        guard let url = URL(string: "https://api.mangadex.org/user/follows/manga/feed?translatedLanguage[]=en") else {
             print("From LatestUpdatesView: Invalid URL")
             return
         }

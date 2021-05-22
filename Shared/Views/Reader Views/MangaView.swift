@@ -251,7 +251,7 @@ struct MangaView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)/feed?locales[]=en&limit=500") else {
+        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)/feed?translatedLanguage[]=en&limit=500") else {
             print("From MangaView: Invalid URL")
             return
         }
