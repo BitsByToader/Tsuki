@@ -152,7 +152,7 @@ struct LibraryView: View {
             }
         }
     }
-    
+    //MARK: - Retrieve the mangas in the library
     func loadLibrary() {
         let loadingDescription: LocalizedStringKey = "Loading library..."
         DispatchQueue.main.async {
@@ -190,11 +190,13 @@ struct LibraryView: View {
                     
                     for manga in decodedResponse.results {
                         mangaTitleByIdDict[manga.id] = manga.title
-                        coverArtByIdDict[manga.id] = manga.coverArtURL
                     }
                     
                     DispatchQueue.main.async {
                         searchResult = decodedResponse.results
+                        
+                        loadCovers()
+                        
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
@@ -221,8 +223,63 @@ struct LibraryView: View {
             }
         }.resume()
     }
-    
-    
+    //MARK: - Retrieve the covers for the mangas in the library
+    func loadCovers() {
+        let loadingDescription: LocalizedStringKey = "Retrieving covers..."
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
+        
+        var urlComponents = URLComponents()
+        urlComponents.queryItems = []
+        
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "100"))
+        
+        for manga in searchResult {
+            urlComponents.queryItems?.append(URLQueryItem(name: "manga[]", value: manga.id))
+        }
+        
+        let payload = urlComponents.percentEncodedQuery
+        
+        guard let url = URL(string: "https://api.mangadex.org/cover?\(payload ?? "")") else {
+            print("From LibraryView: Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        print("From LibraryView(cover loading): \(url.absoluteString)")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    let decodedResponse = try JSONDecoder().decode(Covers.self, from: data)
+                    
+                    for cover in decodedResponse.results {
+                        coverArtByIdDict[cover.manga] = cover.path
+                    }
+                    
+                    DispatchQueue.main.async {
+                        for (index, manga) in searchResult.enumerated() {
+                            searchResult[index].coverArtURL = coverArtByIdDict[manga.id] ?? ""
+                        }
+                        
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                } catch {
+                    print ("error")
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "Unknown error when getting covers (library).\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                }
+            }
+        }.resume()
+    }
 }
 
 struct LibraryView_Previews: PreviewProvider {

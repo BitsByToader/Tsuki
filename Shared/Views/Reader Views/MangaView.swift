@@ -180,7 +180,6 @@ struct MangaView: View {
                         if wasSuccesfull {
                             loadChapters()
                             getMangaStatus()
-                            getAuthorDetails()
                         }
                     }
                     self.reloadContents = false
@@ -198,7 +197,7 @@ struct MangaView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)") else {
+        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)?includes[]=author&includes[]=artist&includes[]=cover_art") else {
             print("From MangaView: Invalid URL")
             return
         }
@@ -527,57 +526,6 @@ struct MangaView: View {
                     
                     DispatchQueue.main.async {
                         appState.errorMessage += "From Manga (status retrieval).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
-                        withAnimation {
-                            appState.errorOccured = true
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        }
-                    }
-                    
-                    return
-                }
-            } else {
-                DispatchQueue.main.async {
-                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
-                    withAnimation {
-                        appState.errorOccured = true
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                    }
-                }
-                
-                return
-            }
-        }.resume()
-    }
-    //MARK: - Authoer loader method
-    func getAuthorDetails() {
-        let loadingDescription: LocalizedStringKey = "Loading author..."
-        DispatchQueue.main.async {
-            appState.loadingQueue.append(loadingDescription)
-        }
-        
-        guard let url = URL(string :"https://api.mangadex.org/author/\(manga.artist[1])") else {
-            print("from updateMangaStatus: Invalid URL")
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
-                do {
-                    let decodedResponse = try JSONDecoder().decode(Author.self, from: data)
-                    
-                    DispatchQueue.main.async {
-                        self.manga.artist[0] = decodedResponse.authorName
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                    }
-                } catch {
-                    print(error)
-                    
-                    DispatchQueue.main.async {
-                        appState.errorMessage += "From Manga (author retrieval).\nAn error occured during the decoding of the JSON response from the server.\nMessage: \(error)\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)

@@ -11,6 +11,7 @@ import Foundation
 struct Manga: Decodable {
     let title: String
     var artist: [String]
+    var artistId: [String]
     var coverURL: String
     let description: String
     let rating: Rating
@@ -19,6 +20,7 @@ struct Manga: Decodable {
     init() {
         self.title = ""
         self.artist = [""]
+        self.artistId = [""]
         self.coverURL = ""
         self.description = ""
         self.rating = Rating(bayesian: 1, users: 0)
@@ -28,6 +30,7 @@ struct Manga: Decodable {
     init( title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [String]) {
         self.title = title
         self.artist = [artist]
+        self.artistId = []
         self.coverURL = coverURL
         self.description = description
         self.rating = rating
@@ -37,6 +40,7 @@ struct Manga: Decodable {
     init(fromDownloadedManga manga: DownloadedManga) {
         title = manga.wrappedMangaTitle
         artist = [manga.wrappedMangaArtist]
+        artistId = []
         coverURL = manga.wrappedMangaCoverURL
         description = manga.wrappedMangaDescription
         rating = Rating(bayesian: Float(manga.wrappedMangaRating) ?? 1, users: Int(manga.wrappedUsersRated) ?? 0)
@@ -54,7 +58,7 @@ struct Manga: Decodable {
     }
     
     enum DataCodingKeys: String, CodingKey {
-        case attributes
+        case id, attributes
     }
     
     enum AttributesCodingKeys: String, CodingKey {
@@ -74,6 +78,7 @@ struct Manga: Decodable {
         
         let data = try container.nestedContainer(keyedBy: DataCodingKeys.self, forKey: .data)
         let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
+        let id: String = try data.decode(String.self, forKey: .id)
         
         let titleContainer = try attributes.nestedContainer(keyedBy: TitleCodingKeys.self, forKey: .title)
         self.title = try titleContainer.decode(String.self, forKey: .en)
@@ -92,16 +97,23 @@ struct Manga: Decodable {
         let relationshipsContainer = try container.decode([MDRelationship].self, forKey: .relationships)
         
         var artistArr: [String] = []
-        artistArr.append("Author Name")
+        var artistIdArr: [String] = []
+        var cover: String = ""
+        
         for relation in relationshipsContainer {
             if ( relation.type == "author" || relation.type == "artist" ) {
-                artistArr.append(relation.id)
+                artistArr.append(relation.authorName)
+                artistIdArr.append(relation.id)
+            } else if ( relation.type == "cover_art" ) {
+                cover = relation.coverFileName
             }
         }
-        self.artist = artistArr
         
-        //The API doesn't provide these.
-        self.coverURL = ""
+        self.artist = artistArr
+        self.artistId = artistIdArr
+        self.coverURL = "https://uploads.mangadex.org/covers/\(id)/\(cover).256.jpg"
+        
+        //The API doesn't provide these yet...
         self.rating = Rating(bayesian: 0, users: 0)
     }
     
@@ -137,6 +149,29 @@ struct Manga: Decodable {
 struct MDRelationship: Decodable {
     let id: String
     let type: String
+    
+    //Optional values that can be decoded from the attributes of a relationship
+    let coverFileName: String
+    let authorName: String
+    
+    enum CodingKeys: String, CodingKey {
+        case id, type, attributes
+    }
+    
+    enum AttributesCodingKeys: String, CodingKey {
+        case fileName, name
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.id = try container.decode(String.self, forKey: .id)
+        self.type = try container.decode(String.self, forKey: .type)
+        
+        let attributesContainer = try? container.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
+        self.coverFileName = ( try? attributesContainer?.decode(String.self, forKey: .fileName) ) ?? ""
+        self.authorName = ( try? attributesContainer?.decode(String.self, forKey: .name) ) ?? ""
+    }
 }
 
 struct ReturnedMangas: Decodable {
@@ -146,11 +181,11 @@ struct ReturnedMangas: Decodable {
 //MARK: - Manga returned from seach struct 
 struct ReturnedManga: Decodable, Hashable {
     let title: String
-    let coverArtURL: String
+    var coverArtURL: String
     let id: String
     
     enum CodingKeys: String, CodingKey {
-        case data
+        case data, relationships
     }
     
     enum DataCodingKeys: String, CodingKey {
@@ -175,7 +210,17 @@ struct ReturnedManga: Decodable, Hashable {
         let titleContainer = try attributes.nestedContainer(keyedBy: TitleCodingKeys.self, forKey: .title)
         self.title = try titleContainer.decode(String.self, forKey: .en)
         
-        self.coverArtURL = ""
+        let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
+        
+        var coverName: String = ""
+        for relation in relationships {
+            if ( relation.type == "cover_art" ) {
+                coverName = relation.coverFileName
+                break
+            }
+        }
+        
+        self.coverArtURL = "https://uploads.mangadex.org/covers/\(self.id)/\(coverName).256.jpg"
     }
     
     init(title: String, coverArtURL: String, id: String) {

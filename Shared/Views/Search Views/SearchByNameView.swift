@@ -87,6 +87,8 @@ struct SearchByNameView: View {
             }
         }
         
+        urlComponents.queryItems?.append( URLQueryItem(name: "includes[]", value: "cover_art") )
+        
         let payload = urlComponents.percentEncodedQuery
         
         guard let url = URL(string: "https://api.mangadex.org/manga?\(payload ?? "")") else {
