@@ -10,9 +10,10 @@ import SwiftUI
 struct TodayView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var appState: AppState
-    @State private var loadingMangas: Bool = true
     
-//    @State private var newChapters: [] = []
+    @State private var newChapters: [Chapter] = []
+    @State private var newChaptersCovers: [String: String] = [:]
+    
     @State private var featuredDisplayedMangas: [ReturnedManga] = []
     @State private var newDisplayedMangas: [ReturnedManga] = []
     
@@ -27,17 +28,17 @@ struct TodayView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            if loadingMangas {
+                            if newChapters.isEmpty {
                                 ForEach(0..<6) {_ in
                                     PlaceholderManga()
                                 }
                             } else {
-                                /*ForEach(newChapters, id: \.self) { manga in
-                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
-                                        UpdatedManga(manga: manga)
+                                ForEach(newChapters, id: \.self) { manga in
+                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.mangaId)) {
+                                        UpdatedManga(manga: manga, coverArt: newChaptersCovers[manga.mangaId] ?? "", mangaTitle: manga.mangaTitle)
                                     }.buttonStyle(PlainButtonStyle())
                                     .frame(width: 125)
-                                }*/
+                                }
                             }
                         }
                     }
@@ -50,7 +51,7 @@ struct TodayView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            if loadingMangas {
+                            if featuredDisplayedMangas.isEmpty {
                                 ForEach(0..<6) {_ in
                                     PlaceholderManga()
                                 }
@@ -73,7 +74,7 @@ struct TodayView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            if loadingMangas {
+                            if newDisplayedMangas.isEmpty {
                                 ForEach(0..<6) {_ in
                                     PlaceholderManga()
                                 }
@@ -97,17 +98,18 @@ struct TodayView: View {
         }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
         .if( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
         .onAppear {
-            //loadUpdates()
+            loadFeaturedManga()
+            getNewestTitles()
+            loadNewestChapters()
         }
     }
-    
-    func loadUpdates() {
-        let loadingDescription: LocalizedStringKey = "Loading mangas..."
+    //MARK: - Get featured manga
+    func loadFeaturedManga() {
+        let loadingDescription: LocalizedStringKey = "Loading featured manga..."
         
         appState.loadingQueue.append(loadingDescription)
-        self.loadingMangas = true
         
-        guard let url = URL(string: "https://mangadex.org") else {
+        guard let url = URL(string: "https://api.mangadex.org/list/8018a70b-1492-4f91-a584-7451d7787f7a?includes[]=manga") else {
             print("Invalid URL")
             return
         }
@@ -116,97 +118,235 @@ struct TodayView: View {
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
-        print("From TodayView: \(url.absoluteString)")
+        print("From TodayView(loadFeaturedManga): \(url.absoluteString)")
         
         URLSession.shared.dataTask(with: request) { data, response, error in
-            if let _ = data {
+            if let data = data {
                 do {
+                    struct FeaturedManga: Decodable {
+                        let relationships: [MDRelationship]
+                    }
                     
-//                    let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
-//
-//                    //MARK: - Retrieve latest updated manga
-//                    let latestUpdatedChapters = try doc.getElementById("latest_update")?.child(0).children().array()
-//                    var latestUpdatedMangas: [ReturnedUpdatedManga] = []
-//                    for manga in latestUpdatedChapters ?? [] {
-//                        let title: String = try manga.child(1).getElementsByClass("manga_title").first()!.text()
-//
-//                        let mangaLink: String = try manga.child(1).getElementsByClass("manga_title").first()!.attr("href")
-//                        let mangaId: String = mangaLink.components(separatedBy: "/")[2]
-//
-//                        let coverArt: String = try manga.getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")
-//
-//                        let timeOfUpdate: String = try manga.children().array()[2].select("a").text()
-//                        let chapter: String = try manga.children().array()[4].text()
-//
-//                        latestUpdatedMangas.append(ReturnedUpdatedManga(title: title, coverArtURL: coverArt, id: mangaId, timeOfUpdate: timeOfUpdate, volumeAndChapter: chapter))
-//                    }
-//
-//                    //MARK: - Retrieve featured titles
-//                    let featuredTitles = try doc.getElementById("hled_titles_owl_carousel")?.children().array()
-//                    var featuredMangas: [ReturnedManga] = []
-//                    for manga in featuredTitles ?? [] {
-//                        let result: ReturnedManga =  try extractMangaFromCarousel(element: manga)
-//
-//                        featuredMangas.append(result)
-//                    }
-//
-//                    //MARK: - Retrieve featured titles
-//                    let newTitles = try doc.getElementById("new_titles_owl_carousel")?.children().array()
-//                    var newMangas: [ReturnedManga] = []
-//                    for manga in newTitles ?? [] {
-//                        let result: ReturnedManga =  try extractMangaFromCarousel(element: manga)
-//
-//                        newMangas.append(result)
-//                    }
-//
-//                    //MARK: - Update View
-//                    DispatchQueue.main.async {
-//                        self.newChapters = latestUpdatedMangas
-//                        self.featuredDisplayedMangas = featuredMangas
-//                        self.newDisplayedMangas = newMangas
-//                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
-//                        self.loadingMangas = false
-//                    }
-                    //MARK: -
-                    return
-                } //catch {
-//                    print ("error")
-//                    DispatchQueue.main.async {
-//                        appState.errorMessage += "Unknown error when parsing response from server.\n\n"
-//                        withAnimation {
-//                            appState.errorOccured = true
-//                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-//                        }
-//                    }
-//                    return
-//                }
-            }
-            
-            DispatchQueue.main.async {
-                print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
-                appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
-                withAnimation {
-                    appState.errorOccured = true
-                    appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    let decodedResponse = try JSONDecoder().decode(FeaturedManga.self, from: data)
+                    
+                    var arr: [ReturnedManga] = []
+                    for relation in decodedResponse.relationships {
+                        if relation.type == "manga" {
+                            arr.append(ReturnedManga(title: relation.mangaTitle, coverArtURL: "", id: relation.id))
+                        }
+                    }
+                    
+                    DispatchQueue.main.async {
+                        self.featuredDisplayedMangas = arr
+                        
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                    
+                } catch {
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "(From TodayView, featuredManga) Unknown error when parsing response from server.\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                    withAnimation {
+                        appState.errorOccured = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
                 }
             }
-            return
         }.resume()
     }
-    
-//    func extractMangaFromCarousel(element: Element) throws -> ReturnedManga {
-//        let mangaTitle: Element = try element.child(1)
-//            .select("p").first()!.getElementsByClass("manga_title").first()!
-//        
-//        let _: String = try mangaTitle.text()
-//
-//        let mangaLink: String = try mangaTitle.attr("href")
-//        let _: String = mangaLink.components(separatedBy: "/")[2]
-//
-//        let _: String = try element.child(0).select("a").select("img").attr("data-src")
-//
-//        return ReturnedManga(title: "title", coverArtURL: "coverArt", id: "mangaId")
-//    }
+    //MARK: - Get newest chapters
+    func loadNewestChapters() {
+        let loadingDescription: LocalizedStringKey = "Loading newest chapters..."
+        
+        appState.loadingQueue.append(loadingDescription)
+        
+        guard let url = URL(string: "https://api.mangadex.org/chapter?limit=20&order[createdAt]=desc&translatedLanguage[]=en&includes[]=manga") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.httpShouldHandleCookies = true
+        
+        print("From TodayView(loadNewestChapters): \(url.absoluteString)")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    struct Result: Decodable {
+                        let results: [Chapter]
+                    }
+                    
+                    let decodedResponse = try JSONDecoder().decode(Result.self, from: data)
+                    
+                    DispatchQueue.main.async {
+                        self.newChapters = decodedResponse.results
+                        
+                        loadNewestChaptersCovers()
+                        
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                    
+                } catch {
+                    print ("error")
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "(From TodayView, featuredManga) Unknown error when parsing response from server.\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                    withAnimation {
+                        appState.errorOccured = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
+            }
+        }.resume()
+    }
+    //MARK: - Get covers for newest chapters and featured manga
+    func loadNewestChaptersCovers() {
+        let loadingDescription: LocalizedStringKey = "Retrieving covers..."
+        
+        appState.loadingQueue.append(loadingDescription)
+        
+        var urlComponents = URLComponents()
+        urlComponents.queryItems = []
+        
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "100"))
+        
+        var arr: [String] = []
+        for chapter in newChapters {
+            if !arr.contains(chapter.mangaId) {
+                arr.append(chapter.mangaId)
+                urlComponents.queryItems?.append(URLQueryItem(name: "manga[]", value: chapter.mangaId))
+            }
+        }
+        print(arr.count)
+        
+        for manga in featuredDisplayedMangas {
+            urlComponents.queryItems?.append(URLQueryItem(name: "manga[]", value: manga.id))
+        }
+        
+        print (urlComponents.queryItems?.count)
+        
+        let payload = urlComponents.percentEncodedQuery
+        
+        guard let url = URL(string: "https://api.mangadex.org/cover?\(payload ?? "")") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.httpShouldHandleCookies = true
+        
+        print("From TodayView(loadNewestChaptersCovers): \(url.absoluteString)")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    let decodedResponse = try JSONDecoder().decode(Covers.self, from: data)
+                    
+                    DispatchQueue.main.async {
+                        for cover in decodedResponse.results {
+                            newChaptersCovers[cover.manga] = cover.path
+                        }
+                        
+                        print (decodedResponse.results.count)
+                        print(newChaptersCovers.keys.count)
+                        
+                        for (index, manga) in featuredDisplayedMangas.enumerated() {
+                            featuredDisplayedMangas[index].coverArtURL = newChaptersCovers[manga.id] ?? ""
+                        }
+                        
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                    
+                } catch {
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "(From TodayView, newestChapters, covers) Unknown error when parsing response from server.\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                    withAnimation {
+                        appState.errorOccured = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
+            }
+        }.resume()
+    }
+    //MARK: - Get newest mangas
+    func getNewestTitles() {
+        let loadingDescription: LocalizedStringKey = "Loading newest manga..."
+        
+        appState.loadingQueue.append(loadingDescription)
+        
+        guard let url = URL(string: "https://api.mangadex.org/manga?limit=20&order[createdAt]=desc&includes[]=cover_art") else {
+            print("Invalid URL")
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.httpShouldHandleCookies = true
+        
+        print("From TodayView(loadNewestMangas): \(url.absoluteString)")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
+                    
+                    DispatchQueue.main.async {
+                        newDisplayedMangas = decodedResponse.results
+                        
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        appState.errorMessage += "(From TodayView, newestManga) Unknown error when parsing response from server.\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        withAnimation {
+                            appState.errorOccured = true
+                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        }
+                    }
+                }
+            } else {
+                DispatchQueue.main.async {
+                    print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
+                    appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
+                    withAnimation {
+                        appState.errorOccured = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
+            }
+        }.resume()
+    }
 }
 
 extension View {
@@ -222,10 +362,3 @@ extension View {
     }
   }
 }
-
-
-//struct TodayView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        TodayView()
-//    }
-//}

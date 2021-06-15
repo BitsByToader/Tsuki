@@ -9,6 +9,8 @@ import Foundation
 
 struct Chapter: Decodable, Hashable {
     let mangaId: String
+    let mangaTitle: String
+    
     let chapterId: String
     let hash: String
     
@@ -56,14 +58,18 @@ struct Chapter: Decodable, Hashable {
         
         let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
         
-        var manga = ""
+        var mangaId = ""
+        var mangaName = ""
         for relationship in relationships {
             if ( relationship.type == "manga" ) {
-                manga = relationship.id
+                mangaId = relationship.id
+                mangaName = relationship.mangaTitle
                 break
             }
         }
-        self.mangaId = manga
+        
+        self.mangaId = mangaId
+        self.mangaTitle = mangaName
     }
 }
 

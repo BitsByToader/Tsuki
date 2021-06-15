@@ -145,7 +145,7 @@ struct Manga: Decodable {
         }
     }
 }
-
+//MARK: - MDRelationship
 struct MDRelationship: Decodable {
     let id: String
     let type: String
@@ -153,13 +153,18 @@ struct MDRelationship: Decodable {
     //Optional values that can be decoded from the attributes of a relationship
     let coverFileName: String
     let authorName: String
+    let mangaTitle: String
     
     enum CodingKeys: String, CodingKey {
         case id, type, attributes
     }
     
     enum AttributesCodingKeys: String, CodingKey {
-        case fileName, name
+        case fileName, name, title
+    }
+    
+    enum MangaNameCodingKeys: String, CodingKey {
+        case en
     }
     
     init(from decoder: Decoder) throws {
@@ -171,14 +176,16 @@ struct MDRelationship: Decodable {
         let attributesContainer = try? container.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         self.coverFileName = ( try? attributesContainer?.decode(String.self, forKey: .fileName) ) ?? ""
         self.authorName = ( try? attributesContainer?.decode(String.self, forKey: .name) ) ?? ""
+        
+        let mangaNamesContainer = try? attributesContainer?.nestedContainer(keyedBy: MangaNameCodingKeys.self, forKey: .title)
+        self.mangaTitle = ( try? mangaNamesContainer?.decode(String.self, forKey: .en) ) ?? ""
     }
 }
-
+//MARK: - Manga returned from seach struct 
 struct ReturnedMangas: Decodable {
     let results: [ReturnedManga]
 }
 
-//MARK: - Manga returned from seach struct 
 struct ReturnedManga: Decodable, Hashable {
     let title: String
     var coverArtURL: String

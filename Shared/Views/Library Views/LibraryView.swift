@@ -17,7 +17,6 @@ struct LibraryView: View {
     @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var widgetURL: WidgetURL
     @EnvironmentObject var appState: AppState
-    @AppStorage("MDListLink") var MDlListLink: String = ""
 
     @State private var loggedIn: Bool = false
     
