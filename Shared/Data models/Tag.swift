@@ -10,9 +10,9 @@ import SwiftUI
 
 //MARK: - Global MangaTags class
 class MangaTags: ObservableObject  {
-    @Published var tags: [String: String] = [:]
+    @Published var tags: [String: [Tag]] = [:]
     
-    func loadTags(completion: @escaping ([String: String]) -> Void) {
+    func loadTags(completion: @escaping ([String: [Tag]]) -> Void) {
         //let loadingDescription: LocalizedStringKey = "Loading search tags..."
         //appState.loadingQueue.append(loadingDescription)
         
@@ -32,16 +32,23 @@ class MangaTags: ObservableObject  {
                 do {
                     let decodedResponse = try JSONDecoder().decode([MDTag].self, from: data)
                     
-                    var MDTags: [String: String] = [:]
-                    
+                    var tagDict: [String: [Tag]] = [:]
                     for tag in decodedResponse {
-                        MDTags[tag.id] = tag.name
+                        if tagDict.index(forKey: tag.group) == nil {
+                            //The tag group wasn't added to the dictionary yet
+                            tagDict[tag.group] = [Tag(id: tag.id, tagName: tag.name)]
+                        } else {
+                            //The tag group is in the dictionery so update the array for that group
+                            var tempArr = tagDict[tag.group]
+                            tempArr?.append(Tag(id: tag.id, tagName: tag.name))
+                            
+                            tagDict[tag.group] = tempArr
+                        }
                     }
                     
                     DispatchQueue.main.async {
-                        self.tags = MDTags
-                        completion(self.tags)
-                        //self.appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        self.tags = tagDict
+                        completion(tagDict)
                     }
                 } catch {
                     print(error)
@@ -78,6 +85,7 @@ struct Tag: Hashable {
 struct MDTag: Decodable {
     let id: String
     let name: String
+    let group: String
     
     //MARK: Decodable stuff...
     enum CodingKeys: String, CodingKey {
@@ -89,7 +97,7 @@ struct MDTag: Decodable {
     }
     
     enum AttributesCodingKeys: String, CodingKey {
-        case name
+        case name, group
     }
     
     enum NameCodingKeys: String, CodingKey {
@@ -100,10 +108,11 @@ struct MDTag: Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         let data = try container.nestedContainer(keyedBy: DataCodingKeys.self, forKey: .data)
-        id = try data.decode(String.self, forKey: .id)
+        self.id = try data.decode(String.self, forKey: .id)
         let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         
+        self.group = try attributes.decode(String.self, forKey: .group)
         let nameContainer = try attributes.nestedContainer(keyedBy: NameCodingKeys.self, forKey: .name)
-        name = try nameContainer.decode(String.self, forKey: .en)
+        self.name = try nameContainer.decode(String.self, forKey: .en)
     }
 }

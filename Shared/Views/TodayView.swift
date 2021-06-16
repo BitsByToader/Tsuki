@@ -246,7 +246,6 @@ struct TodayView: View {
                 urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: chapter.mangaId))
             }
         }
-        print(arr.count)
         
         for manga in featuredDisplayedMangas {
             urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: manga))

@@ -24,13 +24,12 @@ struct SearchView: View {
     @State private var showCancelButton: Bool = false
     @State private var logInViewPresented: Bool = false
     
-    @State private var tags: [Tag] = []
+    @State private var tagsDict: [String: [Tag]] = [:]
     
     @State private var includedTagsArray: [String] = []
     @State private var excludedTagsArray: [String] = []
-    @State private var includedTags: Int = 0
-    @State private var excludedTags: Int = 0
     
+    #warning("Refactor this to use the ToggleState enum from the Tag struct")
     enum TagMode {
         case include, exclude
     }
@@ -45,38 +44,36 @@ struct SearchView: View {
                             }
                         }
                         
-                        Section(header: Text("Tags")) {
-                            ForEach(Array((tags).enumerated()), id: \.element) { i, tag in
-                                Button(action: {
-                                    switch tag.state {
-                                    case .untoggled:
-                                        //If the row is untoggled, we'll include the tag.
-                                        withAnimation {
-                                            tags[i].state = .enabled
-                                            updateTagArray(mode: .include, tagId: tag.id)
-//                                            includedTags += 1
+                        ForEach(Array(tagsDict.keys.sorted(by: >)), id:\.self) { section in
+                            Section(header: Text(section)) {
+                                ForEach(Array((tagsDict[section] ?? []).enumerated()), id: \.element) { i, tag in
+                                    Button(action: {
+                                        switch tag.state {
+                                        case .untoggled:
+                                            //If the row is untoggled, we'll include the tag.
+                                            withAnimation {
+                                                tagsDict[section]?[i].state = .enabled
+                                                updateTagArray(mode: .include, tagId: tag.id)
+                                            }
+                                        case .enabled:
+                                            //If the row is included, we'll exclude it
+                                            withAnimation {
+                                                tagsDict[section]?[i].state = .disabled
+                                                removeTagFromArray(mode: .include, tagId: tag.id)
+                                                updateTagArray(mode: .exclude, tagId: tag.id)
+                                            }
+                                        case .disabled:
+                                            //If the row is excluded, we'll untoggle it.
+                                            withAnimation {
+                                                tagsDict[section]?[i].state = .untoggled
+                                                removeTagFromArray(mode: .exclude, tagId: tag.id)
+                                            }
                                         }
-                                    case .enabled:
-                                        //If the row is included, we'll exclude it
-                                        withAnimation {
-                                            tags[i].state = .disabled
-                                            removeTagFromArray(mode: .include, tagId: tag.id)
-                                            updateTagArray(mode: .exclude, tagId: tag.id)
-//                                            includedTags -= 1
-//                                            excludedTags += 1
-                                        }
-                                    case .disabled:
-                                        //If the row is excluded, we'll untoggle it.
-                                        withAnimation {
-                                            tags[i].state = .untoggled
-                                            removeTagFromArray(mode: .exclude, tagId: tag.id)
-//                                            excludedTags -= 1
-                                        }
-                                    }
-                                }, label: {
-                                    Text(tag.tagName)
-                                        .foregroundColor( (colorScheme == .dark) || (tag.state == .enabled || tag.state == .disabled) ? .white : .black)
-                                }).listRowBackground(state: tag.state)
+                                    }, label: {
+                                        Text(tag.tagName)
+                                            .foregroundColor( (colorScheme == .dark) || (tag.state == .enabled || tag.state == .disabled) ? .white : .black)
+                                    }).listRowBackground(state: tag.state)
+                                }
                             }
                         }
                     }.navigationBarTitle(Text("Search"))
@@ -102,19 +99,9 @@ struct SearchView: View {
                     appState.loadingQueue.append(loadingDescription)
                     
                     DispatchQueue.global(qos: .userInitiated).async {
-                        mangaTags.loadTags { tagsDict in
-                            var arr: [Tag] = []
-                            
-                            for (id, name) in tagsDict {
-                                arr.append(Tag(id: id, tagName: name))
-                            }
-                            
-                            arr = arr.sorted {
-                                return $0.tagName < $1.tagName
-                            }
-                            
+                        mangaTags.loadTags { testDict in
                             DispatchQueue.main.async {
-                                self.tags = arr
+                                self.tagsDict = testDict
                                 appState.removeFromLoadingQueue(loadingState: loadingDescription)
                             }
                         }
@@ -123,6 +110,7 @@ struct SearchView: View {
             }
     }
     
+    #warning("Maybe refactor these two functions into one and place them in the tag struct or smth")
     func updateTagArray(mode: TagMode, tagId: String) {
         switch mode {
         case .include:
