@@ -207,6 +207,12 @@ struct ReturnedManga: Decodable, Hashable {
         case en
     }
     
+    init() {
+        self.coverArtURL = ""
+        self.id = ""
+        self.title = ""
+    }
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         

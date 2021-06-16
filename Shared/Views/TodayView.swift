@@ -12,9 +12,9 @@ struct TodayView: View {
     @EnvironmentObject var appState: AppState
     
     @State private var newChapters: [Chapter] = []
-    @State private var newChaptersCovers: [String: String] = [:]
+    @State private var mangasById: [String: ReturnedManga] = [:]
     
-    @State private var featuredDisplayedMangas: [ReturnedManga] = []
+    @State private var featuredDisplayedMangas: [String] = []
     @State private var newDisplayedMangas: [ReturnedManga] = []
     
     var body: some View {
@@ -35,7 +35,9 @@ struct TodayView: View {
                             } else {
                                 ForEach(newChapters, id: \.self) { manga in
                                     NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.mangaId)) {
-                                        UpdatedManga(manga: manga, coverArt: newChaptersCovers[manga.mangaId] ?? "", mangaTitle: manga.mangaTitle)
+                                        UpdatedManga(manga: manga,
+                                                     coverArt: mangasById[manga.mangaId]?.coverArtURL ?? "",
+                                                     mangaTitle: manga.mangaTitle)
                                     }.buttonStyle(PlainButtonStyle())
                                     .frame(width: 125)
                                 }
@@ -57,8 +59,8 @@ struct TodayView: View {
                                 }
                             } else {
                                 ForEach(featuredDisplayedMangas, id: \.self) { manga in
-                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
-                                        PlainManga(manga: manga)
+                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga)) {
+                                        PlainManga(manga: mangasById[manga] ?? ReturnedManga())
                                     }.buttonStyle(PlainButtonStyle())
                                     .frame(width: 125)
                                 }
@@ -91,7 +93,7 @@ struct TodayView: View {
             }.listStyle(PlainListStyle())
             .navigationTitle(Text("Today"))
             
-            MangaView(reloadContents: !featuredDisplayedMangas.isEmpty, mangaId: featuredDisplayedMangas.isEmpty ? "" : featuredDisplayedMangas[0].id)
+            MangaView(reloadContents: !featuredDisplayedMangas.isEmpty, mangaId: featuredDisplayedMangas.isEmpty ? "" : featuredDisplayedMangas[0])
 
             ChapterView(loadContents: false, isViewPresented: .constant(1), remainingChapters: [])
             
@@ -129,10 +131,10 @@ struct TodayView: View {
                     
                     let decodedResponse = try JSONDecoder().decode(FeaturedManga.self, from: data)
                     
-                    var arr: [ReturnedManga] = []
+                    var arr: [String] = []
                     for relation in decodedResponse.relationships {
                         if relation.type == "manga" {
-                            arr.append(ReturnedManga(title: relation.mangaTitle, coverArtURL: "", id: relation.id))
+                            arr.append(relation.id)
                         }
                     }
                     
@@ -221,6 +223,12 @@ struct TodayView: View {
     }
     //MARK: - Get covers for newest chapters and featured manga
     func loadNewestChaptersCovers() {
+        ///So initially, this method was using the /cover endpoint to retrieve the covers for the newest chapters and the featured mangas
+        ///The featured chapters are retrieved from a custom list, and there is no data about the manga other than its id.
+        ///The newest chapters are taken from the /chapter endpoint and so, the are no covers.
+        ///Ideally, the cover endpoint would be used to save on bandwith, but it doesn't provide manga titles for featured manga.
+        ///So, the /manga endpoint was used with the includes query parameter to get manga titles and covers in one call.
+        
         let loadingDescription: LocalizedStringKey = "Retrieving covers..."
         
         appState.loadingQueue.append(loadingDescription)
@@ -228,26 +236,25 @@ struct TodayView: View {
         var urlComponents = URLComponents()
         urlComponents.queryItems = []
         
-        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "100"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "40"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "includes[]", value: "cover_art"))
         
         var arr: [String] = []
         for chapter in newChapters {
             if !arr.contains(chapter.mangaId) {
                 arr.append(chapter.mangaId)
-                urlComponents.queryItems?.append(URLQueryItem(name: "manga[]", value: chapter.mangaId))
+                urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: chapter.mangaId))
             }
         }
         print(arr.count)
         
         for manga in featuredDisplayedMangas {
-            urlComponents.queryItems?.append(URLQueryItem(name: "manga[]", value: manga.id))
+            urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: manga))
         }
-        
-        print (urlComponents.queryItems?.count)
         
         let payload = urlComponents.percentEncodedQuery
         
-        guard let url = URL(string: "https://api.mangadex.org/cover?\(payload ?? "")") else {
+        guard let url = URL(string: "https://api.mangadex.org/manga?\(payload ?? "")") else {
             print("Invalid URL")
             return
         }
@@ -261,18 +268,11 @@ struct TodayView: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    let decodedResponse = try JSONDecoder().decode(Covers.self, from: data)
+                    let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
                     
                     DispatchQueue.main.async {
-                        for cover in decodedResponse.results {
-                            newChaptersCovers[cover.manga] = cover.path
-                        }
-                        
-                        print (decodedResponse.results.count)
-                        print(newChaptersCovers.keys.count)
-                        
-                        for (index, manga) in featuredDisplayedMangas.enumerated() {
-                            featuredDisplayedMangas[index].coverArtURL = newChaptersCovers[manga.id] ?? ""
+                        for manga in decodedResponse.results {
+                            mangasById[manga.id] = manga
                         }
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
