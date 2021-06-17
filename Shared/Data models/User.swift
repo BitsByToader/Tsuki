@@ -147,7 +147,7 @@ final class MDAuthentification {
         }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -155,7 +155,7 @@ final class MDAuthentification {
         
         URLSession.shared.dataTask(with: request) {data,response,error in
             if let data = data {
-                //                print( String(data: data, encoding: .utf8) )
+                                print( String(data: data, encoding: .utf8) )
                 
                 do {
                     struct CheckLoginResponse: Codable {
@@ -185,7 +185,7 @@ final class MDAuthentification {
         }
         
         var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
