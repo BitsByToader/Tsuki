@@ -109,12 +109,12 @@ struct TodayView: View {
     func loadFeaturedManga() {
         let loadingDescription: LocalizedStringKey = "Loading featured manga..."
         
-        appState.loadingQueue.append(loadingDescription)
-        
-        guard let url = URL(string: "https://api.mangadex.org/list/8018a70b-1492-4f91-a584-7451d7787f7a?includes[]=manga") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")list/8018a70b-1492-4f91-a584-7451d7787f7a?includes[]=manga") else {
             print("Invalid URL")
             return
         }
+        
+        appState.loadingQueue.append(loadingDescription)
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -169,12 +169,12 @@ struct TodayView: View {
     func loadNewestChapters() {
         let loadingDescription: LocalizedStringKey = "Loading newest chapters..."
         
-        appState.loadingQueue.append(loadingDescription)
-        
-        guard let url = URL(string: "https://api.mangadex.org/chapter?limit=20&order[createdAt]=desc&translatedLanguage[]=en&includes[]=manga") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")chapter?limit=20&order[createdAt]=desc&translatedLanguage[]=en&includes[]=manga") else {
             print("Invalid URL")
             return
         }
+        
+        appState.loadingQueue.append(loadingDescription)
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -231,8 +231,6 @@ struct TodayView: View {
         
         let loadingDescription: LocalizedStringKey = "Retrieving covers..."
         
-        appState.loadingQueue.append(loadingDescription)
-        
         var urlComponents = URLComponents()
         urlComponents.queryItems = []
         
@@ -253,10 +251,12 @@ struct TodayView: View {
         
         let payload = urlComponents.percentEncodedQuery
         
-        guard let url = URL(string: "https://api.mangadex.org/manga?\(payload ?? "")") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?\(payload ?? "")") else {
             print("Invalid URL")
             return
         }
+        
+        appState.loadingQueue.append(loadingDescription)
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -302,12 +302,12 @@ struct TodayView: View {
     func getNewestTitles() {
         let loadingDescription: LocalizedStringKey = "Loading newest manga..."
         
-        appState.loadingQueue.append(loadingDescription)
-        
-        guard let url = URL(string: "https://api.mangadex.org/manga?limit=20&order[createdAt]=desc&includes[]=cover_art") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?limit=20&order[createdAt]=desc&includes[]=cover_art") else {
             print("Invalid URL")
             return
         }
+        
+        appState.loadingQueue.append(loadingDescription)
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"

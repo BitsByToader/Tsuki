@@ -383,7 +383,7 @@ struct ChapterSelectionView: View {
     func getChapterPages(chapter: Chapter) {
         //appState.isLoading = true
         
-        guard let url = URL(string: "https://api.mangadex.org/at-home/server/\(chapter.chapterId)") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")at-home/server/\(chapter.chapterId)") else {
             print("From ChapterSelectionView: Invalid URL")
             return
         }

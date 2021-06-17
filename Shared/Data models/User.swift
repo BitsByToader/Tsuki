@@ -60,7 +60,7 @@ final class MDAuthentification {
     
     //MARK: - Log In method
     func logInToMD(username: String, password: String, completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "https://api.mangadex.org/auth/login") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")auth/login") else {
             print("From LogInVIew: Invalid URL")
             return
         }
@@ -100,7 +100,7 @@ final class MDAuthentification {
     
     //MARK: - Refresh the session token method
     func getNewSessionToken(completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "https://api.mangadex.org/auth/refresh") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")auth/refresh") else {
             print("From LogInVIew: Invalid URL")
             return
         }
@@ -141,7 +141,7 @@ final class MDAuthentification {
     
     //MARK: - Check if the user is logged in
     func checkLogin(completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "https://api.mangadex.org/auth/check") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")auth/check") else {
             print("From LogInVIew: Invalid URL")
             return
         }
@@ -179,7 +179,7 @@ final class MDAuthentification {
     
     //MARK: - Log out method
     func logOut() {
-        guard let url = URL(string: "https://api.mangadex.org/auth/logout") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")auth/logout") else {
             print("From MDAuth: Invalid URL")
             return
         }

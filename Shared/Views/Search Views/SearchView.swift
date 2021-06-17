@@ -95,6 +95,10 @@ struct SearchView: View {
             .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
             .onAppear {
                 if mangaTags.tags.isEmpty {
+                    if UserDefaults.standard.value(forKey: "apiURL") == nil {
+                        return
+                    }
+                    
                     let loadingDescription: LocalizedStringKey = "Loading search tags..."
                     appState.loadingQueue.append(loadingDescription)
                     

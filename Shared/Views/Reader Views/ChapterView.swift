@@ -175,7 +175,7 @@ struct ChapterView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "https://api.mangadex.org/at-home/server/\(remainingChapters[currentChapter].chapterId)") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")at-home/server/\(remainingChapters[currentChapter].chapterId)") else {
             print("From ChapterView: Invalid URL")
             return
         }
@@ -244,7 +244,7 @@ struct ChapterView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string :"https://api.mangadex.org/chapter/\(remainingChapters[chapterToMark].chapterId)/read") else {
+        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "")chapter/\(remainingChapters[chapterToMark].chapterId)/read") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }

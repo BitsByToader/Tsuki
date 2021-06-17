@@ -61,7 +61,6 @@ struct SearchByNameView: View {
     
     func searchManga() {
         let loadingDescription: LocalizedStringKey = "Loading mangas..."
-        appState.loadingQueue.append(loadingDescription)
         
         var urlComponents = URLComponents()
         urlComponents.queryItems = []
@@ -91,10 +90,12 @@ struct SearchByNameView: View {
         
         let payload = urlComponents.percentEncodedQuery
         
-        guard let url = URL(string: "https://api.mangadex.org/manga?\(payload ?? "")") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?\(payload ?? "")") else {
             print("From SearchByName: Invalid URL")
             return
         }
+        
+        appState.loadingQueue.append(loadingDescription)
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"

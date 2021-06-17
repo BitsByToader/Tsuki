@@ -158,7 +158,7 @@ struct LibraryView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "https://api.mangadex.org/user/follows/manga?limit=100") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")user/follows/manga?limit=100") else {
             print("From LibraryView: Invalid URL")
             return
         }
@@ -240,7 +240,7 @@ struct LibraryView: View {
         
         let payload = urlComponents.percentEncodedQuery
         
-        guard let url = URL(string: "https://api.mangadex.org/cover?\(payload ?? "")") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")cover?\(payload ?? "")") else {
             print("From LibraryView: Invalid URL")
             return
         }

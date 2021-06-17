@@ -233,6 +233,7 @@ struct ReturnedManga: Decodable, Hashable {
             }
         }
         
+        #warning("Make this URL user changeable as well.")
         self.coverArtURL = "https://uploads.mangadex.org/covers/\(self.id)/\(coverName).256.jpg"
     }
     

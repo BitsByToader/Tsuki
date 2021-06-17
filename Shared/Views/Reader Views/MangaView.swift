@@ -197,7 +197,7 @@ struct MangaView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)?includes[]=author&includes[]=artist&includes[]=cover_art") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)?includes[]=author&includes[]=artist&includes[]=cover_art") else {
             print("From MangaView: Invalid URL")
             return
         }
@@ -250,7 +250,7 @@ struct MangaView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "https://api.mangadex.org/manga/\(mangaId)/feed?translatedLanguage[]=en&limit=500") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)/feed?translatedLanguage[]=en&limit=500") else {
             print("From MangaView: Invalid URL")
             return
         }
@@ -322,7 +322,7 @@ struct MangaView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string :"https://api.mangadex.org/manga/\(mangaId)/read") else {
+        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)/read") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }
@@ -400,7 +400,7 @@ struct MangaView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string :"https://api.mangadex.org/manga/\(mangaId)/status") else {
+        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)/status") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }
@@ -483,7 +483,7 @@ struct MangaView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string :"https://api.mangadex.org/manga/\(mangaId)/status") else {
+        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)/status") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }

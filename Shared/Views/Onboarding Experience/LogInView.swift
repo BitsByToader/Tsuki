@@ -19,6 +19,7 @@ struct LogInView: View {
     @State private var twoFactorCode: String = ""
     @State private var username: String = ""
     @State private var password: String = ""
+    @State private var apiURL: String = ""
     
     var testUsername: String = "ToaderTheBoi"
     var testPassword: String = "Pr0z6Po58jm3"
@@ -35,6 +36,12 @@ struct LogInView: View {
                 .padding(.top, 50)
             
             VStack {
+                TextField("API URL (add trailing slash!)", text: $apiURL)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .textContentType(.URL)
+                    .keyboardType(.URL)
+                    .padding(.horizontal)
+                
                 TextField("Username", text: $username)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .textContentType(.username)
@@ -77,6 +84,12 @@ struct LogInView: View {
                     .font(.system(size: 12))
                 
                 Button(action: {
+                    if ( apiURL == "" ) {
+                        UserDefaults.standard.removeObject(forKey: "apiURL")
+                    } else {
+                        UserDefaults.standard.setValue(apiURL, forKey: "apiURL")
+                    }
+                    
                     MDAuthentification.standard.logInToMD(username: username, password: password) { logInSuccessfull in
                         if logInSuccessfull {
                             DispatchQueue.main.async {
