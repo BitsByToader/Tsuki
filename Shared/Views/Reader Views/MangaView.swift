@@ -193,13 +193,14 @@ struct MangaView: View {
     //MARK: - Manga details loader
     func loadMangaInfo(completion: @escaping (Bool) -> Void) {
         let loadingDescription: LocalizedStringKey = "Loading manga information..."
-        DispatchQueue.main.async {
-            appState.loadingQueue.append(loadingDescription)
-        }
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)?includes[]=author&includes[]=artist&includes[]=cover_art") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)?includes[]=author&includes[]=artist&includes[]=cover_art") else {
             print("From MangaView: Invalid URL")
             return
+        }
+        
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
         }
         
         var request = URLRequest(url: url)
@@ -246,13 +247,14 @@ struct MangaView: View {
     //MARK: - Chapter loader
     func loadChapters() {
         let loadingDescription: LocalizedStringKey = "Loading manga chapters..."
-        DispatchQueue.main.async {
-            appState.loadingQueue.append(loadingDescription)
-        }
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)/feed?translatedLanguage[]=en&limit=500") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/feed?translatedLanguage[]=en&limit=500") else {
             print("From MangaView: Invalid URL")
             return
+        }
+        
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
         }
         
         var request = URLRequest(url: url)
@@ -318,13 +320,14 @@ struct MangaView: View {
     //MARK: - Get list of read markers
     func getReadMarkers() {
         let loadingDescription: LocalizedStringKey = "Loading read markers..."
-        DispatchQueue.main.async {
-            appState.loadingQueue.append(loadingDescription)
-        }
         
-        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)/read") else {
+        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/read") else {
             print("from updateMangaStatus: Invalid URL")
             return
+        }
+        
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
         }
         
         var request = URLRequest(url: url)
@@ -396,13 +399,14 @@ struct MangaView: View {
     //MARK: - Update the reading status of the manga
     func updateMangaStatus(statusId: Int) {
         let loadingDescription: LocalizedStringKey = "Updating status..."
-        DispatchQueue.main.async {
-            appState.loadingQueue.append(loadingDescription)
-        }
         
-        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)/status") else {
+        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/status") else {
             print("from updateMangaStatus: Invalid URL")
             return
+        }
+        
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
         }
         
         var request = URLRequest(url: url)
@@ -479,13 +483,14 @@ struct MangaView: View {
     //MARK: - Get manga status method
     func getMangaStatus() {
         let loadingDescription: LocalizedStringKey = "Loading status..."
-        DispatchQueue.main.async {
-            appState.loadingQueue.append(loadingDescription)
-        }
         
-        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/\(mangaId)/status") else {
+        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/status") else {
             print("from updateMangaStatus: Invalid URL")
             return
+        }
+        
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
         }
         
         var request = URLRequest(url: url)
