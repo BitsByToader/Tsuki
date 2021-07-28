@@ -104,7 +104,7 @@ struct LatestUpdatesView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")user/follows/manga/feed?translatedLanguage[]=en") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")user/follows/manga/feed?translatedLanguage[]=en&limit=500&order[publishAt]=desc") else {
             print("From LatestUpdatesView: Invalid URL")
             return
         }

@@ -29,6 +29,7 @@
 		8B333514254DB8D40040041F /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8B333513254DB8D40040041F /* SDWebImageSwiftUI */; };
 		8B36F36C250E88210085F52D /* WidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F36B250E88210085F52D /* WidgetURL.swift */; };
 		8B36F36D250E88210085F52D /* WidgetURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B36F36B250E88210085F52D /* WidgetURL.swift */; };
+		8B43FF0126909D610082E254 /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B43FF0026909D610082E254 /* ZoomableScrollView.swift */; };
 		8B47E4812676713E00F774D4 /* Cover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B47E4802676713E00F774D4 /* Cover.swift */; };
 		8B47E4822676713E00F774D4 /* Cover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B47E4802676713E00F774D4 /* Cover.swift */; };
 		8B49D61B24C77EAC007D1FFE /* Tests_iOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B49D61A24C77EAC007D1FFE /* Tests_iOS.swift */; };
@@ -164,6 +165,7 @@
 		8B31D35124D2054200A17C94 /* Chapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chapter.swift; sourceTree = "<group>"; };
 		8B31D35524D2245500A17C94 /* ChapterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChapterView.swift; sourceTree = "<group>"; };
 		8B36F36B250E88210085F52D /* WidgetURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetURL.swift; sourceTree = "<group>"; };
+		8B43FF0026909D610082E254 /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ZoomableScrollView.swift; path = "Shared/Data models/ZoomableScrollView.swift"; sourceTree = SOURCE_ROOT; };
 		8B47E4802676713E00F774D4 /* Cover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cover.swift; sourceTree = "<group>"; };
 		8B49D5FF24C77EAB007D1FFE /* TsukiApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TsukiApp.swift; sourceTree = "<group>"; };
 		8B49D60024C77EAB007D1FFE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -443,6 +445,7 @@
 			isa = PBXGroup;
 			children = (
 				8B47E4802676713E00F774D4 /* Cover.swift */,
+				8B43FF0026909D610082E254 /* ZoomableScrollView.swift */,
 				8B19C3F7264EF10000CC5E86 /* Author.swift */,
 				8BBA7D5724CF606B004BAF63 /* Manga.swift */,
 				8B31D35124D2054200A17C94 /* Chapter.swift */,
@@ -699,6 +702,7 @@
 				8B8560DB25018E7B00243543 /* DownloadedChapter+CoreDataProperties.swift in Sources */,
 				8BBA7D5B24CF6176004BAF63 /* MangaView.swift in Sources */,
 				8BACBB0224C8632C005D5F08 /* LogInView.swift in Sources */,
+				8B43FF0126909D610082E254 /* ZoomableScrollView.swift in Sources */,
 				8B59E13D24F9780400392E6E /* AccountView.swift in Sources */,
 				8B2D726424DBDD0D004C1602 /* LibraryView.swift in Sources */,
 				8B75DBD324FC0A77009FBCF1 /* PersistentStore.swift in Sources */,
@@ -841,7 +845,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = LatestUpdatesWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = MX583UVSDV;
 				INFOPLIST_FILE = LatestUpdatesWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -868,7 +872,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = LatestUpdatesWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = MX583UVSDV;
 				INFOPLIST_FILE = LatestUpdatesWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1012,7 +1016,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = iOS/Tsuki.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = MX583UVSDV;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;
@@ -1039,7 +1043,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = iOS/Tsuki.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = MX583UVSDV;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = iOS/Info.plist;

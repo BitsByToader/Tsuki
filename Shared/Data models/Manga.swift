@@ -27,7 +27,7 @@ struct Manga: Decodable {
         self.tags = []
     }
     
-    init( title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [String]) {
+    init(title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [String]) {
         self.title = title
         self.artist = [artist]
         self.artistId = []
@@ -109,7 +109,7 @@ struct Manga: Decodable {
             }
         }
         
-        self.artist = artistArr
+        self.artist = artistArr.isEmpty ? ["No author/artist"] : artistArr
         self.artistId = artistIdArr
         self.coverURL = "https://uploads.mangadex.org/covers/\(id)/\(cover).256.jpg"
         

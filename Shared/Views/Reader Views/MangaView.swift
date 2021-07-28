@@ -30,14 +30,46 @@ struct MangaView: View {
         
         if mangaId != "" {
             statusButtons.append(.destructive(Text("Unfollow"), action: {
-                updateMangaStatus(statusId: 0)
+                
+                let loadingDescription: LocalizedStringKey = "Checking for account..."
+                DispatchQueue.main.async {
+                    appState.loadingQueue.append(loadingDescription)
+                }
+                
+                MDAuthentification.standard.logInProcedure { isLoggedIn in
+                    print("Loading library...")
+                    
+                    if isLoggedIn {
+                        updateMangaStatus(statusId: 0)
+                    }
+                    
+                    DispatchQueue.main.async {
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
+                
                 currentStatus = "Status"
             }))
         }
         
         for index in 1..<MangaStatus.allCases.count {
             statusButtons.append(.default(Text(MangaStatus.allCases[index].rawValue), action: {
-                updateMangaStatus(statusId: index)
+                let loadingDescription: LocalizedStringKey = "Checking for account..."
+                DispatchQueue.main.async {
+                    appState.loadingQueue.append(loadingDescription)
+                }
+                
+                MDAuthentification.standard.logInProcedure { isLoggedIn in
+                    print("Loading library...")
+                    
+                    if isLoggedIn {
+                        updateMangaStatus(statusId: index)
+                    }
+                    
+                    DispatchQueue.main.async {
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                }
             }))
         }
         
@@ -175,14 +207,30 @@ struct MangaView: View {
             }
         }.onAppear{
             if reloadContents {
-                DispatchQueue.global(qos: .utility).async {
+                let loadingDescription: LocalizedStringKey = "Checking for account..."
+                DispatchQueue.main.async {
+                    appState.loadingQueue.append(loadingDescription)
+                }
+                
+                MDAuthentification.standard.logInProcedure { isLoggedIn in
+                    print("Loading library...")
+                    
+                    
                     loadMangaInfo { wasSuccesfull in
                         if wasSuccesfull {
                             loadChapters()
-                            getMangaStatus()
+                            
+                            if isLoggedIn {
+                                getMangaStatus()
+                            }
                         }
                     }
+                    
                     self.reloadContents = false
+                    
+                    DispatchQueue.main.async {
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
                 }
             }
         }.navigationTitle(mangaId != "" ? manga.title : "Please select a manga to read.")

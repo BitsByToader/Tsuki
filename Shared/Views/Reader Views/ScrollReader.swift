@@ -27,57 +27,30 @@ struct ScrollReader: View {
             ScrollView {
                 LazyVStack {
                     ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
-                        if contentIsRemote {
-                            WebImage(url: URL(string: page))
-                                .resizable()
-                                .placeholder {
-                                    Rectangle().foregroundColor(.gray)
-                                        .opacity(0.2)
-                                }
-                                .indicator(.activity)
-                                .transition(.fade(duration: 0.5))
-                                .scaledToFit()
-                                .id(index)
-                                .onAppear {
-                                    currentPage = index
+                        SwipeReaderImage(contentIsRemote: contentIsRemote, imageURL: page)
+                            .id(index)
+                            .onAppear {
+                                currentPage = index
+                                
+                                if ( currentPage + 2 == pages.count && currentChapter + 1 != remainingChapters ) {
+                                    currentChapter += 1
+                                    loadChapter(currentChapter)
                                     
-                                    if ( currentPage + 2 == pages.count && currentChapter + 1 != remainingChapters ) {
-                                        currentChapter += 1
-                                        loadChapter(currentChapter)
-                                        
-                                        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
-                                        hapticFeedback.impactOccurred()
-                                    }
+                                    let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+                                    hapticFeedback.impactOccurred()
                                 }
-                        } else {
-                            Image(uiImage: UIImage(contentsOfFile: page)!)
-                                .resizable()
-                                .transition(.fade(duration:0.5))
-                                .scaledToFit()
-                                .id(index)
-                                .onAppear {
-                                    currentPage = index
-                                    
-                                    if ( currentPage + 2 == pages.count && currentChapter + 1 != remainingChapters ) {
-                                        currentChapter += 1
-                                        loadChapter(currentChapter)
-                                        
-                                        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
-                                        hapticFeedback.impactOccurred()
-                                    }
-                                }
+                            }
+                    }
+                }.onChange(of: readerSettingsPresented) { newValue in
+                    if !readerSettingsPresented && readerStyle == "Scroll" {
+                        withAnimation {
+                            value.scrollTo(currentPageBackup, anchor: .top)
                         }
                     }
-                }
-            }.onChange(of: readerSettingsPresented) { newValue in
-                if !readerSettingsPresented && readerStyle == "Scroll" {
+                }.onChange(of: navBarHidden) { _ in
                     withAnimation {
-                        value.scrollTo(currentPageBackup, anchor: .top)
+                        value.scrollTo(currentPage, anchor: .top)
                     }
-                }
-            }.onChange(of: navBarHidden) { _ in
-                withAnimation {
-                    value.scrollTo(currentPage, anchor: .top)
                 }
             }
         }
