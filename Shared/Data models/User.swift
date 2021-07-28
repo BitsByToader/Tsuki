@@ -155,8 +155,6 @@ final class MDAuthentification {
         
         URLSession.shared.dataTask(with: request) {data,response,error in
             if let data = data {
-                                print( String(data: data, encoding: .utf8) )
-                
                 do {
                     struct CheckLoginResponse: Codable {
                         let result: String

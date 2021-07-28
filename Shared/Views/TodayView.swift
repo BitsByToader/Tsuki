@@ -14,7 +14,7 @@ struct TodayView: View {
     @State private var newChapters: [Chapter] = []
     @State private var mangasById: [String: ReturnedManga] = [:]
     
-    @State private var featuredDisplayedMangas: [String] = []
+    @State private var seasonalDisplayedManga: [String] = []
     @State private var newDisplayedMangas: [ReturnedManga] = []
     
     var body: some View {
@@ -47,18 +47,18 @@ struct TodayView: View {
                 }
                 //MARK: - Featured Manga
                 VStack(alignment: .leading) {
-                    Text("Featured Manga")
+                    Text("Seasonal Manga")
                         .font(.title2)
                         .bold()
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 10) {
-                            if featuredDisplayedMangas.isEmpty {
+                            if seasonalDisplayedManga.isEmpty {
                                 ForEach(0..<6) {_ in
                                     PlaceholderManga()
                                 }
                             } else {
-                                ForEach(featuredDisplayedMangas, id: \.self) { manga in
+                                ForEach(seasonalDisplayedManga, id: \.self) { manga in
                                     NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga)) {
                                         PlainManga(manga: mangasById[manga] ?? ReturnedManga())
                                     }.buttonStyle(PlainButtonStyle())
@@ -93,23 +93,23 @@ struct TodayView: View {
             }.listStyle(PlainListStyle())
             .navigationTitle(Text("Today"))
             
-            MangaView(reloadContents: !featuredDisplayedMangas.isEmpty, mangaId: featuredDisplayedMangas.isEmpty ? "" : featuredDisplayedMangas[0])
+            MangaView(reloadContents: !seasonalDisplayedManga.isEmpty, mangaId: seasonalDisplayedManga.isEmpty ? "" : seasonalDisplayedManga[0])
 
             ChapterView(loadContents: false, isViewPresented: .constant(1), remainingChapters: [])
             
         }.if( sizeClass == .regular ) { $0.navigationViewStyle(DoubleColumnNavigationViewStyle()) }
         .if( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
         .onAppear {
-            loadFeaturedManga()
+            loadSeasonalManga()
             getNewestTitles()
             loadNewestChapters()
         }
     }
-    //MARK: - Get featured manga
-    func loadFeaturedManga() {
+    //MARK: - Get "seasonal" manga
+    func loadSeasonalManga() {
         let loadingDescription: LocalizedStringKey = "Loading featured manga..."
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")list/8018a70b-1492-4f91-a584-7451d7787f7a?includes[]=manga") else {
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")list/a153b4e6-1fcc-4f45-a990-f37f989c0d74?includes[]=manga") else {
             print("Invalid URL")
             return
         }
@@ -139,7 +139,7 @@ struct TodayView: View {
                     }
                     
                     DispatchQueue.main.async {
-                        self.featuredDisplayedMangas = arr
+                        self.seasonalDisplayedManga = arr
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
@@ -245,7 +245,7 @@ struct TodayView: View {
             }
         }
         
-        for manga in featuredDisplayedMangas {
+        for manga in seasonalDisplayedManga {
             urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: manga))
         }
         
