@@ -104,7 +104,19 @@ struct LatestUpdatesView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")user/follows/manga/feed?translatedLanguage[]=en&limit=500&order[publishAt]=desc") else {
+        var urlComponents = URLComponents()
+        urlComponents.queryItems = []
+        
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "500"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "order[publishAt]", value: "desc"))
+        
+        let pickedLanguages = UserDefaults.standard.stringArray(forKey: "pickedLanguages") ?? []
+        
+        for lang in pickedLanguages {
+            urlComponents.queryItems?.append(URLQueryItem(name: "translatedLanguage[]", value: lang))
+        }
+        
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")user/follows/manga/feed?\(urlComponents.percentEncodedQuery ?? "")") else {
             print("From LatestUpdatesView: Invalid URL")
             return
         }
@@ -195,7 +207,7 @@ struct UpdatedManga: View {
             Label(labelText:   (ISO8601DateFormatter().date(from: manga.timestamp) ?? Date()).timeAgoDisplay(style: .short)  )
             Label(labelText: "Vol. \(manga.volume) Ch. \(manga.chapter)")
             
-            Text(mangaTitle)
+            Text("\(languagesEmojiDict[manga.chapterLanguageCode] ?? "")\(mangaTitle)")
                 .multilineTextAlignment(.center)
             
             Spacer()

@@ -296,7 +296,18 @@ struct MangaView: View {
     func loadChapters() {
         let loadingDescription: LocalizedStringKey = "Loading manga chapters..."
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/feed?translatedLanguage[]=en&limit=500") else {
+        var urlComponents = URLComponents()
+        urlComponents.queryItems = []
+        
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "500"))
+        
+        let pickedLanguages = UserDefaults.standard.stringArray(forKey: "pickedLanguages") ?? []
+        
+        for lang in pickedLanguages {
+            urlComponents.queryItems?.append(URLQueryItem(name: "translatedLanguage[]", value: lang))
+        }
+        
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/feed?\(urlComponents.percentEncodedQuery ?? "")") else {
             print("From MangaView: Invalid URL")
             return
         }

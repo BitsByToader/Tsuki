@@ -8,6 +8,8 @@
 import SwiftUI
 import CoreData
 
+#warning("Localize more strings!")
+
 @main
 struct TsukiApp: App {
     @StateObject var appState: AppState = AppState()

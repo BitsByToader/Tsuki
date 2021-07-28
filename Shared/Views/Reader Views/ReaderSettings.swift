@@ -6,8 +6,6 @@
 //
 
 import SwiftUI
-#warning("Localize strings")
-#warning("Extend the UserDefaults class to accept storage of ReaderStyle and ReaderOrientation")
 
 struct ReaderSettings: View {
     @AppStorage("readerStyle") var readerStyle: String = ReaderStyle.Scroll.rawValue

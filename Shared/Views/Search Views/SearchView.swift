@@ -114,7 +114,6 @@ struct SearchView: View {
             }
     }
     
-    #warning("Maybe refactor these two functions into one and place them in the tag struct or smth")
     func updateTagArray(mode: TagMode, tagId: String) {
         switch mode {
         case .include:

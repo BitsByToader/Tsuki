@@ -8,13 +8,13 @@
 import SwiftUI
 import SDWebImageSwiftUI
 
-#warning("DON'T FORGET TO LOCALIZE THE NEW ACCOUNT STRINGS")
-
 struct AccountView: View {
     @EnvironmentObject var appState: AppState
     @AppStorage("userProfileId") var userProfileId: String = ""
     @AppStorage("readingDataSaver") var readingDataSaver: Bool = false
     @AppStorage("downloadingDataSaver") var downloadingDataSaver: Bool = false
+    
+    @State var pickedLanguages: [String] = []
     
     private var logInButtonString: LocalizedStringKey {
         return loggedIn ? "Change account" : "Sign In"
@@ -57,7 +57,7 @@ struct AccountView: View {
                     }
                 }
                 if loggedIn {
-                    Section {
+                    Section(header: Text("User information")) {
                         ProfileStat(label: "User ID:", value: "1234")
                         
                         ProfileStat(label: "Joined:", value: "May, 20th, 1969.")
@@ -74,7 +74,20 @@ struct AccountView: View {
                     Toggle("Save data when downloading", isOn: $downloadingDataSaver)
                 }
                 
-                Section {
+                Section(header: Text("Languages"), footer: Text("If no languages are selected, then chapters from all languages will be loaded.")) {
+                    NavigationLink(destination: LanguagePickerView(pickedLanguages: $pickedLanguages)) {
+                        HStack {
+                            Text("Picker")
+                            
+                            Spacer()
+                            
+                            Text("\(pickedLanguages.isEmpty ? "All languages" : "\(pickedLanguages.count) languages" )")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                
+                Section(header: Text("Account actions")) {
                     Button(action: {logInViewPresented = true}, label: {
                         Text(logInButtonString)
                     }).sheet(isPresented: $logInViewPresented) {
@@ -97,6 +110,8 @@ struct AccountView: View {
             .transition(.fade)
         }.navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
+            self.pickedLanguages = UserDefaults.standard.stringArray(forKey: "pickedLanguages") ?? []
+            
             let loadingDescription: LocalizedStringKey = "Loading account..."
             appState.loadingQueue.append(loadingDescription)
             
@@ -170,12 +185,6 @@ struct AccountView: View {
             return
         }.resume()
     }*/
-}
-
-struct AccountView_Previews: PreviewProvider {
-    static var previews: some View {
-        AccountView()
-    }
 }
 
 struct ProfileStat: View {

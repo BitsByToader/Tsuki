@@ -169,7 +169,20 @@ struct TodayView: View {
     func loadNewestChapters() {
         let loadingDescription: LocalizedStringKey = "Loading newest chapters..."
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")chapter?limit=20&order[createdAt]=desc&translatedLanguage[]=en&includes[]=manga") else {
+        var urlComponents = URLComponents()
+        urlComponents.queryItems = []
+        
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "20"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "order[createdAt]", value: "desc"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "includes[]", value: "manga"))
+        
+        let pickedLanguages = UserDefaults.standard.stringArray(forKey: "pickedLanguages") ?? []
+        
+        for lang in pickedLanguages {
+            urlComponents.queryItems?.append(URLQueryItem(name: "translatedLanguage[]", value: lang))
+        }
+        
+        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")chapter?\(urlComponents.percentEncodedQuery ?? "")") else {
             print("Invalid URL")
             return
         }

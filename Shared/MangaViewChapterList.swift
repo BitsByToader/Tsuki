@@ -32,17 +32,20 @@ struct MangaViewChapterList: View {
                         ChapterListRow(volume: chapter.volume,
                                        chapter: chapter.chapter,
                                        title: chapter.title,
+                                       languageEmoji: languagesEmojiDict[chapter.chapterLanguageCode] ?? "",
                                        date: "\(formatterToString.string(from: formatterFromString.date(from: chapter.timestamp) ?? Date() ))",
                                        localizedTime: (formatterFromString.date(from: chapter.timestamp) ?? Date()).timeAgoDisplay(style: .full),
                                        isRead: chapter.isRead)
                     }
                 }
             } else {
+                #warning("FIX ME! Add chapter language emoji to db")
                 ForEach(Array(localChapters.enumerated()), id: \.offset) { index, chapter in
                     NavigationLink(destination: ChapterView(loadContents: false, isViewPresented: $navigationSelection, remainingChapters: [], remainingLocalChapters: localChapters.reversed().suffix(index+1))) {
                         ChapterListRow(volume: chapter.wrappedVolume,
                                        chapter: chapter.wrappedChapter,
                                        title: chapter.wrappedTitle,
+                                       languageEmoji: "",
                                        date: "Downloaded",
                                        localizedTime: "\(formatterToString.string(from: formatterFromString.date(from: chapter.timestamp) ?? Date() ))",
                                        isRead: false)
@@ -58,6 +61,7 @@ struct ChapterListRow: View {
     let volume: String
     let chapter: String
     let title: String
+    let languageEmoji: String
     
     let date: String
     let localizedTime: String
@@ -67,7 +71,7 @@ struct ChapterListRow: View {
     var body: some View {
         VStack(spacing: 5) {
             HStack {
-                Text("Vol.\(volume) Ch.\(chapter)")
+                Text("Vol.\(volume) Ch.\(chapter) \(languageEmoji)")
                     .font(.subheadline)
                 
                 Image(systemName: "checkmark")

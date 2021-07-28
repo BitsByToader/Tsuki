@@ -22,6 +22,7 @@ struct Chapter: Decodable, Hashable {
     let dataSaverPages: [String]
     
     let timestamp: String
+    let chapterLanguageCode: String
     
     var isRead: Bool = false
     
@@ -34,7 +35,7 @@ struct Chapter: Decodable, Hashable {
     }
     
     enum AttributesCodingKeys: String, CodingKey {
-        case title, volume, chapter, hash, data, dataSaver, publishAt
+        case title, volume, chapter, hash, data, dataSaver, publishAt, translatedLanguage
     }
     
     init(from decoder: Decoder) throws {
@@ -55,6 +56,7 @@ struct Chapter: Decodable, Hashable {
         self.dataSaverPages = ( try? attributes.decode([String].self, forKey: .dataSaver) ) ?? []
         
         self.timestamp = try attributes.decode(String.self, forKey: .publishAt)
+        self.chapterLanguageCode = try attributes.decode(String.self, forKey: .translatedLanguage)
         
         let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
         
