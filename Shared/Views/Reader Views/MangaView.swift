@@ -14,6 +14,7 @@ struct MangaView: View {
     @EnvironmentObject var appState: AppState
     
     @State var manga: Manga = Manga()
+    @State var mangaDetailsAlreadyLoaded: Bool = false
     
     @State var chapters: [Chapter] = [] //chapters -- remoteChapters
     @State var localChapters: [DownloadedChapter] = []
@@ -21,10 +22,13 @@ struct MangaView: View {
     @State var reloadContents: Bool
     
     @State private var descriptionExpanded: Bool = false
+    
     @State private var chapterDownloadingViewPresented: Bool = false
     @State private var presentAlert: Bool = false
-    @State private var currentStatus: String = "Status"
     @State private var statusSheetPresented: Bool = false
+    @State private var authorDetailSheetPresented: Bool = false
+    
+    @State private var currentStatus: String = "Status"
     private var statusActions: [ActionSheet.Button] {
         var statusButtons: [ActionSheet.Button] = []
         
@@ -103,7 +107,11 @@ struct MangaView: View {
     var body: some View {
         List {
             //MARK: - Header
-            MangaViewTitle(manga: manga)
+            MangaViewTitle(authorDetailsPresented: $authorDetailSheetPresented, manga: manga)
+                .sheet(isPresented: $authorDetailSheetPresented, content: {
+                    AuthorListView(authorIds: manga.artistId)
+                        .environmentObject(appState)
+                })
             //MARK: - Manga actions
             HStack {
                 Spacer()
@@ -215,13 +223,24 @@ struct MangaView: View {
                 MDAuthentification.standard.logInProcedure { isLoggedIn in
                     print("Loading library...")
                     
-                    
-                    loadMangaInfo { wasSuccesfull in
-                        if wasSuccesfull {
-                            loadChapters()
-                            
-                            if isLoggedIn {
-                                getMangaStatus()
+                    if mangaDetailsAlreadyLoaded {
+                        loadChapters()
+                        
+                        if isLoggedIn {
+                            getMangaStatus()
+                        }
+                        
+                        //Basically, we will use the already filled manga object only the first time.
+                        //If the user reloads, then we will fetch the manga details (along with all the other stuff) from the network.
+                        mangaDetailsAlreadyLoaded = false
+                    } else {
+                        loadMangaInfo { wasSuccesfull in
+                            if wasSuccesfull {
+                                loadChapters()
+                                
+                                if isLoggedIn {
+                                    getMangaStatus()
+                                }
                             }
                         }
                     }

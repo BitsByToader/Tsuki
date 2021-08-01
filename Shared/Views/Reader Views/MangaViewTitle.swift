@@ -9,6 +9,7 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct MangaViewTitle: View {
+    @Binding var authorDetailsPresented: Bool
     let manga: Manga
     
     var body: some View {
@@ -32,10 +33,14 @@ struct MangaViewTitle: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(2)
                 
-                Text(manga.artist[0])
-                    .font(.body)
-                    .lineLimit(1)
-                    .foregroundColor(Color(.gray))
+                Button {
+                    authorDetailsPresented = true
+                } label: {
+                    Text(manga.artist[0])
+                        .font(.body)
+                        .lineLimit(1)
+                        .foregroundColor(Color(.gray))
+                }
                 
                 Spacer()
                 

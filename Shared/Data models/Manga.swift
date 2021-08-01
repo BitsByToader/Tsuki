@@ -9,6 +9,7 @@ import Foundation
 
 //MARK: - Manga Data Model Struct
 struct Manga: Decodable {
+    let id: String
     let title: String
     var artist: [String]
     var artistId: [String]
@@ -18,6 +19,7 @@ struct Manga: Decodable {
     let tags: [String]
     
     init() {
+        self.id = ""
         self.title = ""
         self.artist = [""]
         self.artistId = [""]
@@ -27,7 +29,8 @@ struct Manga: Decodable {
         self.tags = []
     }
     
-    init(title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [String]) {
+    init(id: String, title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [String]) {
+        self.id = id
         self.title = title
         self.artist = [artist]
         self.artistId = []
@@ -38,6 +41,7 @@ struct Manga: Decodable {
     }
     
     init(fromDownloadedManga manga: DownloadedManga) {
+        id = ""
         title = manga.wrappedMangaTitle
         artist = [manga.wrappedMangaArtist]
         artistId = []
@@ -78,7 +82,7 @@ struct Manga: Decodable {
         
         let data = try container.nestedContainer(keyedBy: DataCodingKeys.self, forKey: .data)
         let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
-        let id: String = try data.decode(String.self, forKey: .id)
+        self.id = try data.decode(String.self, forKey: .id)
         
         let titleContainer = try attributes.nestedContainer(keyedBy: TitleCodingKeys.self, forKey: .title)
         self.title = try titleContainer.decode(String.self, forKey: .en)
