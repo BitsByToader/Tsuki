@@ -95,7 +95,7 @@ struct SearchView: View {
             .if ( sizeClass == .compact ) { $0.navigationViewStyle(StackNavigationViewStyle()) }
             .onAppear {
                 if mangaTags.tags.isEmpty {
-                    if UserDefaults.standard.value(forKey: "apiURL") == nil {
+                    if UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") == nil {
                         return
                     }
                     

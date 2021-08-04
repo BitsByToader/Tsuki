@@ -16,7 +16,7 @@ class MangaTags: ObservableObject  {
         //let loadingDescription: LocalizedStringKey = "Loading search tags..."
         //appState.loadingQueue.append(loadingDescription)
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")manga/tag") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")manga/tag") else {
             print("From SearchView: Invalid URL")
             return
         }

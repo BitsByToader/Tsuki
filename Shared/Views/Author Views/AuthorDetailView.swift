@@ -111,7 +111,7 @@ struct AuthorDetailView: View {
                 urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: id))
             }
             
-            guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?\(urlComponents.percentEncodedQuery ?? "")") else {
+            guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?\(urlComponents.percentEncodedQuery ?? "")") else {
                 print("From MangaView: Invalid URL")
                 return
             }

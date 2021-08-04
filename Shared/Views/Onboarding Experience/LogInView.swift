@@ -85,9 +85,9 @@ struct LogInView: View {
                 
                 Button(action: {
                     if ( apiURL == "" ) {
-                        UserDefaults.standard.removeObject(forKey: "apiURL")
+                        UserDefaults(suiteName: "group.TsukiApp")?.removeObject(forKey: "apiURL")
                     } else {
-                        UserDefaults.standard.setValue(apiURL, forKey: "apiURL")
+                        UserDefaults(suiteName: "group.TsukiApp")?.setValue(apiURL, forKey: "apiURL")
                     }
                     
                     MDAuthentification.standard.logInToMD(username: username, password: password) { logInSuccessfull in

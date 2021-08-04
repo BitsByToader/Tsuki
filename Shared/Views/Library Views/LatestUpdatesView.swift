@@ -110,13 +110,13 @@ struct LatestUpdatesView: View {
         urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "500"))
         urlComponents.queryItems?.append(URLQueryItem(name: "order[publishAt]", value: "desc"))
         
-        let pickedLanguages = UserDefaults.standard.stringArray(forKey: "pickedLanguages") ?? []
+        let pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
         
         for lang in pickedLanguages {
             urlComponents.queryItems?.append(URLQueryItem(name: "translatedLanguage[]", value: lang))
         }
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")user/follows/manga/feed?\(urlComponents.percentEncodedQuery ?? "")") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")user/follows/manga/feed?\(urlComponents.percentEncodedQuery ?? "")") else {
             print("From LatestUpdatesView: Invalid URL")
             return
         }

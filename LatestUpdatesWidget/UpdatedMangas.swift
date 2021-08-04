@@ -7,6 +7,7 @@
 
 import Foundation
 import WidgetKit
+import SwiftKeychainWrapper
 
 struct UpdatedMangas {
     let mangas: [UpdatedManga]
@@ -19,79 +20,133 @@ struct UpdatedMangas {
         self.relevance = relevance
     }
     
-    static func getLibraryUpdates(completion: @escaping (UpdatedMangas?, String?) -> Void) {
-        guard let url = URL(string: "https://mangadex.org") else {
-            print("From chapter selection view, invalid url")
-            
-            completion(nil, nil)
+    static func getLibraryUpdates(completion: @escaping (UpdatedMangas?, String?) -> Void) {        
+        var urlComponents = URLComponents()
+        urlComponents.queryItems = []
+        
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "30"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "order[publishAt]", value: "desc"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "includes[]", value: "manga"))
+        
+        let pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
+        
+        for lang in pickedLanguages {
+            urlComponents.queryItems?.append(URLQueryItem(name: "translatedLanguage[]", value: lang))
+        }
+        
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")user/follows/manga/feed?\(urlComponents.percentEncodedQuery ?? "")") else {
+            print("From LatestUpdatesView: Invalid URL")
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.httpShouldHandleCookies = true
         
-        //Get the login cookies from the shared container with the main app
-        let sessionConfig = URLSessionConfiguration.default
-        sessionConfig.httpCookieStorage = HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "group.TsukiApp")
-        let session = URLSession(configuration: sessionConfig)
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(MDAuthentification.standard.getSessionToken())", forHTTPHeaderField: "Authorization")
         
-        if ( (HTTPCookieStorage.sharedCookieStorage(forGroupContainerIdentifier: "group.TsukiApp").cookies ?? []).isEmpty ) {
-            completion(nil, "You need to login before viewing the library updates.")
-        }
+        print("From getLibraryUpdates: \(url.absoluteString)")
         
-        session.dataTask(with: request) { data, response, error in
+        URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    /*let doc: Document = try SwiftSoup.parse(String(data: data, encoding: .utf8)!)
-                    
-                    let returnedMangas = try doc.getElementById("follows_update")?.child(0).children().array()
-                    
-                    let numberOfMangas: Int = (returnedMangas ?? []).count >= 6 ? 6 : (returnedMangas ?? []).count
-                    
-                    print(numberOfMangas)
+                    struct Results: Decodable {
+                        let results: [Chapter]
+                    }
+                 
+                    let decodedResponse = try JSONDecoder().decode(Results.self, from: data)
                     
                     var mangas: [UpdatedManga] = []
                     var mangaIds: [String] = []
                     
-                    for index in 0 ..< numberOfMangas {
-                        let title: String = "try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.text()"
-                        let coverArt: String = "try (returnedMangas ?? [])[index].getElementsByClass("sm_md_logo").first()!.select("a").select("img").attr("src")"
-                        
-                        let mangaLink: String = "try (returnedMangas ?? [])[index].child(1).getElementsByClass("manga_title").first()!.attr("href")"
-                        let mangaId: String = mangaLink.components(separatedBy: "/")[2]
-                        
-                        mangas.append(UpdatedManga(title: title, cover: coverArt, id: mangaId))
-                        mangaIds.append(mangaId)
-                    }
-                    
-                    var similarCounter: Int = 0
-                    let array: [String] = UserDefaults.standard.stringArray(forKey: "latestMangas") ?? []
-                    for id in array {
-                        for anotherId in mangaIds {
-                            if ( id == anotherId ) {
-                                similarCounter += 1
-                                break
-                            }
+                    for chapter in decodedResponse.results {
+                        if !mangaIds.contains(chapter.mangaId) {
+                            mangaIds.append(chapter.mangaId)
                         }
                     }
                     
-                    let relevance = array.count - similarCounter
-                    print(relevance)
-                    UserDefaults.standard.setValue(mangaIds, forKey: "latestMangas")
-                    
-                    for _ in mangas.count ..< 6 {
-                        mangas.append(UpdatedManga(title: "", cover: "", id: "", isPlaceholder: true))
+                    getChapterCovers(mangaIds: mangaIds) { covers in
+                        for manga in mangaIds {
+                            mangas.append(UpdatedManga(title: covers[manga]?.title ?? "",
+                                                       cover: covers[manga]?.coverArtURL ?? "",
+                                                       id: manga,
+                                                       isPlaceholder: false))
+                        }
+                        
+                        #warning("Place a check if the mangas array is empty to indicate we didn't find any manga")
+                        for _ in 0 ..< 6 {
+                            mangas.append(UpdatedManga(title: "", cover: "", id: "", isPlaceholder: true))
+                        }
+                        
+                        var similarCounter: Int = 0
+                        let array: [String] = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "latestMangas") ?? []
+                        for id in array {
+                            for anotherId in mangaIds {
+                                if ( id == anotherId ) {
+                                    similarCounter += 1
+                                    break
+                                }
+                            }
+                        }
+                        
+                        let relevance = array.count - similarCounter
+                        print("Relevance: \(relevance)")
+                        UserDefaults(suiteName: "group.TsukiApp")?.setValue(mangaIds, forKey: "latestMangas")
+                        
+                        completion(UpdatedMangas(mangas: mangas, placeholder: false, relevance: relevance), nil)
                     }
-                    */
-                    completion(UpdatedMangas(mangas: [], placeholder: false, relevance: 0), nil)
                 } catch {
                     completion(nil, error.localizedDescription)
                 }
             } else {
                 completion(nil, "There was an error retrieving the library.")
             }
-        }//.resume()
+        }.resume()
+    }
+    
+    static func getChapterCovers(mangaIds: [String], completion: @escaping([String: ReturnedManga]) -> Void) {
+        var urlComponents = URLComponents()
+        urlComponents.queryItems = []
+        
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "30"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "includes[]", value: "cover_art"))
+        
+        for id in mangaIds {
+            urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: id))
+        }
+        
+        let payload = urlComponents.percentEncodedQuery
+        
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")manga?\(payload ?? "")") else {
+            print("From LibraryView: Invalid URL")
+            completion([:])
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        
+        print("From getChapterCovers: \(url.absoluteString)")
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let data = data {
+                do {
+                    let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
+                    
+                    var dict: [String: ReturnedManga] = [:]
+                    for manga in decodedResponse.results {
+                        dict[manga.id] = manga
+                    }
+                    
+                    completion(dict)
+                } catch {
+                    completion([:])
+                }
+            } else {
+                completion([:])
+            }
+        }.resume()
     }
     
     init(numberOfPlaceholder: Int) {

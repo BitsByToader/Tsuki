@@ -12,10 +12,13 @@ struct TodayView: View {
     @EnvironmentObject var appState: AppState
     
     @State private var newChapters: [Chapter] = []
-    @State private var mangasById: [String: ReturnedManga] = [:]
+    @State private var coversByMangaId: [String: String] = [:]
     
-    @State private var seasonalDisplayedManga: [String] = []
+    @State private var seasonalDisplayedManga: [ReturnedManga] = []
     @State private var newDisplayedMangas: [ReturnedManga] = []
+    
+    @State private var newChaptersLoaded: Bool = false
+    @State private var seasonalMangaLoaded: Bool = false
     
     var body: some View {
         NavigationView {
@@ -36,7 +39,7 @@ struct TodayView: View {
                                 ForEach(newChapters, id: \.self) { manga in
                                     NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.mangaId)) {
                                         UpdatedManga(manga: manga,
-                                                     coverArt: mangasById[manga.mangaId]?.coverArtURL ?? "",
+                                                     coverArt: coversByMangaId[manga.mangaId] ?? "",
                                                      mangaTitle: manga.mangaTitle)
                                     }.buttonStyle(PlainButtonStyle())
                                     .frame(width: 125)
@@ -45,7 +48,7 @@ struct TodayView: View {
                         }
                     }
                 }
-                //MARK: - Featured Manga
+                //MARK: - Seasonal Manga
                 VStack(alignment: .leading) {
                     Text("Seasonal Manga")
                         .font(.title2)
@@ -59,8 +62,10 @@ struct TodayView: View {
                                 }
                             } else {
                                 ForEach(seasonalDisplayedManga, id: \.self) { manga in
-                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga)) {
-                                        PlainManga(manga: mangasById[manga] ?? ReturnedManga())
+                                    NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
+                                        PlainManga(manga: ReturnedManga(title: manga.title,
+                                                                        coverArtURL: coversByMangaId[manga.id] ?? "",
+                                                                        id: manga.id))
                                     }.buttonStyle(PlainButtonStyle())
                                     .frame(width: 125)
                                 }
@@ -93,7 +98,7 @@ struct TodayView: View {
             }.listStyle(PlainListStyle())
             .navigationTitle(Text("Today"))
             
-            MangaView(reloadContents: !seasonalDisplayedManga.isEmpty, mangaId: seasonalDisplayedManga.isEmpty ? "" : seasonalDisplayedManga[0])
+            MangaView(reloadContents: !seasonalDisplayedManga.isEmpty, mangaId: seasonalDisplayedManga.isEmpty ? "" : seasonalDisplayedManga[0].id)
 
             ChapterView(loadContents: false, isViewPresented: .constant(1), remainingChapters: [])
             
@@ -109,7 +114,7 @@ struct TodayView: View {
     func loadSeasonalManga() {
         let loadingDescription: LocalizedStringKey = "Loading featured manga..."
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")list/a153b4e6-1fcc-4f45-a990-f37f989c0d74?includes[]=manga") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")list/a153b4e6-1fcc-4f45-a990-f37f989c0d74?includes[]=manga") else {
             print("Invalid URL")
             return
         }
@@ -131,15 +136,20 @@ struct TodayView: View {
                     
                     let decodedResponse = try JSONDecoder().decode(FeaturedManga.self, from: data)
                     
-                    var arr: [String] = []
+                    var arr: [ReturnedManga] = []
                     for relation in decodedResponse.relationships {
                         if relation.type == "manga" {
-                            arr.append(relation.id)
+                            arr.append(ReturnedManga(title: relation.mangaTitle, coverArtURL: relation.coverFileName, id: relation.id))
                         }
                     }
                     
                     DispatchQueue.main.async {
                         self.seasonalDisplayedManga = arr
+                        self.seasonalMangaLoaded = true
+                        
+                        if ( newChaptersLoaded ) {
+                            loadCovers()
+                        }
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
@@ -176,13 +186,13 @@ struct TodayView: View {
         urlComponents.queryItems?.append(URLQueryItem(name: "order[createdAt]", value: "desc"))
         urlComponents.queryItems?.append(URLQueryItem(name: "includes[]", value: "manga"))
         
-        let pickedLanguages = UserDefaults.standard.stringArray(forKey: "pickedLanguages") ?? []
+        let pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
         
         for lang in pickedLanguages {
             urlComponents.queryItems?.append(URLQueryItem(name: "translatedLanguage[]", value: lang))
         }
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")chapter?\(urlComponents.percentEncodedQuery ?? "")") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")chapter?\(urlComponents.percentEncodedQuery ?? "")") else {
             print("Invalid URL")
             return
         }
@@ -206,8 +216,11 @@ struct TodayView: View {
                     
                     DispatchQueue.main.async {
                         self.newChapters = decodedResponse.results
+                        self.newChaptersLoaded = true
                         
-                        loadNewestChaptersCovers()
+                        if ( seasonalMangaLoaded ) {
+                            loadCovers()
+                        }
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
@@ -234,37 +247,26 @@ struct TodayView: View {
             }
         }.resume()
     }
-    //MARK: - Get covers for newest chapters and featured manga
-    func loadNewestChaptersCovers() {
-        ///So initially, this method was using the /cover endpoint to retrieve the covers for the newest chapters and the featured mangas
-        ///The featured chapters are retrieved from a custom list, and there is no data about the manga other than its id.
-        ///The newest chapters are taken from the /chapter endpoint and so, the are no covers.
-        ///Ideally, the cover endpoint would be used to save on bandwith, but it doesn't provide manga titles for featured manga.
-        ///So, the /manga endpoint was used with the includes query parameter to get manga titles and covers in one call.
-        
+    //MARK: - Get covers for newest chapters
+    func loadCovers() {
         let loadingDescription: LocalizedStringKey = "Retrieving covers..."
         
         var urlComponents = URLComponents()
         urlComponents.queryItems = []
         
-        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "40"))
-        urlComponents.queryItems?.append(URLQueryItem(name: "includes[]", value: "cover_art"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "100"))
         
-        var arr: [String] = []
         for chapter in newChapters {
-            if !arr.contains(chapter.mangaId) {
-                arr.append(chapter.mangaId)
-                urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: chapter.mangaId))
-            }
+            urlComponents.queryItems?.append(URLQueryItem(name: "manga[]", value: chapter.mangaId))
         }
         
         for manga in seasonalDisplayedManga {
-            urlComponents.queryItems?.append(URLQueryItem(name: "ids[]", value: manga))
+            urlComponents.queryItems?.append(URLQueryItem(name: "manga[]", value: manga.id))
         }
         
         let payload = urlComponents.percentEncodedQuery
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?\(payload ?? "")") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")cover?\(payload ?? "")") else {
             print("Invalid URL")
             return
         }
@@ -280,12 +282,15 @@ struct TodayView: View {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
+                    let decodedResponse = try JSONDecoder().decode(Covers.self, from: data)
+                    
+                    var dict: [String: String] = [:]
+                    for cover in decodedResponse.results {
+                        dict[cover.mangaId] = cover.path
+                    }
                     
                     DispatchQueue.main.async {
-                        for manga in decodedResponse.results {
-                            mangasById[manga.id] = manga
-                        }
+                        self.coversByMangaId = dict
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
@@ -315,7 +320,7 @@ struct TodayView: View {
     func getNewestTitles() {
         let loadingDescription: LocalizedStringKey = "Loading newest manga..."
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?limit=20&order[createdAt]=desc&includes[]=cover_art") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?limit=20&order[createdAt]=desc&includes[]=cover_art") else {
             print("Invalid URL")
             return
         }

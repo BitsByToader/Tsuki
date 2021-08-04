@@ -14,8 +14,9 @@ extension KeychainWrapper.Key {
 
 final class MDAuthentification {
     static let standard = MDAuthentification()
+    let tsukiKeychain = KeychainWrapper.init(serviceName: "com.toader.Tsuki")
     
-    private init() { }
+    private init() {}
     
     //MARK: - MD Response struct
     struct LogInResponse: Codable {
@@ -60,7 +61,7 @@ final class MDAuthentification {
     
     //MARK: - Log In method
     func logInToMD(username: String, password: String, completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")auth/login") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")auth/login") else {
             print("From LogInVIew: Invalid URL")
             return
         }
@@ -81,8 +82,8 @@ final class MDAuthentification {
                     if ( decodedResponse.result == "ok" ) {
                         print("Logged in.")
                         
-                        KeychainWrapper.standard[.sessionToken] = decodedResponse.token!.session
-                        KeychainWrapper.standard[.refreshToken] = decodedResponse.token!.refresh
+                        self.tsukiKeychain[.sessionToken] = decodedResponse.token!.session
+                        self.tsukiKeychain[.refreshToken] = decodedResponse.token!.refresh
                         
                         completion(true)
                     } else {
@@ -100,7 +101,7 @@ final class MDAuthentification {
     
     //MARK: - Refresh the session token method
     func getNewSessionToken(completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")auth/refresh") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")auth/refresh") else {
             print("From LogInVIew: Invalid URL")
             return
         }
@@ -121,8 +122,8 @@ final class MDAuthentification {
                     
                     if ( decodedResponse.result == "ok" ) {
                         
-                        KeychainWrapper.standard[.sessionToken] = decodedResponse.token!.session
-                        KeychainWrapper.standard[.refreshToken] = decodedResponse.token!.refresh
+                        self.tsukiKeychain[.sessionToken] = decodedResponse.token!.session
+                        self.tsukiKeychain[.refreshToken] = decodedResponse.token!.refresh
                         
                         completion(true)
                     } else if ( decodedResponse.result == "error" ) {
@@ -141,7 +142,7 @@ final class MDAuthentification {
     
     //MARK: - Check if the user is logged in
     func checkLogin(completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")auth/check") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")auth/check") else {
             print("From LogInVIew: Invalid URL")
             return
         }
@@ -177,7 +178,7 @@ final class MDAuthentification {
     
     //MARK: - Log out method
     func logOut() {
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "")auth/logout") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")auth/logout") else {
             print("From MDAuth: Invalid URL")
             return
         }
@@ -191,18 +192,18 @@ final class MDAuthentification {
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let _ = data {
-                KeychainWrapper.standard[.refreshToken] = ""
-                KeychainWrapper.standard[.sessionToken] = ""
+                self.tsukiKeychain[.refreshToken] = ""
+                self.tsukiKeychain[.sessionToken] = ""
             }
         }.resume()
     }
     
     //MARK: - Keychain helpers
     func getSessionToken() -> String {
-        return KeychainWrapper.standard[.sessionToken] ?? ""
+        return tsukiKeychain[.sessionToken] ?? ""
     }
     
     func getRefreshToken() -> String {
-        return KeychainWrapper.standard[.refreshToken] ?? ""
+        return tsukiKeychain[.refreshToken] ?? ""
     }
 }

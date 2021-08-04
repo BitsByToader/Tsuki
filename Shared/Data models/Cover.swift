@@ -9,7 +9,7 @@ import Foundation
 
 struct Cover: Decodable {
     let path: String
-    let manga: String
+    let mangaId: String
     
     enum CodingKeys: String, CodingKey {
         case data, relationships
@@ -41,7 +41,7 @@ struct Cover: Decodable {
             }
         }
         
-        self.manga = mangaId
+        self.mangaId = mangaId
         self.path = "https://uploads.mangadex.org/covers/\(mangaId)/\(fileName).256.jpg"
     }
 }

@@ -261,7 +261,7 @@ struct MangaView: View {
     func loadMangaInfo(completion: @escaping (Bool) -> Void) {
         let loadingDescription: LocalizedStringKey = "Loading manga information..."
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)?includes[]=author&includes[]=artist&includes[]=cover_art") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)?includes[]=author&includes[]=artist&includes[]=cover_art") else {
             print("From MangaView: Invalid URL")
             return
         }
@@ -320,13 +320,13 @@ struct MangaView: View {
         
         urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "500"))
         
-        let pickedLanguages = UserDefaults.standard.stringArray(forKey: "pickedLanguages") ?? []
+        let pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
         
         for lang in pickedLanguages {
             urlComponents.queryItems?.append(URLQueryItem(name: "translatedLanguage[]", value: lang))
         }
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/feed?\(urlComponents.percentEncodedQuery ?? "")") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/feed?\(urlComponents.percentEncodedQuery ?? "")") else {
             print("From MangaView: Invalid URL")
             return
         }
@@ -399,7 +399,7 @@ struct MangaView: View {
     func getReadMarkers() {
         let loadingDescription: LocalizedStringKey = "Loading read markers..."
         
-        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/read") else {
+        guard let url = URL(string :"\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/read") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }
@@ -478,7 +478,7 @@ struct MangaView: View {
     func updateMangaStatus(statusId: Int) {
         let loadingDescription: LocalizedStringKey = "Updating status..."
         
-        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/status") else {
+        guard let url = URL(string :"\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/status") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }
@@ -562,7 +562,7 @@ struct MangaView: View {
     func getMangaStatus() {
         let loadingDescription: LocalizedStringKey = "Loading status..."
         
-        guard let url = URL(string :"\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/status") else {
+        guard let url = URL(string :"\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga/\(mangaId)/status") else {
             print("from updateMangaStatus: Invalid URL")
             return
         }

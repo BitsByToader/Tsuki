@@ -40,6 +40,15 @@
 		8B49D62B24C77EAC007D1FFE /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B49D60024C77EAB007D1FFE /* ContentView.swift */; };
 		8B49D62C24C77EAC007D1FFE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B49D60124C77EAC007D1FFE /* Assets.xcassets */; };
 		8B49D62D24C77EAC007D1FFE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8B49D60124C77EAC007D1FFE /* Assets.xcassets */; };
+		8B51047D26BA9969009B66C8 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBEA24D2555DEFA009C03F6 /* User.swift */; };
+		8B51047F26BA9C70009B66C8 /* SwiftKeychainWrapper in Frameworks */ = {isa = PBXBuildFile; productRef = 8B51047E26BA9C70009B66C8 /* SwiftKeychainWrapper */; };
+		8B51048026BAAD24009B66C8 /* Chapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B31D35124D2054200A17C94 /* Chapter.swift */; };
+		8B51048126BAAE8C009B66C8 /* Manga.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BBA7D5724CF606B004BAF63 /* Manga.swift */; };
+		8B51048226BAAEBD009B66C8 /* DownloadedManga+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8560D825018E7B00243543 /* DownloadedManga+CoreDataProperties.swift */; };
+		8B51048326BAAEC6009B66C8 /* DownloadedManga+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8560D725018E7B00243543 /* DownloadedManga+CoreDataClass.swift */; };
+		8B51048426BAAEC9009B66C8 /* DownloadedChapter+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8560D625018E7B00243543 /* DownloadedChapter+CoreDataProperties.swift */; };
+		8B51048526BAAECC009B66C8 /* DownloadedChapter+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B8560D525018E7B00243543 /* DownloadedChapter+CoreDataClass.swift */; };
+		8B51048626BAB1CA009B66C8 /* Cover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B47E4802676713E00F774D4 /* Cover.swift */; };
 		8B53722A24FA6EBC006D95BD /* SignInRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B53722924FA6EBC006D95BD /* SignInRequiredView.swift */; };
 		8B53722B24FA6EBC006D95BD /* SignInRequiredView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B53722924FA6EBC006D95BD /* SignInRequiredView.swift */; };
 		8B59E13D24F9780400392E6E /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B59E13C24F9780400392E6E /* AccountView.swift */; };
@@ -239,6 +248,7 @@
 			files = (
 				8B0F72A3250BED3C000E5F41 /* SwiftUI.framework in Frameworks */,
 				8B0F72A2250BED3C000E5F41 /* WidgetKit.framework in Frameworks */,
+				8B51047F26BA9C70009B66C8 /* SwiftKeychainWrapper in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -524,6 +534,7 @@
 			);
 			name = LatestUpdatesWidgetExtension;
 			packageProductDependencies = (
+				8B51047E26BA9C70009B66C8 /* SwiftKeychainWrapper */,
 			);
 			productName = LatestUpdatesWidgetExtension;
 			productReference = 8B0F72A1250BED3C000E5F41 /* LatestUpdatesWidgetExtension.appex */;
@@ -712,11 +723,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B51048226BAAEBD009B66C8 /* DownloadedManga+CoreDataProperties.swift in Sources */,
+				8B51048326BAAEC6009B66C8 /* DownloadedManga+CoreDataClass.swift in Sources */,
 				8B7861E02517BBBC00E5B7F2 /* SmallWidgetView.swift in Sources */,
+				8B51048426BAAEC9009B66C8 /* DownloadedChapter+CoreDataProperties.swift in Sources */,
+				8B51048526BAAECC009B66C8 /* DownloadedChapter+CoreDataClass.swift in Sources */,
 				8B7861D42517BA7F00E5B7F2 /* MediumWidgetView.swift in Sources */,
+				8B51048126BAAE8C009B66C8 /* Manga.swift in Sources */,
+				8B51047D26BA9969009B66C8 /* User.swift in Sources */,
+				8B51048626BAB1CA009B66C8 /* Cover.swift in Sources */,
 				8BB899D2250C04A700968FF1 /* UpdatedMangas.swift in Sources */,
 				8B0F72A6250BED3C000E5F41 /* LatestUpdatesWidget.swift in Sources */,
 				8B7861E72517BCE700E5B7F2 /* LargeWidgetView.swift in Sources */,
+				8B51048026BAAD24009B66C8 /* Chapter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1337,6 +1356,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8B6504CB24CCDFCE00BFAD22 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
 			productName = SDWebImageSwiftUI;
+		};
+		8B51047E26BA9C70009B66C8 /* SwiftKeychainWrapper */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B6F085B2649B8EE00461A1F /* XCRemoteSwiftPackageReference "SwiftKeychainWrapper" */;
+			productName = SwiftKeychainWrapper;
 		};
 		8B6504CC24CCDFCE00BFAD22 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;

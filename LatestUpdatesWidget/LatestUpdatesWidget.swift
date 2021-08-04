@@ -24,8 +24,24 @@ struct Provider: TimelineProvider {
         // Generate a timeline consisting of five entries an hour apart, starting from the current date.
         let currentDate = Date()
         
-        UpdatedMangas.getLibraryUpdates { mangas, error in
-            guard let mangas = mangas else {
+        MDAuthentification.standard.logInProcedure() { isLoggedIn in
+            if isLoggedIn {
+                UpdatedMangas.getLibraryUpdates { mangas, error in
+                    guard let mangas = mangas else {
+                        entries = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil)]
+                        
+                        let timeline = Timeline(entries: entries, policy: .atEnd)
+                        completion(timeline)
+                        
+                        return
+                    }
+                    let relevance = TimelineEntryRelevance(score: Float( mangas.relevance))
+                    entries  = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: mangas, relevance: relevance)]
+                    
+                    let timeline = Timeline(entries: entries, policy: .atEnd)
+                    completion(timeline)
+                }
+            } else {
                 entries = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: UpdatedMangas(numberOfPlaceholder: 6), relevance: nil)]
                 
                 let timeline = Timeline(entries: entries, policy: .atEnd)
@@ -33,11 +49,6 @@ struct Provider: TimelineProvider {
                 
                 return
             }
-            let relevance = TimelineEntryRelevance(score: Float( mangas.relevance))
-            entries  = [SimpleEntry(date: Calendar.current.date(byAdding: .hour, value: 0, to: currentDate)!, mangas: mangas, relevance: relevance)]
-            
-            let timeline = Timeline(entries: entries, policy: .atEnd)
-            completion(timeline)
         }
     }
 }

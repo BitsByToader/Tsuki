@@ -110,7 +110,7 @@ struct AccountView: View {
             .transition(.fade)
         }.navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
-            self.pickedLanguages = UserDefaults.standard.stringArray(forKey: "pickedLanguages") ?? []
+            self.pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
             
             let loadingDescription: LocalizedStringKey = "Loading account..."
             appState.loadingQueue.append(loadingDescription)

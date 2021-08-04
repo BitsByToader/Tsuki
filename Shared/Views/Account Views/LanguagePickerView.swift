@@ -20,7 +20,7 @@ struct LanguagePickerView: View {
                         self.pickedLanguages.append(languageKey)
                     }
                     
-                    UserDefaults.standard.set(self.pickedLanguages, forKey: "pickedLanguages")
+                    UserDefaults(suiteName: "group.TsukiApp")?.set(self.pickedLanguages, forKey: "pickedLanguages")
                 }, label: {
                     HStack(spacing: 10) {
                         Text(languagesDict[languageKey] ?? "Unknown language")

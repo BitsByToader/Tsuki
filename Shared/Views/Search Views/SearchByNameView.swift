@@ -90,7 +90,7 @@ struct SearchByNameView: View {
         
         let payload = urlComponents.percentEncodedQuery
         
-        guard let url = URL(string: "\(UserDefaults.standard.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?\(payload ?? "")") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "( ͡° ͜ʖ ͡°)")manga?\(payload ?? "")") else {
             print("From SearchByName: Invalid URL")
             return
         }
