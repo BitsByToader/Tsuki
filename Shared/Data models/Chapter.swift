@@ -27,15 +27,6 @@ struct Chapter: Decodable, Hashable {
     
     var isRead: Bool = false
     
-    //MARK: - Conforms to Hashable
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(chapterId)
-    }
-    
-    static func == (lhs: Chapter, rhs: Chapter) -> Bool {
-        return lhs.chapterId == rhs.chapterId
-    }
-    
     //MARK: - Conforms to Decoder
     enum CodingKeys: String, CodingKey {
         case data, relationships

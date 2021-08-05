@@ -427,12 +427,11 @@ struct MangaView: View {
                     let chaptersReadCount = (decodedResponse.data ?? []).count
                     var counter: Int = 0
                     
-                    for (index, chapter) in self.chapters.enumerated() {
+                    var tempArray = self.chapters
+                    for (index, chapter) in tempArray.enumerated() {
                         for id in ( decodedResponse.data ?? [] ) {
                             if ( chapter.chapterId == id ) {
-                                DispatchQueue.main.async {
-                                    self.chapters[index].isRead = true
-                                }
+                                tempArray[index].isRead = true
                                 counter += 1
                                 break
                             }
@@ -444,6 +443,7 @@ struct MangaView: View {
                     }
                     
                     DispatchQueue.main.async {
+                        self.chapters = tempArray
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
