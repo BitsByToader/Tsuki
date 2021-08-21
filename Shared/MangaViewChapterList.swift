@@ -39,7 +39,7 @@ struct MangaViewChapterList: View {
                     }
                 }
             } else {
-                #warning("FIX ME! Add chapter language emoji to db")
+                //languageEmoji will be an empty string for local chapters because it is already inserted in the chapter string
                 ForEach(Array(localChapters.enumerated()), id: \.offset) { index, chapter in
                     NavigationLink(destination: ChapterView(loadContents: false, isViewPresented: $navigationSelection, remainingChapters: [], remainingLocalChapters: localChapters.reversed().suffix(index+1))) {
                         ChapterListRow(volume: chapter.wrappedVolume,

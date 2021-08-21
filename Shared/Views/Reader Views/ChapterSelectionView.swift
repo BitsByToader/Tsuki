@@ -96,7 +96,7 @@ struct ChapterSelectionView: View {
                             selection = .selectedChapters
                         }) {
                             HStack {
-                                Text("Vol.\(chapter.volume) Ch.\(chapter.chapter)")
+                                Text("Vol.\(chapter.volume) Ch.\(chapter.chapter) \(languagesEmojiDict[chapter.chapterLanguageCode] ?? "")")
                                 
                                 Spacer()
                                 
@@ -230,7 +230,7 @@ struct ChapterSelectionView: View {
             let chapter = DownloadedChapter(context: moc)
 
             chapter.title = self.pages[index].chapter.title
-            chapter.chapter = self.pages[index].chapter.chapter
+            chapter.chapter = self.pages[index].chapter.chapter + " " +  (languagesEmojiDict[self.pages[index].chapter.chapterLanguageCode] ?? "")
             chapter.volume = self.pages[index].chapter.volume
             chapter.timestamp = self.pages[index].chapter.timestamp
 
@@ -306,7 +306,7 @@ struct ChapterSelectionView: View {
             let chapter = DownloadedChapter(context: moc)
             
             chapter.title = self.pages[index].chapter.title
-            chapter.chapter = self.pages[index].chapter.chapter
+            chapter.chapter = self.pages[index].chapter.chapter + " " +  (languagesEmojiDict[self.pages[index].chapter.chapterLanguageCode] ?? "")
             chapter.volume = self.pages[index].chapter.volume
             chapter.timestamp = self.pages[index].chapter.timestamp
             
