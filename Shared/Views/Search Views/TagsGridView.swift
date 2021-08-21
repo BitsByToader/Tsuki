@@ -13,6 +13,7 @@ struct TagsGridView: View {
     var tagColorToDisplay: UIColor
     var headline: LocalizedStringKey
     
+    var removeTag: (Int) -> Void
     var reloadList: () -> Void
     
     var body: some View {
@@ -45,7 +46,8 @@ struct TagsGridView: View {
                             .background(Color(tagColorToDisplay))
                             .cornerRadius(15)
                             .onTapGesture {
-                                tags.remove(at: index)
+//                                tags.remove(at: index)
+                                removeTag(index)
                                 reloadList()
                             }
                     }

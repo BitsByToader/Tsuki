@@ -84,8 +84,9 @@ struct Manga: Decodable {
         let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         self.id = try data.decode(String.self, forKey: .id)
         
-        let titleContainer = try attributes.nestedContainer(keyedBy: TitleCodingKeys.self, forKey: .title)
-        self.title = try titleContainer.decode(String.self, forKey: .en)
+        #warning("If the main title isn't in 'english', then it will be empty, which is bullshit behaviour.")
+        let titleContainer = try? attributes.nestedContainer(keyedBy: TitleCodingKeys.self, forKey: .title)
+        self.title = ( try? titleContainer?.decode(String.self, forKey: .en) ) ?? ""
         
         let descriptionContainer = try attributes.nestedContainer(keyedBy: DescriptionCodingKeys.self, forKey: .description)
         self.description = try descriptionContainer.decode(String.self, forKey: .en)

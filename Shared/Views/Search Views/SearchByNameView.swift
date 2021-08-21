@@ -18,7 +18,8 @@ struct SearchByNameView: View {
     
     @State private var searchInput: String = ""
     
-    @State var tagsToSearchWith: [Tag] = []
+    @Binding var tagsToSearchWith: [Tag]
+    var removeToggledTagByIndex: (Int) -> Void
     
     var preloadManga: Bool = false
     var sectionName: String = ""
@@ -51,14 +52,24 @@ struct SearchByNameView: View {
             .navigationTitle(Text(sectionName != "" ?  "\(sectionName) manga" : "Search by name"))
             
             if tagsToSearchWith.contains(where: { $0.state == .enabled }) {
-                TagsGridView(tags: $tagsToSearchWith, tagStateToDisplay: .enabled, tagColorToDisplay: .systemGreen, headline: "Included tags", reloadList: searchManga)
+                TagsGridView(tags: $tagsToSearchWith,
+                             tagStateToDisplay: .enabled,
+                             tagColorToDisplay: .systemGreen,
+                             headline: "Included tags",
+                             removeTag: removeToggledTagByIndex,
+                             reloadList: searchManga)
                     .padding(.horizontal, 5)
                     .transition(.opacity)
                     .animation(.default)
             }
             
             if tagsToSearchWith.contains(where: { $0.state == .disabled }) {
-                TagsGridView(tags: $tagsToSearchWith, tagStateToDisplay: .disabled, tagColorToDisplay: .systemRed, headline: "Excluded tags", reloadList: searchManga)
+                TagsGridView(tags: $tagsToSearchWith,
+                             tagStateToDisplay: .disabled,
+                             tagColorToDisplay: .systemRed,
+                             headline: "Excluded tags",
+                             removeTag: removeToggledTagByIndex,
+                             reloadList: searchManga)
                     .padding(.horizontal, 5)
                     .transition(.opacity)
                     .animation(.default)

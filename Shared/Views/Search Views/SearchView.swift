@@ -35,7 +35,7 @@ struct SearchView: View {
                 ZStack(alignment: .bottom) {
                     List {
                         Section() {
-                            NavigationLink(destination: SearchByNameView()) {
+                            NavigationLink(destination: SearchByNameView(tagsToSearchWith: .constant([]), removeToggledTagByIndex: removeTagByIndex)) {
                                 Text("Search by name")
                             }
                         }
@@ -76,7 +76,7 @@ struct SearchView: View {
                     .listStyle(InsetGroupedListStyle())
                     
                     if includedTagsCount > 0 || excludedTagsCount > 0 {
-                        NavigationLink(destination: SearchByNameView(tagsToSearchWith: toggledTags, preloadManga: true)) {
+                        NavigationLink(destination: SearchByNameView(tagsToSearchWith: $toggledTags, removeToggledTagByIndex: removeTagByIndex, preloadManga: true)) {
                             SearchWithTagsBox(includedTags: includedTagsCount, excludedTags: excludedTagsCount)
                         }.transition(.move(edge: .bottom))
                     }
@@ -145,6 +145,44 @@ struct SearchView: View {
             
         case .untoggled:
             excludedTagsCount -= 1
+        }
+    }
+    
+    ///Resets the toggled tags.
+    func resetToggledTags() {
+        //Reset the toggle states to update the list
+        for section in tagsDict.keys {
+            for (index, _) in (tagsDict[section] ?? []).enumerated() {
+                tagsDict[section]?[index].state = .untoggled
+            }
+        }
+        
+        //Reset the included/excluded counts
+        excludedTagsCount = 0
+        includedTagsCount = 0
+        
+        toggledTags.removeAll()
+    }
+    
+    ///Remove the toggle state of the tax using the index of toggledTags array.
+    func removeTagByIndex(index: Int) {
+        let id: String = toggledTags[index].id
+        
+        if ( toggledTags[index].state == .enabled ) {
+            includedTagsCount -= 1
+        } else if ( toggledTags[index].state == .disabled ) {
+            excludedTagsCount -= 1
+        }
+        
+        toggledTags.remove(at: index)
+        
+        for section in tagsDict.keys {
+            for (i, tag) in (tagsDict[section] ?? []).enumerated() {
+                if ( tag.id == id ) {
+                    tagsDict[section]?[i].state = .untoggled
+                    return
+                }
+            }
         }
     }
 }
