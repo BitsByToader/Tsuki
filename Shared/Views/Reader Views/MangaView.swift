@@ -175,10 +175,10 @@ struct MangaView: View {
                 
                 Text(manga.description)
                     .padding(.top, 5)
-            }.frame(maxHeight: descriptionExpanded ? .infinity : 200)
-            .onTapGesture {
+                    .lineLimit(descriptionExpanded ? nil : 6)
+            }.onTapGesture {
                 descriptionExpanded.toggle()
-            }
+            }.animation(.default)
             //MARK: - Tags
             VStack(alignment: .leading) {
                 Text("Genres")

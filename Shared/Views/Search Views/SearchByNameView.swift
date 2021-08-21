@@ -17,8 +17,9 @@ struct SearchByNameView: View {
     @EnvironmentObject var appState: AppState
     
     @State private var searchInput: String = ""
-    var includedTagsToSearch: [String] = []
-    var excludedTagsToSearch: [String] = []
+    
+    @State var tagsToSearchWith: [Tag] = []
+    
     var preloadManga: Bool = false
     var sectionName: String = ""
     
@@ -49,6 +50,20 @@ struct SearchByNameView: View {
             .padding(.bottom, 15)
             .navigationTitle(Text(sectionName != "" ?  "\(sectionName) manga" : "Search by name"))
             
+            if tagsToSearchWith.contains(where: { $0.state == .enabled }) {
+                TagsGridView(tags: $tagsToSearchWith, tagStateToDisplay: .enabled, tagColorToDisplay: .systemGreen, headline: "Included tags", reloadList: searchManga)
+                    .padding(.horizontal, 5)
+                    .transition(.opacity)
+                    .animation(.default)
+            }
+            
+            if tagsToSearchWith.contains(where: { $0.state == .disabled }) {
+                TagsGridView(tags: $tagsToSearchWith, tagStateToDisplay: .disabled, tagColorToDisplay: .systemRed, headline: "Excluded tags", reloadList: searchManga)
+                    .padding(.horizontal, 5)
+                    .transition(.opacity)
+                    .animation(.default)
+            }
+            
             MangaGrid(dataSource: searchResult)
             
             Spacer()
@@ -72,18 +87,17 @@ struct SearchByNameView: View {
             urlComponents.queryItems?.append(q1)
         }
         
-        if ( !includedTagsToSearch.isEmpty ) {
-            for tag in includedTagsToSearch {
-                let q = URLQueryItem(name: "includedTags[]", value: tag)
-                urlComponents.queryItems?.append(q)
+        for tag in tagsToSearchWith {
+            var queryName: String = ""
+            
+            if tag.state == .enabled {
+                queryName = "includedTags[]"
+            } else if tag.state == .disabled {
+                queryName = "excludedTags[]"
             }
-        }
-        
-        if ( !excludedTagsToSearch.isEmpty ) {
-            for tag in excludedTagsToSearch {
-                let q = URLQueryItem(name: "excludedTags[]", value: tag)
-                urlComponents.queryItems?.append(q)
-            }
+            
+            let q = URLQueryItem(name: queryName, value: tag.id)
+            urlComponents.queryItems?.append(q)
         }
         
         urlComponents.queryItems?.append( URLQueryItem(name: "includes[]", value: "cover_art") )
@@ -141,11 +155,6 @@ struct SearchByNameView: View {
     }
 }
 
-struct SearchByNameView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchByNameView(sectionName: "Some")
-    }
-}
 
 #if canImport(UIKit)
 extension View {

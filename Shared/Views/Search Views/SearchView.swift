@@ -26,13 +26,9 @@ struct SearchView: View {
     
     @State private var tagsDict: [String: [Tag]] = [:]
     
-    @State private var includedTagsArray: [String] = []
-    @State private var excludedTagsArray: [String] = []
-    
-    #warning("Refactor this to use the ToggleState enum from the Tag struct")
-    enum TagMode {
-        case include, exclude
-    }
+    @State private var toggledTags: [Tag] = []
+    @State private var includedTagsCount: Int = 0
+    @State private var excludedTagsCount: Int = 0
     
     var body: some View {
             NavigationView {
@@ -53,24 +49,24 @@ struct SearchView: View {
                                             //If the row is untoggled, we'll include the tag.
                                             withAnimation {
                                                 tagsDict[section]?[i].state = .enabled
-                                                updateTagArray(mode: .include, tagId: tag.id)
                                             }
                                         case .enabled:
                                             //If the row is included, we'll exclude it
                                             withAnimation {
                                                 tagsDict[section]?[i].state = .disabled
-                                                removeTagFromArray(mode: .include, tagId: tag.id)
-                                                updateTagArray(mode: .exclude, tagId: tag.id)
                                             }
                                         case .disabled:
                                             //If the row is excluded, we'll untoggle it.
                                             withAnimation {
                                                 tagsDict[section]?[i].state = .untoggled
-                                                removeTagFromArray(mode: .exclude, tagId: tag.id)
                                             }
                                         }
+                                        
+                                        if let tagSection = tagsDict[section] {
+                                            updateTagArray(tag: tagSection[i])
+                                        }
                                     }, label: {
-                                        Text(tag.tagName)
+                                        Text(tag.name)
                                             .foregroundColor( (colorScheme == .dark) || (tag.state == .enabled || tag.state == .disabled) ? .white : .black)
                                     }).listRowBackground(state: tag.state)
                                 }
@@ -79,9 +75,9 @@ struct SearchView: View {
                     }.navigationBarTitle(Text("Search"))
                     .listStyle(InsetGroupedListStyle())
                     
-                    if includedTagsArray.count > 0 || excludedTagsArray.count > 0 {
-                        NavigationLink(destination: SearchByNameView(includedTagsToSearch: includedTagsArray, excludedTagsToSearch: excludedTagsArray, preloadManga: true)) {
-                            SearchWithTagsBox(includedTags: includedTagsArray.count, excludedTags: excludedTagsArray.count)
+                    if includedTagsCount > 0 || excludedTagsCount > 0 {
+                        NavigationLink(destination: SearchByNameView(tagsToSearchWith: toggledTags, preloadManga: true)) {
+                            SearchWithTagsBox(includedTags: includedTagsCount, excludedTags: excludedTagsCount)
                         }.transition(.move(edge: .bottom))
                     }
                 }
@@ -114,21 +110,41 @@ struct SearchView: View {
             }
     }
     
-    func updateTagArray(mode: TagMode, tagId: String) {
-        switch mode {
-        case .include:
-            includedTagsArray.append(tagId)
-        case .exclude:
-            excludedTagsArray.append(tagId)
+    ///Finds the given tag in the array with its id and updates it.
+    ///If it wasn't found, it appends the tag to the array.
+    ///Tags with the *.untoggled* `TagState` will be removed from the array.
+    func updateTagArray(tag: Tag) {
+        var foundTag: Bool = false
+        
+        for (index, currTag) in toggledTags.enumerated() {
+            if ( currTag.id == tag.id ) {
+                toggledTags[index] = tag
+                foundTag = true
+                
+                if ( tag.state == .untoggled ) {
+                    toggledTags.remove(at: index)
+                }
+                
+                break
+            }
         }
-    }
-    
-    func removeTagFromArray(mode: TagMode, tagId: String) {
-        switch mode {
-        case .include:
-            includedTagsArray = includedTagsArray.filter { $0 != tagId }
-        case .exclude:
-            excludedTagsArray = excludedTagsArray.filter { $0 != tagId }
+        
+        if (!foundTag) {
+            toggledTags.append(tag)
+        }
+        
+        //This logic applies because the tags will always be updates in the same order
+        //i.e. from untoggled, to enabled, to disabled, to untoggled again
+        switch tag.state {
+        case .enabled:
+            includedTagsCount += 1
+            
+        case .disabled:
+            excludedTagsCount += 1
+            includedTagsCount -= 1
+            
+        case .untoggled:
+            excludedTagsCount -= 1
         }
     }
 }

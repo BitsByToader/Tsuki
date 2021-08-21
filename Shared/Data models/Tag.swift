@@ -60,7 +60,7 @@ class MangaTags: ObservableObject  {
 
 //MARK: - Tag struct (used in the UI)
 struct Tag: Hashable {
-    let tagName: String
+    let name: String
     let id: String
     var state: ToggleState = .untoggled
     
@@ -71,13 +71,13 @@ struct Tag: Hashable {
     }
     
     init(from decodedTag: MDTag) {
-        self.tagName = decodedTag.name
+        self.name = decodedTag.name
         self.id = decodedTag.id
     }
     
     init(id: String, tagName: String) {
         self.id = id
-        self.tagName = tagName
+        self.name = tagName
     }
 }
 

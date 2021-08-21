@@ -18,7 +18,7 @@ struct MangaViewTags: View {
                     Text("\(tag)")
                         .font(.system(size: 14))
                         .foregroundColor(Color(.systemGray))
-                        .frame(width: 65, height: 65)
+                        .frame(minWidth: 65, minHeight: 65, maxHeight: 65)
                     
                     Divider()
                 }
@@ -26,9 +26,3 @@ struct MangaViewTags: View {
         }
     }
 }
-
-//struct MangaViewTags_Previews: PreviewProvider {
-//    static var previews: some View {
-//        MangaViewTags([1,50,48,70,89])
-//    }
-//}

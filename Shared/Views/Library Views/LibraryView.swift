@@ -281,12 +281,6 @@ struct LibraryView: View {
     }
 }
 
-struct LibraryView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchByNameView()
-    }
-}
-
 extension UIApplication {
     func endEditing(_ force: Bool) {
         self.windows

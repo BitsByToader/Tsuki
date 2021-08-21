@@ -57,7 +57,7 @@ struct ReaderSettings: View {
                 Section(header: Text("Data saver"), footer: Text("When enabling data saver, the chapter pages will be of a lesser quality, in an attempt to save bandwith. This may result in a worse reading experience.")) {
                     Toggle("Save data when reading", isOn: $readingDataSaver)
                 }
-            }.listStyle(GroupedListStyle())
+            }.listStyle(InsetGroupedListStyle())
             .navigationBarItems(trailing: Button(action: {settingsPresented.toggle()}, label: {Text("Done")}))
             .navigationBarTitleDisplayMode(.inline)
             .navigationTitle(Text("Reader Settings"))
