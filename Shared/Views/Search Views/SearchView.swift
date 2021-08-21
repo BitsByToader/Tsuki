@@ -30,6 +30,15 @@ struct SearchView: View {
     @State private var includedTagsCount: Int = 0
     @State private var excludedTagsCount: Int = 0
     
+    var dragDownGesture: some Gesture {
+        DragGesture()
+            .onEnded({ value in
+                if ( value.startLocation.y < value.location.y ) {
+                    resetToggledTags()
+                }
+            })
+    }
+    
     var body: some View {
             NavigationView {
                 ZStack(alignment: .bottom) {
@@ -78,7 +87,9 @@ struct SearchView: View {
                     if includedTagsCount > 0 || excludedTagsCount > 0 {
                         NavigationLink(destination: SearchByNameView(tagsToSearchWith: $toggledTags, removeToggledTagByIndex: removeTagByIndex, preloadManga: true)) {
                             SearchWithTagsBox(includedTags: includedTagsCount, excludedTags: excludedTagsCount)
-                        }.transition(.move(edge: .bottom))
+                                .gesture(dragDownGesture)
+                                .transition(.move(edge: .bottom))
+                        }
                     }
                 }
                 
