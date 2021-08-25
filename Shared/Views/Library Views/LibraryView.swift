@@ -129,31 +129,7 @@ struct LibraryView: View {
             }.navigationBarHidden(true)
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
-                let loadingDescription: LocalizedStringKey = "Checking for account..."
-                DispatchQueue.main.async {
-                    appState.loadingQueue.append(loadingDescription)
-                }
-                
-                MDAuthentification.standard.logInProcedure { isLoggedIn in
-                    if isLoggedIn {
-                        print("Loading library...")
-                        
-                        loadContent(refresh: false)
-                        
-                        DispatchQueue.main.async {
-                            loggedIn = true
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        }
-                    } else {
-                        print("Showing log in view...")
-                        
-                        DispatchQueue.main.async {
-                            loggedIn = false
-                            appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                            logInViewPresented = true
-                        }
-                    }
-                }
+                loadContent(refresh: false)
             }
         }
     }
@@ -165,7 +141,31 @@ struct LibraryView: View {
         }
         
         if loadCounter * numberOfItemsToLoad <= loadLimit {
-            loadLibrary()
+            let loadingDescription: LocalizedStringKey = "Checking for account..."
+            DispatchQueue.main.async {
+                appState.loadingQueue.append(loadingDescription)
+            }
+            
+            MDAuthentification.standard.logInProcedure { isLoggedIn in
+                if isLoggedIn {
+                    print("Loading library...")
+                    
+                    loadLibrary()
+                    
+                    DispatchQueue.main.async {
+                        loggedIn = true
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                } else {
+                    print("Showing log in view...")
+                    
+                    DispatchQueue.main.async {
+                        loggedIn = false
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        logInViewPresented = true
+                    }
+                }
+            }
         }
     }
     //MARK: - Retrieve the mangas in the library

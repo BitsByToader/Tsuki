@@ -56,33 +56,7 @@ struct LatestUpdatesView: View {
         }.onAppear {
             self.widgetURL.openedWithURL = false
             
-            let loadingDescription: LocalizedStringKey = "Checking for account..."
-            DispatchQueue.main.async {
-                appState.loadingQueue.append(loadingDescription)
-            }
-            
-            MDAuthentification.standard.logInProcedure { isLoggedIn in
-                if isLoggedIn {
-                    print("Loading library...")
-                    
-                    
-                    loadContent(refresh: false)
-                    
-                    DispatchQueue.main.async {
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                    }
-                } else {
-                    print("Showing log in view...")
-                    
-                    DispatchQueue.main.async {
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
-                        
-                        //Should never reach here, because we already do this check in the previous view (LibraryView)
-                        //But if we do, just pop the view from the stack.
-//                        self.presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
+            loadContent(refresh: false)
         }.onOpenURL { url in
             if ( url == URL(string: "tsuki:///latestupdates") ) {
                 //Broken atm...
@@ -119,7 +93,33 @@ struct LatestUpdatesView: View {
         }
         
         if ( self.loadCounter * self.numberOfItemsToLoad <= self.loadLimit ) {
-            loadManga()
+            let loadingDescription: LocalizedStringKey = "Checking for account..."
+            DispatchQueue.main.async {
+                appState.loadingQueue.append(loadingDescription)
+            }
+            
+            MDAuthentification.standard.logInProcedure { isLoggedIn in
+                if isLoggedIn {
+                    print("Loading library...")
+                    
+                    
+                    loadManga()
+                    
+                    DispatchQueue.main.async {
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                    }
+                } else {
+                    print("Showing log in view...")
+                    
+                    DispatchQueue.main.async {
+                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
+                        
+                        //Should never reach here, because we already do this check in the previous view (LibraryView)
+                        //But if we do, just pop the view from the stack.
+//                        self.presentationMode.wrappedValue.dismiss()
+                    }
+                }
+            }
         }
     }
     //MARK: - Load manga method

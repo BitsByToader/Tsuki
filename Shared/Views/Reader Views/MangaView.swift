@@ -9,10 +9,11 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct MangaView: View {
+    //MARK: - Environment variables
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @Environment(\.managedObjectContext) var moc
     @EnvironmentObject var appState: AppState
-    
+    //MARK: - Variables
     @State var manga: Manga = Manga()
     @State var mangaDetailsAlreadyLoaded: Bool = false
     
@@ -83,7 +84,7 @@ struct MangaView: View {
     }
     
     var mangaId: String
-    
+    //MARK: - Dictionaries
     enum MangaStatus: String, CaseIterable {
         case unfollow = "Unfollow"
         case reading = "Reading"
@@ -103,7 +104,7 @@ struct MangaView: View {
         .reReading: "re_reading",
         .unfollow: "unfollow"
     ]
-    
+    //MARK: - SwiftUI Views
     var body: some View {
         List {
             //MARK: - Header
