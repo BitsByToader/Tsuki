@@ -14,10 +14,11 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct LibraryView: View {
+    //MARK: - Environment variables
     @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var widgetURL: WidgetURL
     @EnvironmentObject var appState: AppState
-
+    //MARK: - Variables
     @State private var loggedIn: Bool = false
     
     @State private var shouldOpenLatestUpdates: Bool = false
@@ -32,6 +33,11 @@ struct LibraryView: View {
     @State private var mangaTitleByIdDict: [String: String] = [:]
     @State private var coverArtByIdDict: [String: String] = [:]
     
+    private let numberOfItemsToLoad: Int = 50
+    @State private var loadCounter: Int = 0
+    @State private var loadLimit: Int = 1
+    
+    //MARK: - SwiftUI Views
     var body: some View {
         if loggedIn {
             NavigationView {
@@ -77,8 +83,9 @@ struct LibraryView: View {
                         LibraryLink(linkTitle: "Downloaded manga")
                     }
                     //MARK: - Manga
-                    MangaGrid(dataSource: searchResult.filter { $0.title.contains(searchInput) || searchInput == "" })
+                    MangaGrid(dataSource: searchResult.filter { $0.title.contains(searchInput) || searchInput == "" }, reachedTheBottom: {loadContent(refresh: false)})
                         .navigationTitle(Text("Library"))
+                        .navigationBarItems(trailing: Button( "Refresh", action: { loadContent(refresh: true) } ))
                     
                     Spacer()
                 }.onTapGesture {
@@ -131,8 +138,7 @@ struct LibraryView: View {
                     if isLoggedIn {
                         print("Loading library...")
                         
-                        
-                        loadLibrary()
+                        loadContent(refresh: false)
                         
                         DispatchQueue.main.async {
                             loggedIn = true
@@ -151,6 +157,17 @@ struct LibraryView: View {
             }
         }
     }
+    //MARK: - Load more content
+    func loadContent(refresh: Bool) {
+        if ( refresh ) {
+            self.loadCounter = 0
+            self.searchResult = []
+        }
+        
+        if loadCounter * numberOfItemsToLoad <= loadLimit {
+            loadLibrary()
+        }
+    }
     //MARK: - Retrieve the mangas in the library
     func loadLibrary() {
         let loadingDescription: LocalizedStringKey = "Loading library..."
@@ -158,7 +175,7 @@ struct LibraryView: View {
             appState.loadingQueue.append(loadingDescription)
         }
         
-        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")user/follows/manga?limit=100") else {
+        guard let url = URL(string: "\(UserDefaults(suiteName: "group.TsukiApp")?.value(forKey: "apiURL") ?? "")user/follows/manga?limit=\(numberOfItemsToLoad)&offset=\(loadCounter * numberOfItemsToLoad)") else {
             print("From LibraryView: Invalid URL")
             return
         }
@@ -192,25 +209,28 @@ struct LibraryView: View {
                     }
                     
                     DispatchQueue.main.async {
-                        searchResult = decodedResponse.results
+                        self.loadCounter += 1
+                        self.loadLimit = decodedResponse.total
                         
-                        loadCovers()
+                        searchResult += decodedResponse.results
+                        
+                        loadCovers(for: decodedResponse.results)
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     
                     return
                 } catch {
-                    print ("error")
+                    print (error)
                     DispatchQueue.main.async {
-                        appState.errorMessage += "Unknown error when parsing response from server.\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
+                        appState.errorMessage += "(From LibraryView): Unknown error when parsing response from server.\n\n URL: \(url.absoluteString)\n Data received from server: \(String(describing: String(data: data, encoding: .utf8)))\n\n\n"
                         withAnimation {
                             appState.errorOccured = true
                             appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         }
                     }
                 }
-                
+            } else {
                 DispatchQueue.main.async {
                     print("Fetch failed: \(error?.localizedDescription ?? "Unknown error")")
                     appState.errorMessage += "Network fetch failed. \nMessage: \(error?.localizedDescription ?? "Unknown error")\n\n"
@@ -223,7 +243,7 @@ struct LibraryView: View {
         }.resume()
     }
     //MARK: - Retrieve the covers for the mangas in the library
-    func loadCovers() {
+    func loadCovers(for mangas: [ReturnedManga]) {
         let loadingDescription: LocalizedStringKey = "Retrieving covers..."
         DispatchQueue.main.async {
             appState.loadingQueue.append(loadingDescription)
@@ -234,7 +254,7 @@ struct LibraryView: View {
         
         urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "100"))
         
-        for manga in searchResult {
+        for manga in mangas {
             urlComponents.queryItems?.append(URLQueryItem(name: "manga[]", value: manga.id))
         }
         

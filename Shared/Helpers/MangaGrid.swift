@@ -11,6 +11,8 @@ import SDWebImageSwiftUI
 struct MangaGrid: View {
     var dataSource: [ReturnedManga]
     
+    let reachedTheBottom: () -> Void
+    
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 110))], spacing: 10) {
             if dataSource.isEmpty {
@@ -18,9 +20,19 @@ struct MangaGrid: View {
                     PlaceholderManga()
                 }
             }
-            ForEach(dataSource, id: \.self) { manga in
+            ForEach(Array(dataSource.enumerated()), id: \.element.id) { (index, manga) in
                 NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.id)) {
                     PlainManga(manga: manga)
+                        .onAppear {
+                            if index + 1 == dataSource.count {
+                                print("Reached the bottom")
+                                
+                                let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+                                hapticFeedback.impactOccurred()
+                                
+                                reachedTheBottom()
+                            }
+                        }
                 }.buttonStyle(PlainButtonStyle())
             }
         }

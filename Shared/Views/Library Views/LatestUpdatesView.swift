@@ -10,15 +10,20 @@ import SDWebImageSwiftUI
 
 //MARK: - LatestUpdates View
 struct LatestUpdatesView: View {
+    //MARK: - Environment variables
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @EnvironmentObject var widgetURL: WidgetURL
     @EnvironmentObject var appState: AppState
-    
+    //MARK: - Variables
     @State private var result: [Chapter] = []
     
     var mangaTitleDict: [String: String] = [:]
     var coverArtDict: [String: String] = [:]
     
+    private let numberOfItemsToLoad: Int = 50
+    @State private var loadCounter: Int = 0
+    @State private var loadLimit: Int = 1
+    //MARK: SwiftUI Views
     var body: some View {
         
         ScrollView {
@@ -28,9 +33,18 @@ struct LatestUpdatesView: View {
                         PlaceholderManga()
                     }
                 } else {
-                    ForEach(result, id: \.self) { manga in
+                    ForEach(Array(result.enumerated()), id: \.element.chapterId) { (index, manga) in
                         NavigationLink(destination: MangaView(reloadContents: true, mangaId: manga.mangaId)) {
                             UpdatedManga(manga: manga, coverArt: coverArtDict[manga.mangaId] ?? "", mangaTitle: mangaTitleDict[manga.mangaId] ?? "")
+                        }.onAppear {
+                            if ( index + 1 == result.count ) {
+                                print("Reached the bottom")
+                                
+                                let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+                                hapticFeedback.impactOccurred()
+                                
+                                loadContent(refresh: false)
+                            }
                         }.buttonStyle(PlainButtonStyle())
                     }
                 }
@@ -38,6 +52,7 @@ struct LatestUpdatesView: View {
             
             Spacer()
                 .navigationTitle(Text("Latest Updates"))
+                .navigationBarItems(trailing: Button( "Refresh", action: { loadContent(refresh: true) } ))
         }.onAppear {
             self.widgetURL.openedWithURL = false
             
@@ -51,7 +66,7 @@ struct LatestUpdatesView: View {
                     print("Loading library...")
                     
                     
-                    loadManga()
+                    loadContent(refresh: false)
                     
                     DispatchQueue.main.async {
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
@@ -96,7 +111,17 @@ struct LatestUpdatesView: View {
             }
         }
     }
-    
+    //MARK: - Load content method
+    func loadContent(refresh: Bool) {
+        if ( refresh ) {
+            loadCounter = 0
+            self.result = []
+        }
+        
+        if ( self.loadCounter * self.numberOfItemsToLoad <= self.loadLimit ) {
+            loadManga()
+        }
+    }
     //MARK: - Load manga method
     func loadManga() {
         let loadingDescription: LocalizedStringKey = "Loading updates..."
@@ -107,7 +132,8 @@ struct LatestUpdatesView: View {
         var urlComponents = URLComponents()
         urlComponents.queryItems = []
         
-        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "500"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "\(numberOfItemsToLoad)"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "offset", value: "\(loadCounter * numberOfItemsToLoad)"))
         urlComponents.queryItems?.append(URLQueryItem(name: "order[publishAt]", value: "desc"))
         
         let pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
@@ -145,13 +171,19 @@ struct LatestUpdatesView: View {
                 do {
                     struct Results: Decodable {
                         let results: [Chapter]
+                        let limit: Int
+                        let offset: Int
+                        let total: Int
                     }
                     
                     let decodedResponse = try JSONDecoder().decode(Results.self, from: data)
                     
                     
                     DispatchQueue.main.async {
-                        self.result = decodedResponse.results.sorted {
+                        self.loadCounter += 1
+                        self.loadLimit = decodedResponse.total
+                        
+                        self.result += decodedResponse.results.sorted {
                             return (ISO8601DateFormatter().date(from: $0.timestamp) ?? Date()).timeIntervalSince1970 > (ISO8601DateFormatter().date(from: $1.timestamp) ?? Date()).timeIntervalSince1970
                         }
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)

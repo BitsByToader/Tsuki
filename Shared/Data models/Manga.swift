@@ -189,6 +189,9 @@ struct MDRelationship: Decodable {
 //MARK: - Manga returned from seach struct 
 struct ReturnedMangas: Decodable {
     let results: [ReturnedManga]
+    let limit: Int
+    let total: Int
+    let offset: Int
 }
 
 struct ReturnedManga: Decodable, Hashable {

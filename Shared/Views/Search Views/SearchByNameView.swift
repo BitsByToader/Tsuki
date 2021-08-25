@@ -14,8 +14,9 @@ import SwiftUI
 import SDWebImageSwiftUI
 
 struct SearchByNameView: View {
+    //MARK: - Environment variables
     @EnvironmentObject var appState: AppState
-    
+    //MARK: - Variables
     @State private var searchInput: String = ""
     
     @Binding var tagsToSearchWith: [Tag]
@@ -26,6 +27,10 @@ struct SearchByNameView: View {
     
     @State private var searchResult: [ReturnedManga] = []
     
+    private let numberOfItemsToLoad: Int = 50
+    @State private var loadCounter: Int = 0
+    @State private var loadLimit: Int = 1
+    //MARK: - SwiftUI Views
     var body: some View {
         ScrollView {
             HStack {
@@ -50,6 +55,7 @@ struct SearchByNameView: View {
             .padding(.horizontal)
             .padding(.bottom, 15)
             .navigationTitle(Text(sectionName != "" ?  "\(sectionName) manga" : "Search by name"))
+            .navigationBarItems(trailing: Button( "Refresh", action: { loadContent(refresh: true) } ))
             
             if tagsToSearchWith.contains(where: { $0.state == .enabled }) {
                 TagsGridView(tags: $tagsToSearchWith,
@@ -75,23 +81,35 @@ struct SearchByNameView: View {
                     .animation(.default)
             }
             
-            MangaGrid(dataSource: searchResult)
+            MangaGrid(dataSource: searchResult, reachedTheBottom: { loadContent(refresh: false) })
             
             Spacer()
         }.onAppear {
             if preloadManga {
-                searchManga()
+                loadContent(refresh: false)
             }
         }
     }
-    
+    //MARK: - Load content
+    func loadContent(refresh: Bool) {
+        if ( refresh ) {
+            self.loadCounter = 0
+            self.searchResult = []
+        }
+        
+        if ( loadCounter * numberOfItemsToLoad <= loadLimit ) {
+            searchManga()
+        }
+    }
+    //MARK: - Search manga method
     func searchManga() {
         let loadingDescription: LocalizedStringKey = "Loading mangas..."
         
         var urlComponents = URLComponents()
         urlComponents.queryItems = []
         
-        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "30"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "\(numberOfItemsToLoad)"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "offset", value: "\(loadCounter * numberOfItemsToLoad)"))
         
         if ( searchInput != "" ) {
             let q1 = URLQueryItem(name: "title", value: searchInput)
@@ -134,7 +152,10 @@ struct SearchByNameView: View {
                     let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
                     
                     DispatchQueue.main.async {
-                        self.searchResult = decodedResponse.results
+                        self.loadCounter += 1
+                        self.loadLimit = decodedResponse.total
+                        
+                        self.searchResult += decodedResponse.results
                         appState.removeFromLoadingQueue(loadingState: "Loading mangas...")
                     }
                     
