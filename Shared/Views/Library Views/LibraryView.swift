@@ -33,7 +33,7 @@ struct LibraryView: View {
     @State private var mangaTitleByIdDict: [String: String] = [:]
     @State private var coverArtByIdDict: [String: String] = [:]
     
-    private let numberOfItemsToLoad: Int = 50
+    private let numberOfItemsToLoad: Int = 100
     @State private var loadCounter: Int = 0
     @State private var loadLimit: Int = 1
     

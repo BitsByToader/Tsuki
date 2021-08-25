@@ -242,7 +242,7 @@ extension View {
             return self.listRowBackground(Color.green)
                 .animation(.default)
         case .untoggled:
-            return self.listRowBackground(Color.clear)
+            return self.listRowBackground(Color(UIColor.secondarySystemGroupedBackground))
                 .animation(.default)
         }
     }
