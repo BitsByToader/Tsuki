@@ -23,7 +23,7 @@ struct ScrollReader: View {
     let loadChapter: (Int) -> Void
     
     var body: some View {
-        ScrollViewReader { value in
+        ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack {
                     ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
@@ -44,12 +44,12 @@ struct ScrollReader: View {
                 }.onChange(of: readerSettingsPresented) { newValue in
                     if !readerSettingsPresented && readerStyle == "Scroll" {
                         withAnimation {
-                            value.scrollTo(currentPageBackup, anchor: .top)
+                            proxy.scrollTo(currentPageBackup, anchor: .top)
                         }
                     }
                 }.onChange(of: navBarHidden) { _ in
                     withAnimation {
-                        value.scrollTo(currentPage, anchor: .top)
+                        proxy.scrollTo(currentPage, anchor: .top)
                     }
                 }
             }

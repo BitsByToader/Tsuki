@@ -140,7 +140,10 @@ struct LibraryView: View {
             self.searchResult = []
         }
         
-        if loadCounter * numberOfItemsToLoad <= loadLimit {
+        if ( loadCounter * numberOfItemsToLoad <= loadLimit ) {
+            let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+            hapticFeedback.impactOccurred()
+            
             let loadingDescription: LocalizedStringKey = "Checking for account..."
             DispatchQueue.main.async {
                 appState.loadingQueue.append(loadingDescription)
@@ -166,6 +169,9 @@ struct LibraryView: View {
                     }
                 }
             }
+        } else {
+            let hapticFeedback = UINotificationFeedbackGenerator()
+            hapticFeedback.notificationOccurred(.warning)
         }
     }
     //MARK: - Retrieve the mangas in the library

@@ -8,12 +8,15 @@
 import SwiftUI
 
 struct MangaViewChapterList: View {
+    //MARK: - Environment variables
     @Environment(\.managedObjectContext) var moc
-    
+    //MARK: - Variables
     @State var navigationSelection: Int? = nil
     let chapters: [Chapter]
     let remote: Bool
-    var localChapters: [DownloadedChapter] = []
+    var localChapters: [DownloadedChapter]
+    
+    let reachedTheBottom: () -> Void
     
     var formatterToString: DateFormatter {
         let obj: DateFormatter = DateFormatter()
@@ -23,7 +26,21 @@ struct MangaViewChapterList: View {
     }
     
     var formatterFromString = ISO8601DateFormatter()
+    //MARK: - Initializers
+    init(localChapters: [DownloadedChapter]) {
+        self.localChapters = localChapters
+        self.remote = false
+        self.chapters = []
+        self.reachedTheBottom = {}
+    }
     
+    init(remoteChapters: [Chapter], reachedTheBottom: @escaping () -> Void) {
+        self.chapters = remoteChapters
+        self.remote = true
+        self.localChapters = []
+        self.reachedTheBottom = reachedTheBottom
+    }
+    //MARK: - SwiftUI Views
     var body: some View {
         List {
             if remote {
@@ -36,6 +53,11 @@ struct MangaViewChapterList: View {
                                        date: "\(formatterToString.string(from: formatterFromString.date(from: chapter.timestamp) ?? Date() ))",
                                        localizedTime: (formatterFromString.date(from: chapter.timestamp) ?? Date()).timeAgoDisplay(style: .full),
                                        isRead: chapter.isRead)
+                            .onAppear {
+                                if ( index + 1 == chapters.count ) {
+                                    reachedTheBottom()
+                                }
+                            }
                     }
                 }
             } else {
@@ -56,7 +78,7 @@ struct MangaViewChapterList: View {
         }.frame(height: 200)
     }
 }
-
+//MARK: - ChaptereListRow Struct
 struct ChapterListRow: View {
     let volume: String
     let chapter: String

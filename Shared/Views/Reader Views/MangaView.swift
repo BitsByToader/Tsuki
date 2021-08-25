@@ -20,6 +20,10 @@ struct MangaView: View {
     @State var chapters: [Chapter] = [] //chapters -- remoteChapters
     @State var localChapters: [DownloadedChapter] = []
     
+    private let numberOfChaptersToLoad: Int = 100
+    @State private var loadCounter: Int = 0
+    @State private var loadLimit: Int = 1
+    
     @State var reloadContents: Bool
     
     @State private var descriptionExpanded: Bool = false
@@ -208,56 +212,66 @@ struct MangaView: View {
                     Spacer()
                 } else {
                     if localChapters.isEmpty {
-                        MangaViewChapterList(chapters: chapters, remote: true)
+                        MangaViewChapterList(remoteChapters: chapters, reachedTheBottom: loadChapters )
                     } else {
-                        MangaViewChapterList(chapters: [], remote: false, localChapters: localChapters)
+                        MangaViewChapterList(localChapters: localChapters)
                     }
                 }
             }
         }.onAppear{
             if reloadContents {
-                let loadingDescription: LocalizedStringKey = "Checking for account..."
-                DispatchQueue.main.async {
-                    appState.loadingQueue.append(loadingDescription)
+                loadContent(refresh: false)
+            }
+        }.navigationTitle(mangaId != "" ? manga.title : "Please select a manga to read.")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarItems(trailing: Button( "Refresh", action: { loadContent(refresh: true) } ))
+        .listStyle(PlainListStyle())
+    }
+    //MARK: - Load content method
+    func loadContent(refresh: Bool) {
+        if ( refresh ) {
+            self.manga = Manga()
+            self.chapters = []
+            self.loadCounter = 0
+        }
+        
+        let loadingDescription: LocalizedStringKey = "Checking for account..."
+        DispatchQueue.main.async {
+            appState.loadingQueue.append(loadingDescription)
+        }
+        
+        MDAuthentification.standard.logInProcedure { isLoggedIn in
+            print("Loading library...")
+            
+            if mangaDetailsAlreadyLoaded {
+                loadChapters()
+                
+                if isLoggedIn {
+                    getMangaStatus()
                 }
                 
-                MDAuthentification.standard.logInProcedure { isLoggedIn in
-                    print("Loading library...")
-                    
-                    if mangaDetailsAlreadyLoaded {
+                //Basically, we will use the already filled manga object only the first time.
+                //If the user reloads, then we will fetch the manga details (along with all the other stuff) from the network.
+                mangaDetailsAlreadyLoaded = false
+            } else {
+                loadMangaInfo { wasSuccesfull in
+                    if wasSuccesfull {
                         loadChapters()
                         
                         if isLoggedIn {
                             getMangaStatus()
                         }
-                        
-                        //Basically, we will use the already filled manga object only the first time.
-                        //If the user reloads, then we will fetch the manga details (along with all the other stuff) from the network.
-                        mangaDetailsAlreadyLoaded = false
-                    } else {
-                        loadMangaInfo { wasSuccesfull in
-                            if wasSuccesfull {
-                                loadChapters()
-                                
-                                if isLoggedIn {
-                                    getMangaStatus()
-                                }
-                            }
-                        }
-                    }
-                    
-                    self.reloadContents = false
-                    
-                    DispatchQueue.main.async {
-                        appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                 }
             }
-        }.navigationTitle(mangaId != "" ? manga.title : "Please select a manga to read.")
-        .navigationBarTitleDisplayMode(.inline)
-        .listStyle(PlainListStyle())
+            
+            self.reloadContents = false
+            
+            DispatchQueue.main.async {
+                appState.removeFromLoadingQueue(loadingState: loadingDescription)
+            }
+        }
     }
-    
     //MARK: - Manga details loader
     func loadMangaInfo(completion: @escaping (Bool) -> Void) {
         let loadingDescription: LocalizedStringKey = "Loading manga information..."
@@ -314,12 +328,25 @@ struct MangaView: View {
     }
     //MARK: - Chapter loader
     func loadChapters() {
+        if ( loadCounter * numberOfChaptersToLoad > loadLimit ) {
+            let hapticFeedback = UINotificationFeedbackGenerator()
+            hapticFeedback.notificationOccurred(.warning)
+            
+            return
+        }
+        
+        let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+        hapticFeedback.impactOccurred()
+        
         let loadingDescription: LocalizedStringKey = "Loading manga chapters..."
         
         var urlComponents = URLComponents()
         urlComponents.queryItems = []
         
-        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "500"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "\(numberOfChaptersToLoad)"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "offset", value: "\(loadCounter * numberOfChaptersToLoad)"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "order[chapter]", value: "desc"))
+        urlComponents.queryItems?.append(URLQueryItem(name: "order[volume]", value: "desc"))
         
         let pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
         
@@ -357,14 +384,17 @@ struct MangaView: View {
                 do {
                     struct Results: Decodable {
                         let results: [Chapter]
+                        let total: Int
                     }
                     
                     let decodedResponse = try JSONDecoder().decode(Results.self, from: data)
                     
                     DispatchQueue.main.async {
-                        self.chapters = decodedResponse.results.sorted {
-                            return Double($0.chapter) ?? 0 > Double($1.chapter) ?? 0
-                        }
+                        self.loadCounter += 1
+                        self.loadLimit = decodedResponse.total
+                        
+                        self.chapters += decodedResponse.results
+                        
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         getReadMarkers()
                     }

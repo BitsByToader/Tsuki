@@ -27,9 +27,6 @@ struct MangaGrid: View {
                             if index + 1 == dataSource.count {
                                 print("Reached the bottom")
                                 
-                                let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
-                                hapticFeedback.impactOccurred()
-                                
                                 reachedTheBottom()
                             }
                         }

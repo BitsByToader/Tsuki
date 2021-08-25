@@ -93,6 +93,9 @@ struct LatestUpdatesView: View {
         }
         
         if ( self.loadCounter * self.numberOfItemsToLoad <= self.loadLimit ) {
+            let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+            hapticFeedback.impactOccurred()
+            
             let loadingDescription: LocalizedStringKey = "Checking for account..."
             DispatchQueue.main.async {
                 appState.loadingQueue.append(loadingDescription)
@@ -120,6 +123,9 @@ struct LatestUpdatesView: View {
                     }
                 }
             }
+        } else {
+            let hapticFeedback = UINotificationFeedbackGenerator()
+            hapticFeedback.notificationOccurred(.warning)
         }
     }
     //MARK: - Load manga method

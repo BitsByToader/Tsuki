@@ -98,7 +98,13 @@ struct SearchByNameView: View {
         }
         
         if ( loadCounter * numberOfItemsToLoad <= loadLimit ) {
+            let hapticFeedback = UIImpactFeedbackGenerator(style: .soft)
+            hapticFeedback.impactOccurred()
+            
             searchManga()
+        } else {
+            let hapticFeedback = UINotificationFeedbackGenerator()
+            hapticFeedback.notificationOccurred(.warning)
         }
     }
     //MARK: - Search manga method
