@@ -15,11 +15,12 @@
 import SwiftUI
 
 struct SearchView: View {
+    //MARK: - Environment variables
     @Environment(\.horizontalSizeClass) var sizeClass
     @EnvironmentObject var appState: AppState
     @EnvironmentObject var mangaTags: MangaTags
     @Environment(\.colorScheme) var colorScheme
-    
+    //MARK: - Variables
     @State private var searchInput: String = ""
     @State private var showCancelButton: Bool = false
     @State private var logInViewPresented: Bool = false
@@ -38,7 +39,7 @@ struct SearchView: View {
                 }
             })
     }
-    
+    //MARK: - SwiftUI Views
     var body: some View {
             NavigationView {
                 ZStack(alignment: .bottom) {
@@ -120,6 +121,7 @@ struct SearchView: View {
                 }
             }
     }
+    //MARK: - General purpose methods
     
     ///Finds the given tag in the array with its id and updates it.
     ///If it wasn't found, it appends the tag to the array.
@@ -197,7 +199,7 @@ struct SearchView: View {
         }
     }
 }
-
+//MARK: - SearchWithTags struct
 struct SearchWithTagsBox: View {
     var includedTags: Int
     var excludedTags: Int
@@ -225,13 +227,7 @@ struct SearchWithTagsBox: View {
         .foregroundColor(.white)
     }
 }
-
-struct SearchView_Previews: PreviewProvider {
-    static var previews: some View {
-        SearchView()
-    }
-}
-
+//MARK: - listRowBackground extension
 extension View {
     func listRowBackground(state: Tag.ToggleState) -> some View {
         switch state {

@@ -179,7 +179,6 @@ struct MangaView: View {
                     .bold()
                 
                 Text(manga.description)
-                    .padding(.top, 5)
                     .lineLimit(descriptionExpanded ? nil : 6)
             }.onTapGesture {
                 descriptionExpanded.toggle()
