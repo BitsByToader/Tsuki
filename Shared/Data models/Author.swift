@@ -23,11 +23,11 @@ struct Author: Decodable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case data, relationships
+        case data
     }
     
     enum DataCodingKeys: String, CodingKey {
-        case attributes, id
+        case attributes, id, relationships
     }
     
     enum AttributesCodingKeys: String, CodingKey {
@@ -49,7 +49,7 @@ struct Author: Decodable {
         
         self.biography = ""
         
-        let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
+        let relationships = try data.decode([MDRelationship].self, forKey: .relationships)
         var arr: [String] = []
         for relation in relationships {
             if ( relation.type == "manga" ) {

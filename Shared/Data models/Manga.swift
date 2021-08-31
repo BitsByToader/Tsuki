@@ -58,23 +58,15 @@ struct Manga: Decodable {
     
     //MARK: - JSON Decoding enums and methods.
     enum CodingKeys: String, CodingKey {
-        case data, relationships
+        case data
     }
     
     enum DataCodingKeys: String, CodingKey {
-        case id, attributes
+        case id, attributes, relationships
     }
     
     enum AttributesCodingKeys: String, CodingKey {
-        case title, description, tags
-    }
-    
-    enum TitleCodingKeys: String, CodingKey {
-        case en
-    }
-    
-    enum DescriptionCodingKeys: String, CodingKey {
-        case en
+        case title, altTitles, description, tags
     }
     
     init(from decoder: Decoder) throws {
@@ -84,12 +76,27 @@ struct Manga: Decodable {
         let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         self.id = try data.decode(String.self, forKey: .id)
         
-        #warning("If the main title isn't in 'english', then it will be empty, which is bullshit behaviour.")
-        let titleContainer = try? attributes.nestedContainer(keyedBy: TitleCodingKeys.self, forKey: .title)
-        self.title = ( try? titleContainer?.decode(String.self, forKey: .en) ) ?? ""
+        //Default to English if the user hasn't set a preferred language yet.
+        let preferredLanguage = UserDefaults(suiteName: "group.TsukiApp")?.string(forKey: "preferredLanguage") ?? "en"
         
-        let descriptionContainer = try attributes.nestedContainer(keyedBy: DescriptionCodingKeys.self, forKey: .description)
-        self.description = try descriptionContainer.decode(String.self, forKey: .en)
+        var titleContainer = try attributes.decode([String: String].self, forKey: .title)
+        let altTitlesContainer = try attributes.decode([[String: String]].self, forKey: .altTitles)
+        
+        var altTitles: [String: String] = [:]
+        for titled in altTitlesContainer {
+            altTitles.merge(titled, uniquingKeysWith: { current, _ in
+                return current
+            })
+        }
+        
+        titleContainer.merge(altTitles, uniquingKeysWith: { current, _ in
+            return current
+        })
+        
+        self.title = titleContainer[preferredLanguage] ?? (titleContainer["en"] ?? "")
+        
+        let descriptionContainer = try attributes.decode([String: String].self, forKey: .description)
+        self.description = descriptionContainer[preferredLanguage] ?? (descriptionContainer["en"] ?? "")
         
         let tagsContainer = try attributes.decode([TagFromManga].self, forKey: .tags)
         
@@ -99,7 +106,7 @@ struct Manga: Decodable {
         }
         self.tags = arr
         
-        let relationshipsContainer = try container.decode([MDRelationship].self, forKey: .relationships)
+        let relationshipsContainer = try data.decode([MDRelationship].self, forKey: .relationships)
         
         var artistArr: [String] = []
         var artistIdArr: [String] = []
@@ -186,7 +193,8 @@ struct MDRelationship: Decodable {
         self.mangaTitle = ( try? mangaNamesContainer?.decode(String.self, forKey: .en) ) ?? ""
     }
 }
-//MARK: - Manga returned from seach struct 
+//MARK: - Manga returned from seach struct
+//This structure is better to use than the regular Manga when loading thousands of entries in a request (saves on memory).
 struct ReturnedMangas: Decodable {
     let results: [ReturnedManga]
     let limit: Int
@@ -200,19 +208,15 @@ struct ReturnedManga: Decodable, Hashable {
     let id: String
     
     enum CodingKeys: String, CodingKey {
-        case data, relationships
+        case data
     }
     
     enum DataCodingKeys: String, CodingKey {
-        case id, attributes
+        case id, attributes, relationships
     }
     
     enum AttributesCodingKeys: String, CodingKey {
-        case title
-    }
-    
-    enum TitleCodingKeys: String, CodingKey {
-        case en
+        case title, altTitles
     }
     
     init() {
@@ -228,10 +232,26 @@ struct ReturnedManga: Decodable, Hashable {
         self.id = try data.decode(String.self, forKey: .id)
         let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         
-        let titleContainer = try attributes.nestedContainer(keyedBy: TitleCodingKeys.self, forKey: .title)
-        self.title = try titleContainer.decode(String.self, forKey: .en)
+        var titleContainer = try attributes.decode([String: String].self, forKey: .title)
+        let altTitlesContainer = try attributes.decode([[String: String]].self, forKey: .altTitles)
         
-        let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
+        var altTitles: [String: String] = [:]
+        for titled in altTitlesContainer {
+            altTitles.merge(titled, uniquingKeysWith: { current, _ in
+                return current
+            })
+        }
+        
+        titleContainer.merge(altTitles, uniquingKeysWith: { current, _ in
+            return current
+        })
+        
+        //Default to English if the user hasn't set a preferred language yet.
+        let preferredLanguage = UserDefaults(suiteName: "group.TsukiApp")?.string(forKey: "preferredLanguage") ?? "en"
+        
+        self.title = titleContainer[preferredLanguage] ?? (titleContainer["en"] ?? "")
+        
+        let relationships = try data.decode([MDRelationship].self, forKey: .relationships)
         
         var coverName: String = ""
         for relation in relationships {
@@ -251,3 +271,4 @@ struct ReturnedManga: Decodable, Hashable {
         self.id = id
     }
 }
+//MARK: -

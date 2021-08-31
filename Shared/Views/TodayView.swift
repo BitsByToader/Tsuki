@@ -131,13 +131,17 @@ struct TodayView: View {
             if let data = data {
                 do {
                     struct FeaturedManga: Decodable {
-                        let relationships: [MDRelationship]
+                        let data: MangaData
+                        
+                        struct MangaData: Decodable {
+                            let relationships: [MDRelationship]
+                        }
                     }
                     
                     let decodedResponse = try JSONDecoder().decode(FeaturedManga.self, from: data)
                     
                     var arr: [ReturnedManga] = []
-                    for relation in decodedResponse.relationships {
+                    for relation in decodedResponse.data.relationships {
                         if relation.type == "manga" {
                             arr.append(ReturnedManga(title: relation.mangaTitle, coverArtURL: relation.coverFileName, id: relation.id))
                         }

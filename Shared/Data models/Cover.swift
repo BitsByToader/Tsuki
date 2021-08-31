@@ -12,11 +12,11 @@ struct Cover: Decodable {
     let mangaId: String
     
     enum CodingKeys: String, CodingKey {
-        case data, relationships
+        case data
     }
     
     enum DataCodingKeys: String, CodingKey {
-        case attributes
+        case attributes, relationships
     }
     
     enum AttributesCodingKeys: String, CodingKey {
@@ -31,7 +31,7 @@ struct Cover: Decodable {
         
         let fileName = try attributes.decode(String.self, forKey: .fileName)
         
-        let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
+        let relationships = try data.decode([MDRelationship].self, forKey: .relationships)
         
         var mangaId: String = ""
         for relation in relationships {

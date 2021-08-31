@@ -14,7 +14,9 @@ struct AccountView: View {
     @AppStorage("readingDataSaver") var readingDataSaver: Bool = false
     @AppStorage("downloadingDataSaver") var downloadingDataSaver: Bool = false
     
-    @State var pickedLanguages: [String] = []
+    @State private var pickedLanguages: [String] = []
+    @State private var preferredLanguage: String = "en"
+    @State private var langaugePickerActive: Bool = false
     
     private var logInButtonString: LocalizedStringKey {
         return loggedIn ? "Change account" : "Sign In"
@@ -74,15 +76,32 @@ struct AccountView: View {
                     Toggle("Save data when downloading", isOn: $downloadingDataSaver)
                 }
                 
-                Section(header: Text("Languages"), footer: Text("If no languages are selected, then chapters from all languages will be loaded.")) {
-                    NavigationLink(destination: LanguagePickerView(pickedLanguages: $pickedLanguages)) {
-                        HStack {
-                            Text("Picker")
+                Section(header: Text("Languages"), footer: Text("If no languages are selected, then chapters from all languages will be loaded. The preferred language will be used to display titles and descriptions.")) {
+                    NavigationLink(destination: LanguagePickerView(pickedLanguages: $pickedLanguages, preferredLanguage: $preferredLanguage), isActive: $langaugePickerActive) {
+                        VStack(spacing: 10) {
+                            HStack {
+                                Text("Picked languages")
+                                
+                                Spacer()
+                                
+                                Text("\(pickedLanguages.isEmpty ? "All languages" : "\(pickedLanguages.count) languages" )")
+                                    .foregroundColor(.secondary)
+                            }.padding(.top, 5)
                             
-                            Spacer()
+                            Divider()
                             
-                            Text("\(pickedLanguages.isEmpty ? "All languages" : "\(pickedLanguages.count) languages" )")
-                                .foregroundColor(.secondary)
+                            HStack {
+                                Text("Preferred language")
+                                
+                                Spacer()
+                                
+                                Text(languagesDict[preferredLanguage] ?? "English")
+                                    .foregroundColor(.secondary)
+                            }.padding(.bottom, 5)
+                        }
+                    }.onChange(of: langaugePickerActive) { picker in
+                        if ( !picker && preferredLanguage == "" ) {
+                            preferredLanguage = "en"
                         }
                     }
                 }
@@ -111,6 +130,7 @@ struct AccountView: View {
         }.navigationViewStyle(StackNavigationViewStyle())
         .onAppear {
             self.pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
+            self.preferredLanguage = UserDefaults(suiteName: "group.TsukiApp")?.string(forKey: "preferredLanguage") ?? "en"
             
             let loadingDescription: LocalizedStringKey = "Loading account..."
             appState.loadingQueue.append(loadingDescription)

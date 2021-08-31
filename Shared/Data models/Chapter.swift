@@ -29,11 +29,11 @@ struct Chapter: Decodable, Hashable {
     
     //MARK: - Conforms to Decoder
     enum CodingKeys: String, CodingKey {
-        case data, relationships
+        case data
     }
     
     enum DataCodingKeys: String, CodingKey {
-        case id, attributes
+        case id, attributes, relationships
     }
     
     enum AttributesCodingKeys: String, CodingKey {
@@ -60,7 +60,7 @@ struct Chapter: Decodable, Hashable {
         self.timestamp = try attributes.decode(String.self, forKey: .publishAt)
         self.chapterLanguageCode = try attributes.decode(String.self, forKey: .translatedLanguage)
         
-        let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
+        let relationships = try data.decode([MDRelationship].self, forKey: .relationships)
         
         var mangaId = ""
         var mangaName = ""
