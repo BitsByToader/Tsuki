@@ -176,7 +176,7 @@ struct LatestUpdatesView: View {
             if let data = data {
                 do {
                     struct Results: Decodable {
-                        let results: [Chapter]
+                        let data: [Chapter]
                         let limit: Int
                         let offset: Int
                         let total: Int
@@ -189,7 +189,7 @@ struct LatestUpdatesView: View {
                         self.loadCounter += 1
                         self.loadLimit = decodedResponse.total
                         
-                        self.result += decodedResponse.results.sorted {
+                        self.result += decodedResponse.data.sorted {
                             return (ISO8601DateFormatter().date(from: $0.timestamp) ?? Date()).timeIntervalSince1970 > (ISO8601DateFormatter().date(from: $1.timestamp) ?? Date()).timeIntervalSince1970
                         }
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)

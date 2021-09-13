@@ -30,10 +30,14 @@ class MangaTags: ObservableObject  {
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
-                    let decodedResponse = try JSONDecoder().decode([MDTag].self, from: data)
+                    struct Response: Decodable {
+                        let data: [MDTag]
+                    }
+                    
+                    let decodedResponse = try JSONDecoder().decode(Response.self, from: data)
                     
                     var tagDict: [String: [Tag]] = [:]
-                    for tag in decodedResponse {
+                    for tag in decodedResponse.data {
                         if tagDict.index(forKey: tag.group) == nil {
                             //The tag group wasn't added to the dictionary yet
                             tagDict[tag.group] = [Tag(id: tag.id, tagName: tag.name)]
@@ -88,11 +92,8 @@ struct MDTag: Decodable {
     let group: String
     
     //MARK: Decodable stuff...
-    enum CodingKeys: String, CodingKey {
-        case data
-    }
     
-    enum DataCodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case id, attributes
     }
     
@@ -107,9 +108,8 @@ struct MDTag: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let data = try container.nestedContainer(keyedBy: DataCodingKeys.self, forKey: .data)
-        self.id = try data.decode(String.self, forKey: .id)
-        let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
+        self.id = try container.decode(String.self, forKey: .id)
+        let attributes = try container.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         
         self.group = try attributes.decode(String.self, forKey: .group)
         let nameContainer = try attributes.nestedContainer(keyedBy: NameCodingKeys.self, forKey: .name)

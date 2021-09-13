@@ -8,60 +8,18 @@
 import Foundation
 
 //MARK: - Manga Data Model Struct
-struct Manga: Decodable {
+struct MangaEntity: Decodable {
     let id: String
     let title: String
     var artist: [String]
     var artistId: [String]
     var coverURL: String
     let description: String
-    let rating: Rating
+    let rating: MangaRating
     let tags: [String]
-    
-    init() {
-        self.id = ""
-        self.title = ""
-        self.artist = [""]
-        self.artistId = [""]
-        self.coverURL = ""
-        self.description = ""
-        self.rating = Rating(bayesian: 1, users: 0)
-        self.tags = []
-    }
-    
-    init(id: String, title: String, artist: String, coverURL: String, description: String, rating: Rating, tags: [String]) {
-        self.id = id
-        self.title = title
-        self.artist = [artist]
-        self.artistId = []
-        self.coverURL = coverURL
-        self.description = description
-        self.rating = rating
-        self.tags = tags
-    }
-    
-    init(fromDownloadedManga manga: DownloadedManga) {
-        id = ""
-        title = manga.wrappedMangaTitle
-        artist = [manga.wrappedMangaArtist]
-        artistId = []
-        coverURL = manga.wrappedMangaCoverURL
-        description = manga.wrappedMangaDescription
-        rating = Rating(bayesian: Float(manga.wrappedMangaRating) ?? 1, users: Int(manga.wrappedUsersRated) ?? 0)
-        tags = manga.wrappedMangaTags
-    }
-    
-    struct Rating: Codable {
-        let bayesian: Float
-        let users: Int
-    }
     
     //MARK: - JSON Decoding enums and methods.
     enum CodingKeys: String, CodingKey {
-        case data
-    }
-    
-    enum DataCodingKeys: String, CodingKey {
         case id, attributes, relationships
     }
     
@@ -72,9 +30,8 @@ struct Manga: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let data = try container.nestedContainer(keyedBy: DataCodingKeys.self, forKey: .data)
-        let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
-        self.id = try data.decode(String.self, forKey: .id)
+        let attributes = try container.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
+        self.id = try container.decode(String.self, forKey: .id)
         
         //Default to English if the user hasn't set a preferred language yet.
         let preferredLanguage = UserDefaults(suiteName: "group.TsukiApp")?.string(forKey: "preferredLanguage") ?? "en"
@@ -106,7 +63,7 @@ struct Manga: Decodable {
         }
         self.tags = arr
         
-        let relationshipsContainer = try data.decode([MDRelationship].self, forKey: .relationships)
+        let relationshipsContainer = try container.decode([MDRelationship].self, forKey: .relationships)
         
         var artistArr: [String] = []
         var artistIdArr: [String] = []
@@ -126,7 +83,7 @@ struct Manga: Decodable {
         self.coverURL = "https://uploads.mangadex.org/covers/\(id)/\(cover).256.jpg"
         
         //The API doesn't provide these yet...
-        self.rating = Rating(bayesian: 0, users: 0)
+        self.rating = MangaRating(bayesian: 0, users: 0)
     }
     
     //MARK: - Tag struct collected from the manga request
@@ -156,6 +113,85 @@ struct Manga: Decodable {
             self.name = try nameContainer.decode(String.self, forKey: .en)
         }
     }
+}
+
+struct Manga: Decodable {
+    let id: String
+    let title: String
+    var artist: [String]
+    var artistId: [String]
+    var coverURL: String
+    let description: String
+    let rating: MangaRating
+    let tags: [String]
+    
+    init() {
+        self.id = ""
+        self.title = ""
+        self.artist = [""]
+        self.artistId = [""]
+        self.coverURL = ""
+        self.description = ""
+        self.rating = MangaRating(bayesian: 1, users: 0)
+        self.tags = []
+    }
+    
+    init(id: String, title: String, artist: String, coverURL: String, description: String, rating: MangaRating, tags: [String]) {
+        self.id = id
+        self.title = title
+        self.artist = [artist]
+        self.artistId = []
+        self.coverURL = coverURL
+        self.description = description
+        self.rating = rating
+        self.tags = tags
+    }
+    
+    init(fromDownloadedManga manga: DownloadedManga) {
+        id = ""
+        title = manga.wrappedMangaTitle
+        artist = [manga.wrappedMangaArtist]
+        artistId = []
+        coverURL = manga.wrappedMangaCoverURL
+        description = manga.wrappedMangaDescription
+        rating = MangaRating(bayesian: Float(manga.wrappedMangaRating) ?? 1, users: Int(manga.wrappedUsersRated) ?? 0)
+        tags = manga.wrappedMangaTags
+    }
+    //MARK: - JSON Decoding enums and methods.
+    enum CodingKeys: String, CodingKey {
+        case data
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let entity = try container.decode(MangaEntity.self, forKey: .data)
+        
+        self.id = entity.id
+        self.title = entity.title
+        self.artist = entity.artist
+        self.artistId = entity.artistId
+        self.coverURL = entity.coverURL
+        self.description = entity.description
+        self.rating = entity.rating
+        self.tags = entity.tags
+    }
+    
+    init(from entity: MangaEntity) {
+        self.id = entity.id
+        self.title = entity.title
+        self.artist = entity.artist
+        self.artistId = entity.artistId
+        self.coverURL = entity.coverURL
+        self.description = entity.description
+        self.rating = entity.rating
+        self.tags = entity.tags
+    }
+}
+//MARK: - MangaRating
+struct MangaRating: Codable {
+    let bayesian: Float
+    let users: Int
 }
 //MARK: - MDRelationship
 struct MDRelationship: Decodable {
@@ -196,7 +232,7 @@ struct MDRelationship: Decodable {
 //MARK: - Manga returned from seach struct
 //This structure is better to use than the regular Manga when loading thousands of entries in a request (saves on memory).
 struct ReturnedMangas: Decodable {
-    let results: [ReturnedManga]
+    let data: [ReturnedManga]
     let limit: Int
     let total: Int
     let offset: Int
@@ -208,10 +244,6 @@ struct ReturnedManga: Decodable, Hashable {
     let id: String
     
     enum CodingKeys: String, CodingKey {
-        case data
-    }
-    
-    enum DataCodingKeys: String, CodingKey {
         case id, attributes, relationships
     }
     
@@ -228,9 +260,8 @@ struct ReturnedManga: Decodable, Hashable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let data = try container.nestedContainer(keyedBy: DataCodingKeys.self, forKey: .data)
-        self.id = try data.decode(String.self, forKey: .id)
-        let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
+        self.id = try container.decode(String.self, forKey: .id)
+        let attributes = try container.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         
         var titleContainer = try attributes.decode([String: String].self, forKey: .title)
         let altTitlesContainer = try attributes.decode([[String: String]].self, forKey: .altTitles)
@@ -251,7 +282,7 @@ struct ReturnedManga: Decodable, Hashable {
         
         self.title = titleContainer[preferredLanguage] ?? (titleContainer["en"] ?? "")
         
-        let relationships = try data.decode([MDRelationship].self, forKey: .relationships)
+        let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
         
         var coverName: String = ""
         for relation in relationships {

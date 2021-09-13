@@ -213,13 +213,13 @@ struct TodayView: View {
             if let data = data {
                 do {
                     struct Result: Decodable {
-                        let results: [Chapter]
+                        let data: [Chapter]
                     }
                     
                     let decodedResponse = try JSONDecoder().decode(Result.self, from: data)
                     
                     DispatchQueue.main.async {
-                        self.newChapters = decodedResponse.results
+                        self.newChapters = decodedResponse.data
                         self.newChaptersLoaded = true
                         
                         if ( seasonalMangaLoaded ) {
@@ -289,7 +289,7 @@ struct TodayView: View {
                     let decodedResponse = try JSONDecoder().decode(Covers.self, from: data)
                     
                     var dict: [String: String] = [:]
-                    for cover in decodedResponse.results {
+                    for cover in decodedResponse.data {
                         dict[cover.mangaId] = cover.path
                     }
                     
@@ -343,7 +343,7 @@ struct TodayView: View {
                     let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
                     
                     DispatchQueue.main.async {
-                        newDisplayedMangas = decodedResponse.results
+                        newDisplayedMangas = decodedResponse.data
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }

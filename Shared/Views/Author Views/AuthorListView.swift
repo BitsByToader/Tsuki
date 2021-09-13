@@ -85,13 +85,13 @@ struct AuthorListView: View {
             if let data = data {
                 do {
                     struct Authors: Decodable {
-                        let results: [Author]
+                        let data: [Author]
                     }
                     
                     let decodedResponse = try JSONDecoder().decode(Authors.self, from: data)
                     
                     DispatchQueue.main.async {
-                        self.authors = decodedResponse.results
+                        self.authors = decodedResponse.data
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
                     

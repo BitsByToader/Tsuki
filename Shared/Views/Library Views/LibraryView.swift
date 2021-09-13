@@ -210,7 +210,7 @@ struct LibraryView: View {
                 do {
                     let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
                     
-                    for manga in decodedResponse.results {
+                    for manga in decodedResponse.data {
                         mangaTitleByIdDict[manga.id] = manga.title
                     }
                     
@@ -218,9 +218,9 @@ struct LibraryView: View {
                         self.loadCounter += 1
                         self.loadLimit = decodedResponse.total
                         
-                        searchResult += decodedResponse.results
+                        searchResult += decodedResponse.data
                         
-                        loadCovers(for: decodedResponse.results)
+                        loadCovers(for: decodedResponse.data)
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                     }
@@ -281,7 +281,7 @@ struct LibraryView: View {
                 do {
                     let decodedResponse = try JSONDecoder().decode(Covers.self, from: data)
                     
-                    for cover in decodedResponse.results {
+                    for cover in decodedResponse.data {
                         coverArtByIdDict[cover.mangaId] = cover.path
                     }
                     

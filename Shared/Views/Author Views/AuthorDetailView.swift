@@ -11,7 +11,7 @@ import SDWebImageSwiftUI
 struct AuthorDetailView: View {
     var author: Author
     
-    @State private var mangas: [Manga] = []
+    @State private var mangas: [MangaEntity] = []
     
     var body: some View {
         List {
@@ -64,7 +64,7 @@ struct AuthorDetailView: View {
                 }
                 
                 ForEach(mangas, id: \.title ) { manga in
-                    NavigationLink(destination: MangaView(manga: manga, mangaDetailsAlreadyLoaded: true, reloadContents: true, mangaId: manga.id)) {
+                    NavigationLink(destination: MangaView(manga: Manga(from: manga), mangaDetailsAlreadyLoaded: true, reloadContents: true, mangaId: manga.id)) {
                         HStack {
                             WebImage(url: URL(string: manga.coverURL))
                                 .resizable()
@@ -126,13 +126,13 @@ struct AuthorDetailView: View {
                 if let data = data {
                     do {
                         struct Response: Decodable {
-                            let results: [Manga]
+                            let data: [MangaEntity]
                         }
                         
                         let decodedResponse = try JSONDecoder().decode(Response.self, from: data)
                         
                         DispatchQueue.main.async {
-                            self.mangas = decodedResponse.results
+                            self.mangas = decodedResponse.data
                         }
                     } catch {
                         print(error)

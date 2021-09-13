@@ -135,7 +135,7 @@ struct UpdatedMangas {
                     let decodedResponse = try JSONDecoder().decode(ReturnedMangas.self, from: data)
                     
                     var dict: [String: ReturnedManga] = [:]
-                    for manga in decodedResponse.results {
+                    for manga in decodedResponse.data {
                         dict[manga.id] = manga
                     }
                     

@@ -382,7 +382,7 @@ struct MangaView: View {
             if let data = data {
                 do {
                     struct Results: Decodable {
-                        let results: [Chapter]
+                        let data: [Chapter]
                         let total: Int
                     }
                     
@@ -392,7 +392,7 @@ struct MangaView: View {
                         self.loadCounter += 1
                         self.loadLimit = decodedResponse.total
                         
-                        self.chapters += decodedResponse.results
+                        self.chapters += decodedResponse.data
                         
                         appState.removeFromLoadingQueue(loadingState: loadingDescription)
                         getReadMarkers()

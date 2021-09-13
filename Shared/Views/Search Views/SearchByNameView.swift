@@ -38,6 +38,7 @@ struct SearchByNameView: View {
                 
                 TextField("Search", text: $searchInput, onCommit: {
                     self.hideKeyboard()
+                    self.searchResult = []
                     searchManga()
                 }).foregroundColor(.primary)
                 
@@ -161,7 +162,7 @@ struct SearchByNameView: View {
                         self.loadCounter += 1
                         self.loadLimit = decodedResponse.total
                         
-                        self.searchResult += decodedResponse.results
+                        self.searchResult += decodedResponse.data
                         appState.removeFromLoadingQueue(loadingState: "Loading mangas...")
                     }
                     

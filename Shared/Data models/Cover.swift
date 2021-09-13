@@ -7,15 +7,11 @@
 
 import Foundation
 
-struct Cover: Decodable {
+struct CoverEntity: Decodable {
     let path: String
     let mangaId: String
     
     enum CodingKeys: String, CodingKey {
-        case data
-    }
-    
-    enum DataCodingKeys: String, CodingKey {
         case attributes, relationships
     }
     
@@ -26,12 +22,11 @@ struct Cover: Decodable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        let data = try container.nestedContainer(keyedBy: DataCodingKeys.self, forKey: .data)
-        let attributes = try data.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
+        let attributes = try container.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         
         let fileName = try attributes.decode(String.self, forKey: .fileName)
         
-        let relationships = try data.decode([MDRelationship].self, forKey: .relationships)
+        let relationships = try container.decode([MDRelationship].self, forKey: .relationships)
         
         var mangaId: String = ""
         for relation in relationships {
@@ -46,6 +41,29 @@ struct Cover: Decodable {
     }
 }
 
+struct Cover: Decodable {
+    let path: String
+    let mangaId: String
+    
+    enum CodingKeys: String, CodingKey {
+        case data
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        let entity = try container.decode(CoverEntity.self, forKey: .data)
+        
+        self.path = entity.path
+        self.mangaId = entity.mangaId
+    }
+    
+    init(path: String, mangaId: String) {
+        self.path = path
+        self.mangaId = mangaId
+    }
+}
+
 struct Covers: Decodable {
-    let results: [Cover]
+    let data: [CoverEntity]
 }
