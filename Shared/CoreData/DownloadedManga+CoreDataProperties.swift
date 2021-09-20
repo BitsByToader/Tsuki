@@ -1,4 +1,4 @@
-//
+
 //  DownloadedManga+CoreDataProperties.swift
 //  Tsuki
 //
@@ -63,7 +63,7 @@ extension DownloadedManga {
         
         return set.sorted {
             //Same story for sorting as in MangaView.swift
-            return Double($0.chapter!)! > Double($1.chapter!)!
+            return Double( ($0.chapter?.split(separator: " ")[0])! )! < Double( ($1.chapter?.split(separator: " ")[0])! )!
         }
     }
 
