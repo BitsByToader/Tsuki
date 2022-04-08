@@ -13,14 +13,10 @@ struct Chapter: Decodable, Hashable {
     let mangaTitle: String
     
     let chapterId: String
-    let hash: String
     
     let volume: String
     let chapter: String
     let title: String
-    
-    let dataPages: [String]
-    let dataSaverPages: [String]
     
     let timestamp: String
     let chapterLanguageCode: String
@@ -44,13 +40,9 @@ struct Chapter: Decodable, Hashable {
         let attributes = try container.nestedContainer(keyedBy: AttributesCodingKeys.self, forKey: .attributes)
         
         self.title = ( try? attributes.decode(String.self, forKey: .title) ) ?? ""
-        self.hash = try attributes.decode(String.self, forKey: .hash)
         
         self.volume = ( try? attributes.decode(String.self, forKey: .volume) ) ?? "1"
         self.chapter = ( try? attributes.decode(String.self, forKey: .chapter) ) ?? "1"
-        
-        self.dataPages = ( try? attributes.decode([String].self, forKey: .data) ) ?? []
-        self.dataSaverPages = ( try? attributes.decode([String].self, forKey: .dataSaver) ) ?? []
         
         self.timestamp = try attributes.decode(String.self, forKey: .publishAt)
         self.chapterLanguageCode = try attributes.decode(String.self, forKey: .translatedLanguage)

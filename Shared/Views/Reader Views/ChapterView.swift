@@ -191,6 +191,13 @@ struct ChapterView: View {
                 do {
                     struct Result: Decodable {
                         let baseUrl: String
+                        let chapter: AtHomeChapter
+                        
+                        struct AtHomeChapter: Decodable {
+                            let hash: String
+                            let data: [String]
+                            let dataSaver: [String]
+                        }
                     }
                     
                     let decodedResponse = try JSONDecoder().decode(Result.self, from: data)
@@ -198,13 +205,13 @@ struct ChapterView: View {
                     var pages: [String] = []
                     
                     if readingDataSaver {
-                        for chapterPage in remainingChapters[currentChapter].dataSaverPages {
-                            let page: String = decodedResponse.baseUrl + "/data-saver/" + remainingChapters[currentChapter].hash + "/" + chapterPage
+                        for chapterPage in decodedResponse.chapter.dataSaver {
+                            let page: String = decodedResponse.baseUrl + "/data-saver/" + decodedResponse.chapter.hash + "/" + chapterPage
                             pages.append(page)
                         }
                     } else {
-                        for chapterPage in remainingChapters[currentChapter].dataPages {
-                            let page: String = decodedResponse.baseUrl + "/data/" + remainingChapters[currentChapter].hash + "/" + chapterPage
+                        for chapterPage in decodedResponse.chapter.data {
+                            let page: String = decodedResponse.baseUrl + "/data/" + decodedResponse.chapter.hash + "/" + chapterPage
                             pages.append(page)
                         }
                     }

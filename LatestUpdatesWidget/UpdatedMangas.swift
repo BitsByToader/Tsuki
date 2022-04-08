@@ -26,7 +26,6 @@ struct UpdatedMangas {
         
         urlComponents.queryItems?.append(URLQueryItem(name: "limit", value: "30"))
         urlComponents.queryItems?.append(URLQueryItem(name: "order[publishAt]", value: "desc"))
-        urlComponents.queryItems?.append(URLQueryItem(name: "includes[]", value: "manga"))
         
         let pickedLanguages = UserDefaults(suiteName: "group.TsukiApp")?.stringArray(forKey: "pickedLanguages") ?? []
         
@@ -52,7 +51,7 @@ struct UpdatedMangas {
             if let data = data {
                 do {
                     struct Results: Decodable {
-                        let results: [Chapter]
+                        let data: [Chapter]
                     }
                  
                     let decodedResponse = try JSONDecoder().decode(Results.self, from: data)
@@ -60,7 +59,7 @@ struct UpdatedMangas {
                     var mangas: [UpdatedManga] = []
                     var mangaIds: [String] = []
                     
-                    for chapter in decodedResponse.results {
+                    for chapter in decodedResponse.data {
                         if !mangaIds.contains(chapter.mangaId) {
                             mangaIds.append(chapter.mangaId)
                         }
@@ -97,9 +96,11 @@ struct UpdatedMangas {
                         completion(UpdatedMangas(mangas: mangas, placeholder: false, relevance: relevance), nil)
                     }
                 } catch {
+                    print(error)
                     completion(nil, error.localizedDescription)
                 }
             } else {
+                print(error ?? "U wot m8?")
                 completion(nil, "There was an error retrieving the library.")
             }
         }.resume()
