@@ -20,7 +20,7 @@ A beautiful and simple manga app for iOS 14, iPadOS 14 and macOS 11, built with 
 - More and Better Localization!
 - Better navigation for iPad users
 - Supporting multiple manga providers, besides MangaDex
-- *bug fixed and minor improvements...*
+- *bug fixes and minor improvements...*
 
 # AppStore status
   The app hasn't been accepted to the AppStore because of the content it provides. Because of this, it has also been shadow banned from TestFlight, meaning the public link doesn't work anymore (i.e. manual invites are the only way to get added to the TestFlight). However, since making it mandatory to provide an API URL when logging in, Tsuki might get approved to the AppStore, but I am far to tired to even try.
