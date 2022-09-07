@@ -15,12 +15,15 @@ A beautiful and simple manga app for iOS 14, iPadOS 14 and macOS 11, built with 
 - Siri shortcuts
 - Recents! Quickly see your reading history!
 - Drag and drop chapter pages for quick sharing with your friends
-- Saving of chapter pages to your photos library
+- Saving chapter pages to your photos library
 - Easily share mangas and chapters with your friends
-- Localization!
+- More and Better Localization!
+- Better navigation for iPad users
+- Supporting multiple manga providers, besides MangaDex
+- *bug fixed and minor improvements...*
 
 # AppStore status
-  I am planning on uploading the app in a few days, just need to download a non-beta version of Xcode. Then comes the nightmare of *App review* whoaaa....
+  The app hasn't been accepted to the AppStore because of the content it provides. Because of this, it has also been shadow banned from TestFlight, meaning the public link doesn't work anymore (i.e. manual invites are the only way to get added to the TestFlight). However, since making it mandatory to provide an API URL when logging in, Tsuki might get approved to the AppStore, but I am far to tired to even try.
 
 # Bugs and other issues
 Drop me an email at tudorifrim@icloud.com and I'll see what we can do!
